@@ -139,7 +139,7 @@ body {
 .nav-a {
   font-size: 13px;
   font-weight: 500;
-  color: #444;
+  color: #888;
   text-decoration: none;
   transition: color 0.2s;
 }
@@ -164,10 +164,10 @@ body {
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #333;
+  color: #888;
   text-decoration: none;
   padding: 6px 12px;
-  border: 1px solid #1a1a1a;
+  border: 1px solid #444;
   transition: all 0.2s;
 }
 
@@ -273,7 +273,7 @@ body {
   font-weight: 700;
   letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: #444;
+  color: #888;
 }
 
 .hero-anim-1 {
@@ -301,7 +301,7 @@ body {
 .hero-desc {
   font-size: 17px;
   line-height: 1.9;
-  color: #555;
+  color: #999;
   font-weight: 300;
 }
 
@@ -356,12 +356,12 @@ body {
   letter-spacing: 0.18em;
   text-transform: uppercase;
   padding: 0 36px;
-  color: #1e1e1e;
+  color: #777;
   white-space: nowrap;
 }
 
 .m-dot {
-  color: #444;
+  color: #666;
 }
 
 /* ───── Stats ───── */
@@ -384,7 +384,7 @@ body {
   font-weight: 900;
   line-height: 1;
   letter-spacing: -0.03em;
-  color: #333;
+  color: #888;
 }
 
 .stat-number-active {
@@ -393,7 +393,7 @@ body {
 
 .stat-label {
   font-size: 12px;
-  color: #333;
+  color: #888;
   margin-top: 10px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -424,7 +424,7 @@ body {
 
 .tools-subtext {
   font-size: 14px;
-  color: #444;
+  color: #888;
   max-width: 280px;
   line-height: 1.8;
   text-align: right;
@@ -469,7 +469,7 @@ body {
 }
 
 .card-title {
-  color: #666;
+  color: #999;
   font-size: 22px;
   font-weight: 700;
   transition: color 0.2s;
@@ -488,7 +488,7 @@ body {
 .tool-num {
   font-family: monospace;
   font-size: 12px;
-  color: #2a2a2a;
+  color: #777;
   padding-top: 6px;
   letter-spacing: 0.1em;
 }
@@ -497,14 +497,14 @@ body {
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.2em;
-  color: #333;
+  color: #888;
   text-transform: uppercase;
   margin-bottom: 12px;
 }
 
 .tool-desc {
   font-size: 13px;
-  color: #333;
+  color: #888;
   line-height: 1.7;
   margin-top: 10px;
 }
@@ -522,8 +522,8 @@ body {
   letter-spacing: 0.15em;
   padding: 5px 14px;
   background: transparent;
-  color: #2a2a2a;
-  border: 1px solid #1a1a1a;
+  color: #777;
+  border: 1px solid #444;
 }
 
 .tool-status-live {
@@ -557,7 +557,7 @@ body {
   font-weight: 700;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: #999;
+  color: #666;
 }
 
 .nl-heading {
@@ -581,7 +581,7 @@ body {
   padding: 18px 0;
   border-bottom: 1px solid #e8e8e8;
   font-size: 14px;
-  color: #aaa;
+  color: #666;
   transition: color 0.2s;
   cursor: default;
 }
@@ -609,7 +609,7 @@ body {
 
 .nl-form-note {
   font-size: 13px;
-  color: #aaa;
+  color: #666;
   margin-bottom: 40px;
   letter-spacing: 0.04em;
 }
@@ -638,7 +638,7 @@ body {
 }
 
 .nl-input::placeholder {
-  color: #bbb;
+  color: #888;
 }
 
 .nl-submit {
@@ -677,7 +677,7 @@ body {
 
 .nl-success-desc {
   font-size: 14px;
-  color: #aaa;
+  color: #666;
   margin-top: 10px;
 }
 
@@ -701,7 +701,7 @@ body {
 }
 
 .form-input::placeholder {
-  color: #333;
+  color: #888;
 }
 
 /* ───── Agency / Contact ───── */
@@ -723,7 +723,7 @@ body {
   font-weight: 700;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: #333;
+  color: #888;
 }
 
 .agency-heading {
@@ -737,7 +737,7 @@ body {
 
 .agency-desc {
   font-size: 15px;
-  color: #444;
+  color: #999;
   line-height: 1.9;
   margin-top: 28px;
   font-weight: 300;
@@ -752,7 +752,7 @@ body {
   padding: 14px 0;
   border-bottom: 1px solid #111;
   font-size: 13px;
-  color: #444;
+  color: #999;
   display: flex;
   gap: 16px;
   align-items: center;
@@ -761,7 +761,7 @@ body {
 .agency-service-num {
   font-family: monospace;
   font-size: 10px;
-  color: #2a2a2a;
+  color: #777;
 }
 
 .contact-form {
@@ -776,7 +776,7 @@ body {
   font-weight: 700;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: #333;
+  color: #888;
   margin-bottom: 12px;
 }
 
@@ -807,7 +807,7 @@ body {
 
 .contact-success-desc {
   font-size: 14px;
-  color: #444;
+  color: #999;
   margin-top: 10px;
 }
 
@@ -836,14 +836,14 @@ body {
 }
 
 .footer-tld {
-  color: #222;
+  color: #888;
   font-weight: 300;
   font-size: 12px;
 }
 
 .footer-copy {
   font-size: 11px;
-  color: #222;
+  color: #888;
   letter-spacing: 0.08em;
 }
 

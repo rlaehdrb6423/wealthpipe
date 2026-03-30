@@ -12,7 +12,7 @@ export default function NewsletterBenefits({ items }: NewsletterBenefitsProps) {
           key={i}
           className="nl-row"
           onMouseEnter={(e) => (e.currentTarget.style.color = "#000")}
-          onMouseLeave={(e) => (e.currentTarget.style.color = "#aaa")}
+          onMouseLeave={(e) => (e.currentTarget.style.color = "#666")}
         >
           <span className="nl-dot" />
           <span className="nl-benefit-text">{item}</span>

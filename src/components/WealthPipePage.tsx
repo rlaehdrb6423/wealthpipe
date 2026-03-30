@@ -122,15 +122,17 @@ export default function WealthPipePage({ locale }: WealthPipePageProps) {
       {/* NEWSLETTER */}
       <section id="newsletter" className="newsletter-section">
         <div className="newsletter-inner two-col">
-          <RevealOnScroll>
+          <div>
             <span className="nl-frequency">{t.newsletter.frequency}</span>
             <h2 className="nl-heading">
               {t.newsletter.heading.split("\n").map((line, i, arr) => (
                 <span key={i}>{line}{i < arr.length - 1 && <br />}</span>
               ))}
             </h2>
-            <NewsletterBenefits items={t.newsletter.benefits} />
-          </RevealOnScroll>
+            <RevealOnScroll>
+              <NewsletterBenefits items={t.newsletter.benefits} />
+            </RevealOnScroll>
+          </div>
           <RevealOnScroll className="nl-form-col">
             <p className="nl-form-note">{t.newsletter.formNote}</p>
             <NewsletterForm

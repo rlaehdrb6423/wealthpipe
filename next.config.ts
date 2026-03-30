@@ -4,6 +4,7 @@ import withBundleAnalyzer from "@next/bundle-analyzer";
 const nextConfig: NextConfig = {
   experimental: {
     optimizePackageImports: ["react", "react-dom"],
+    inlineCss: true,
   },
 };
 

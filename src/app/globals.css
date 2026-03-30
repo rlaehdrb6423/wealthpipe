@@ -856,9 +856,96 @@ body {
 /* ───── Responsive ───── */
 
 @media (max-width: 768px) {
+  .wp-nav {
+    padding: 0 20px;
+  }
+
+  .nav-inner {
+    height: 56px;
+  }
+
+  .nav-links {
+    display: none;
+  }
+
+  .nav-right {
+    gap: 8px;
+  }
+
+  .nav-cta {
+    padding: 8px 16px;
+    font-size: 11px;
+  }
+
+  .lang-btn {
+    font-size: 10px;
+    padding: 5px 8px;
+  }
+
+  .hero-content {
+    padding: 0 20px;
+  }
+
+  .big {
+    font-size: clamp(48px, 13vw, 180px);
+  }
+
+  .hero-bottom {
+    margin-top: 48px;
+    gap: 32px;
+  }
+
+  .hero-cta-group {
+    flex-direction: column;
+  }
+
+  .hero-cta-group .btn-w,
+  .hero-cta-group .btn-ghost {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .stats-section {
+    padding: 60px 20px;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  .tools-section {
+    padding: 60px 20px;
+  }
+
+  .tools-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .tools-subtext {
+    text-align: left;
+  }
+
+  .tool-card {
+    grid-template-columns: 48px 1fr;
+    gap: 16px;
+  }
+
+  .tool-status-col {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+
   .two-col {
     grid-template-columns: 1fr !important;
     gap: 48px !important;
+  }
+
+  .newsletter-section {
+    padding: 60px 20px;
   }
 
   .newsletter-inner {
@@ -866,12 +953,27 @@ body {
     gap: 48px;
   }
 
+  .agency-section {
+    padding: 60px 20px;
+  }
+
   .agency-inner {
     grid-template-columns: 1fr;
     gap: 48px;
   }
 
-  .stats-grid {
-    grid-template-columns: 1fr 1fr !important;
+  .wp-footer {
+    padding: 28px 20px;
+  }
+
+  .footer-inner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .footer-links {
+    flex-wrap: wrap;
+    gap: 16px;
   }
 }

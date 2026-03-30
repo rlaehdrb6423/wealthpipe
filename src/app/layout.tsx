@@ -8,10 +8,39 @@ const dmSans = DM_Sans({
   display: "swap",
 });
 
+const SITE_URL = "https://wealthpipe.net";
+
 export const metadata: Metadata = {
-  title: "WealthPipe — AI Pipeline for Wealth Intelligence",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: "WealthPipe — AI Pipeline for Wealth Intelligence",
+    template: "%s | WealthPipe",
+  },
   description:
-    "재테크·투자·마케팅 데이터를 AI가 자동으로 수집하고 분석합니다.",
+    "AI automatically collects and analyzes critical data across finance, investment, and marketing. Free tools for bloggers, investors, and marketers.",
+  robots: { index: true, follow: true },
+  alternates: {
+    canonical: SITE_URL,
+    languages: {
+      en: SITE_URL,
+      ko: `${SITE_URL}/ko`,
+    },
+  },
+  openGraph: {
+    type: "website",
+    siteName: "WealthPipe",
+    locale: "en_US",
+    url: SITE_URL,
+    title: "WealthPipe — AI Pipeline for Wealth Intelligence",
+    description:
+      "AI automatically collects and analyzes critical data across finance, investment, and marketing.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "WealthPipe — AI Pipeline for Wealth Intelligence",
+    description:
+      "AI automatically collects and analyzes critical data across finance, investment, and marketing.",
+  },
 };
 
 export default function RootLayout({
@@ -20,7 +49,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ko" className={dmSans.className}>
+    <html lang="en" className={dmSans.className}>
       <body>{children}</body>
     </html>
   );

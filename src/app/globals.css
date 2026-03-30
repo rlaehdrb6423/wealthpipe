@@ -976,4 +976,60 @@ body {
     flex-wrap: wrap;
     gap: 16px;
   }
+
+  /* ── 모바일 가독성: 작은 회색 텍스트 보정 ── */
+
+  .hero-tagline {
+    font-size: 13px;
+    color: #ddd;
+  }
+
+  .m-item {
+    font-size: 13px;
+    color: #ccc;
+  }
+
+  .m-dot {
+    color: #aaa;
+  }
+
+  .stat-label {
+    font-size: 13px;
+    color: #ddd;
+  }
+
+  .tool-num {
+    font-size: 13px;
+    color: #ccc;
+  }
+
+  .tool-tag {
+    font-size: 12px;
+    color: #ddd;
+  }
+
+  .tool-desc {
+    font-size: 14px;
+    color: #ddd;
+  }
+
+  .tool-status {
+    font-size: 11px;
+    color: #ccc;
+  }
+
+  .agency-label {
+    font-size: 14px;
+    color: #ddd;
+  }
+
+  .footer-tld {
+    font-size: 13px;
+    color: #ddd;
+  }
+
+  .footer-copy {
+    font-size: 12px;
+    color: #ddd;
+  }
 }

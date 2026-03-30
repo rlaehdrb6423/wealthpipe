@@ -21,6 +21,7 @@ export const metadata: Metadata = {
     "AI automatically collects and analyzes critical data across finance, investment, and marketing. Free tools for bloggers, investors, and marketers.",
   verification: {
     google: "SwxTRCc5nta8bfJ1XuSY4EaVcENhu8NTezyJskbYQDQ",
+    other: { "msvalidate.01": "6A4E3980272C94E1150535F557F1B69F" },
   },
   robots: { index: true, follow: true },
   alternates: {

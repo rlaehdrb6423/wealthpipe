@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { DM_Sans } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 
 const dmSans = DM_Sans({
@@ -53,6 +54,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={dmSans.className}>
+      <head>
+        <Script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4740331651949774"
+          crossOrigin="anonymous"
+          strategy="afterInteractive"
+        />
+      </head>
       <body>{children}</body>
     </html>
   );

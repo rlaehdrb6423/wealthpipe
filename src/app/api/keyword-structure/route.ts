@@ -2,7 +2,9 @@ import { NextRequest } from "next/server"
 import Anthropic from "@anthropic-ai/sdk"
 import { getServiceClient } from "@/lib/supabase"
 
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+function getClient() {
+  return new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY || "" })
+}
 
 const DAILY_LIMIT = 3
 
@@ -96,7 +98,7 @@ export async function POST(request: NextRequest) {
       context.topWords?.length ? `자주 쓰이는 단어: ${context.topWords.join(", ")}` : "",
     ].filter(Boolean).join("\n")
 
-    const message = await client.messages.create({
+    const message = await getClient().messages.create({
       model: "claude-haiku-4-5-20251001",
       max_tokens: 800,
       messages: [{

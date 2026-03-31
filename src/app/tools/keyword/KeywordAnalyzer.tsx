@@ -59,9 +59,10 @@ function fmt(n: number) {
 
 interface KeywordAnalyzerProps {
   locale?: Locale
+  initialKeyword?: string
 }
 
-export default function KeywordAnalyzer({ locale = "en" }: KeywordAnalyzerProps) {
+export default function KeywordAnalyzer({ locale = "en", initialKeyword }: KeywordAnalyzerProps) {
   const t = getTexts(locale).keyword
   const searchParams = useSearchParams()
   const [keyword, setKeyword] = useState("")
@@ -77,7 +78,7 @@ export default function KeywordAnalyzer({ locale = "en" }: KeywordAnalyzerProps)
 
   useEffect(() => {
     if (initialized) return
-    const q = searchParams.get("q")
+    const q = initialKeyword || searchParams.get("q")
     if (q) {
       setKeyword(q)
       setInitialized(true)
@@ -85,7 +86,7 @@ export default function KeywordAnalyzer({ locale = "en" }: KeywordAnalyzerProps)
     } else {
       setInitialized(true)
     }
-  }, [searchParams, initialized])
+  }, [searchParams, initialized, initialKeyword])
 
   const analyze = async (overrideKeyword?: string) => {
     const q = (overrideKeyword ?? keyword).trim()

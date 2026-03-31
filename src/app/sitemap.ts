@@ -1,9 +1,10 @@
 import type { MetadataRoute } from "next";
+import { getServiceClient } from "@/lib/supabase";
 
 const SITE_URL = "https://wealthpipe.net";
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  return [
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const staticRoutes: MetadataRoute.Sitemap = [
     {
       url: SITE_URL,
       lastModified: new Date(),
@@ -47,4 +48,51 @@ export default function sitemap(): MetadataRoute.Sitemap {
       },
     },
   ];
+
+  // 캐시된 키워드 퍼머링크 페이지 동적 추가
+  let keywordRoutes: MetadataRoute.Sitemap = [];
+  try {
+    const supabase = getServiceClient();
+    const { data } = await supabase
+      .from("keyword_cache")
+      .select("keyword, created_at")
+      .order("created_at", { ascending: false })
+      .limit(500);
+
+    if (data) {
+      keywordRoutes = data.flatMap((row) => {
+        const encoded = encodeURIComponent(row.keyword);
+        return [
+          {
+            url: `${SITE_URL}/tools/keyword/${encoded}`,
+            lastModified: new Date(row.created_at),
+            changeFrequency: "weekly" as const,
+            priority: 0.6,
+            alternates: {
+              languages: {
+                en: `${SITE_URL}/tools/keyword/${encoded}`,
+                ko: `${SITE_URL}/ko/tools/keyword/${encoded}`,
+              },
+            },
+          },
+          {
+            url: `${SITE_URL}/ko/tools/keyword/${encoded}`,
+            lastModified: new Date(row.created_at),
+            changeFrequency: "weekly" as const,
+            priority: 0.5,
+            alternates: {
+              languages: {
+                en: `${SITE_URL}/tools/keyword/${encoded}`,
+                ko: `${SITE_URL}/ko/tools/keyword/${encoded}`,
+              },
+            },
+          },
+        ];
+      });
+    }
+  } catch {
+    // Supabase 연결 실패 시 정적 라우트만 반환
+  }
+
+  return [...staticRoutes, ...keywordRoutes];
 }

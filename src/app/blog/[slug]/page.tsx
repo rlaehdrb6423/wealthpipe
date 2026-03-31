@@ -93,7 +93,7 @@ export default async function BlogPostPage({ params }: Props) {
           </div>
 
           <div
-            style={{ fontSize: 15, lineHeight: 1.8, color: "#ccc" }}
+            style={{ fontSize: 15, lineHeight: 2.0, color: "#ccc", textAlign: "center" }}
             dangerouslySetInnerHTML={{ __html: post.content }}
           />
         </article>

@@ -101,20 +101,26 @@ export default function WealthPipePage({ locale }: WealthPipePageProps) {
           <p className="tools-subtext">{t.tools.subtext}</p>
         </RevealOnScroll>
         <div>
-          {t.tools.items.map((tool, i) => (
-            <RevealOnScroll key={i} delay={i * 0.1} className="tool-card">
-              <div className="tool-num">{tool.n}</div>
-              <div>
-                <div className="tool-tag">{tool.tag}</div>
-                <h3 className="card-title">{tool.title}</h3>
-                <p className="tool-desc">{tool.desc}</p>
-              </div>
-              <div className="tool-status-col">
-                <span className={`tool-status${tool.status === "LIVE" ? " tool-status-live" : ""}`}>{tool.status}</span>
-                <span className="card-arrow">&nearr;</span>
-              </div>
-            </RevealOnScroll>
-          ))}
+          {t.tools.items.map((tool, i) => {
+            const content = (
+              <RevealOnScroll key={i} delay={i * 0.1} className="tool-card">
+                <div className="tool-num">{tool.n}</div>
+                <div>
+                  <div className="tool-tag">{tool.tag}</div>
+                  <h3 className="card-title">{tool.title}</h3>
+                  <p className="tool-desc">{tool.desc}</p>
+                </div>
+                <div className="tool-status-col">
+                  <span className={`tool-status${tool.status === "LIVE" ? " tool-status-live" : ""}`}>{tool.status}</span>
+                  <span className="card-arrow">&nearr;</span>
+                </div>
+              </RevealOnScroll>
+            );
+            if (tool.status === "LIVE") {
+              return <a key={i} href={`/tools/keyword`} style={{ textDecoration: "none", color: "inherit" }}>{content}</a>;
+            }
+            return content;
+          })}
           <div className="tools-end-border" />
         </div>
       </section>

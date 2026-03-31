@@ -3,11 +3,6 @@
 import { useState, useEffect } from "react"
 import { useSearchParams } from "next/navigation"
 import { type Locale, getTexts } from "@/lib/i18n"
-import OpportunityScore from "./components/OpportunityScore"
-import RevenueCalculator from "./components/RevenueCalculator"
-import TitleAnalysis from "./components/TitleAnalysis"
-import AiStructure from "./components/AiStructure"
-import RelatedKeywords from "./components/RelatedKeywords"
 
 interface KeywordResult {
   keyword: string
@@ -202,64 +197,78 @@ export default function KeywordAnalyzer({ locale = "en" }: KeywordAnalyzerProps)
   })()
 
   return (
-    <div className="min-h-screen bg-black text-white px-5 pt-20 pb-16">
-      <div className="max-w-[720px] mx-auto">
-        <div className="flex justify-between items-center">
-          <a href={homeHref} className="text-[#666] text-sm no-underline">
+    <div style={{ minHeight: "100vh", background: "#000", color: "#fff", padding: "80px 20px 60px" }}>
+      <div style={{ maxWidth: 720, margin: "0 auto" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <a href={homeHref} style={{ color: "#666", fontSize: 14, textDecoration: "none" }}>
             {t.backLink}
           </a>
-          <a
-            href={langSwitchHref}
-            className="text-[#666] text-[13px] no-underline border border-[#333] px-3 py-1 rounded-md"
-          >
+          <a href={langSwitchHref} style={{ color: "#666", fontSize: 13, textDecoration: "none", border: "1px solid #333", padding: "4px 12px", borderRadius: 6 }}>
             {t.langSwitchLabel}
           </a>
         </div>
 
-        <h1 className="text-3xl font-bold mt-6 mb-2">{t.heading}</h1>
-        <p className="text-[#999] text-[15px] mb-8">{t.subheading}</p>
+        <h1 style={{ fontSize: 28, fontWeight: 700, margin: "24px 0 8px" }}>
+          {t.heading}
+        </h1>
+        <p style={{ color: "#999", fontSize: 15, marginBottom: 32 }}>
+          {t.subheading}
+        </p>
 
-        <div className="flex gap-2 mb-4">
+        <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
           <input
             type="text"
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && analyze()}
             placeholder={t.placeholder}
-            className="flex-1 px-4 py-3.5 bg-[#111] border border-[#333] rounded-lg text-white text-[15px] outline-none"
+            style={{
+              flex: 1,
+              padding: "14px 16px",
+              background: "#111",
+              border: "1px solid #333",
+              borderRadius: 8,
+              color: "#fff",
+              fontSize: 15,
+              outline: "none",
+            }}
           />
           <button
             onClick={() => analyze()}
             disabled={loading}
-            className="px-7 py-3.5 border-none rounded-lg text-[15px] font-semibold text-black"
-            style={{ background: loading ? "#333" : "#fff", cursor: loading ? "not-allowed" : "pointer" }}
+            style={{
+              padding: "14px 28px",
+              background: loading ? "#333" : "#fff",
+              color: "#000",
+              border: "none",
+              borderRadius: 8,
+              fontSize: 15,
+              fontWeight: 600,
+              cursor: loading ? "not-allowed" : "pointer",
+            }}
           >
             {loading ? t.analyzingBtn : t.analyzeBtn}
           </button>
         </div>
 
         {error && (
-          <p className="text-[#ef4444] text-sm mb-4">{error}</p>
+          <p style={{ color: "#ef4444", fontSize: 14, marginBottom: 16 }}>{error}</p>
         )}
 
         {result && (
           <div style={{ animation: "up 0.4s ease" }}>
-            <div className="flex items-center gap-3 mt-8 mb-5">
-              <h2 className="text-[22px] font-bold">{result.keyword}</h2>
+            <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "32px 0 20px" }}>
+              <h2 style={{ fontSize: 22, fontWeight: 700 }}>{result.keyword}</h2>
               {result.remaining !== undefined && (
-                <span className="text-[#666] text-[13px]">
+                <span style={{ color: "#666", fontSize: 13 }}>
                   {locale === "ko" ? `오늘 ${result.remaining}${t.remainingLabel}` : `${result.remaining} ${t.remainingLabel}`}
                 </span>
               )}
             </div>
 
             {/* 핵심 지표 카드 */}
-            <div className="grid grid-cols-3 gap-3 mb-6">
-              <Card
-                label={t.totalVolume}
-                value={fmt(result.totalVolume)}
-                sub={`${t.pcLabel} ${fmt(result.pcVolume)} / ${t.mobileLabel} ${fmt(result.mobileVolume)}`}
-              />
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 24 }}>
+              <Card label={t.totalVolume} value={fmt(result.totalVolume)} sub={`${t.pcLabel} ${fmt(result.pcVolume)} / ${t.mobileLabel} ${fmt(result.mobileVolume)}`} />
               <Card
                 label={t.competition}
                 value={result.competitionLabel}
@@ -275,17 +284,39 @@ export default function KeywordAnalyzer({ locale = "en" }: KeywordAnalyzerProps)
             </div>
 
             {/* Opportunity Score + 판정 */}
-            <OpportunityScore
-              opportunityScore={result.opportunityScore}
-              verdictKey={result.verdictKey}
-              verdict={result.verdict}
-              t={t}
-            />
+            <div style={{ background: "#0a0a0a", border: "1px solid #1a1a1a", borderRadius: 12, padding: 20, marginBottom: 24 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                <span style={{ color: "#888", fontSize: 12, fontWeight: 600, letterSpacing: 1 }}>{t.opportunityScore}</span>
+                <span style={{ fontSize: 28, fontWeight: 700, color: gradeColor(result.opportunityScore >= 80 ? "A" : result.opportunityScore >= 60 ? "B" : result.opportunityScore >= 40 ? "C" : "E") }}>
+                  {result.opportunityScore}
+                </span>
+              </div>
+              <div style={{ background: "#111", borderRadius: 6, height: 12, overflow: "hidden", marginBottom: 12 }}>
+                <div style={{
+                  width: `${result.opportunityScore}%`,
+                  height: "100%",
+                  borderRadius: 6,
+                  background: result.opportunityScore >= 80 ? "#22c55e" : result.opportunityScore >= 60 ? "#3b82f6" : result.opportunityScore >= 40 ? "#eab308" : "#ef4444",
+                  transition: "width 0.5s ease",
+                }} />
+              </div>
+              <div style={{
+                display: "inline-block",
+                padding: "6px 16px",
+                borderRadius: 20,
+                fontSize: 14,
+                fontWeight: 600,
+                background: result.opportunityScore >= 80 ? "rgba(34,197,94,0.15)" : result.opportunityScore >= 60 ? "rgba(59,130,246,0.15)" : result.opportunityScore >= 40 ? "rgba(234,179,8,0.15)" : "rgba(239,68,68,0.15)",
+                color: result.opportunityScore >= 80 ? "#22c55e" : result.opportunityScore >= 60 ? "#3b82f6" : result.opportunityScore >= 40 ? "#eab308" : "#ef4444",
+              }}>
+                {t[result.verdictKey as keyof typeof t] || result.verdict}
+              </div>
+            </div>
 
             {/* 상세 데이터 */}
-            <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-xl p-5 mb-6">
-              <h3 className="text-base font-semibold mb-4">{t.detailTitle}</h3>
-              <div className="grid grid-cols-2 gap-3">
+            <div style={{ background: "#0a0a0a", border: "1px solid #1a1a1a", borderRadius: 12, padding: 20, marginBottom: 24 }}>
+              <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 16 }}>{t.detailTitle}</h3>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 12 }}>
                 <Row label={t.blogDocs} value={fmt(result.blogDocCount)} />
                 <Row label={t.newsDocs} value={fmt(result.newsCount)} />
                 <Row label={t.cafeDocs} value={fmt(result.cafeCount)} />
@@ -301,54 +332,200 @@ export default function KeywordAnalyzer({ locale = "en" }: KeywordAnalyzerProps)
 
             {/* 수익 계산기 */}
             {result.avgCpc > 0 && (
-              <RevenueCalculator
-                totalVolume={result.totalVolume}
-                pcCpc={result.pcCpc}
-                mobileCpc={result.mobileCpc}
-                avgCpc={result.avgCpc}
-                avgCtr={result.avgCtr}
-                revenueConservative={result.revenueConservative}
-                revenueRealistic={result.revenueRealistic}
-                revenueOptimistic={result.revenueOptimistic}
-                shareRate={shareRate}
-                onShareRateChange={setShareRate}
-                t={t}
-              />
+              <div style={{ background: "#0a0a0a", border: "1px solid #1a1a1a", borderRadius: 12, padding: 20, marginBottom: 24 }}>
+                <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 16 }}>{t.revenueTitle}</h3>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 12, marginBottom: 16 }}>
+                  <Row label={t.pcCpc} value={`₩${fmt(result.pcCpc)}`} />
+                  <Row label={t.mobileCpc} value={`₩${fmt(result.mobileCpc)}`} />
+                  <Row label={t.avgCpc} value={`₩${fmt(result.avgCpc)}`} />
+                </div>
+
+                {/* 수익 3단계 */}
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8, marginBottom: 16 }}>
+                  <div style={{ background: "#111", borderRadius: 8, padding: 12, textAlign: "center" as const }}>
+                    <p style={{ color: "#888", fontSize: 11, marginBottom: 4 }}>{t.revenueConservative}</p>
+                    <p style={{ fontSize: 16, fontWeight: 700, color: "#888" }}>₩{fmt(result.revenueConservative)}</p>
+                  </div>
+                  <div style={{ background: "#111", borderRadius: 8, padding: 12, textAlign: "center" as const, border: "1px solid #22c55e" }}>
+                    <p style={{ color: "#22c55e", fontSize: 11, marginBottom: 4 }}>{t.revenueRealistic}</p>
+                    <p style={{ fontSize: 20, fontWeight: 700, color: "#22c55e" }}>₩{fmt(result.revenueRealistic)}</p>
+                  </div>
+                  <div style={{ background: "#111", borderRadius: 8, padding: 12, textAlign: "center" as const }}>
+                    <p style={{ color: "#888", fontSize: 11, marginBottom: 4 }}>{t.revenueOptimistic}</p>
+                    <p style={{ fontSize: 16, fontWeight: 700, color: "#3b82f6" }}>₩{fmt(result.revenueOptimistic)}</p>
+                  </div>
+                </div>
+
+                {/* 커스텀 슬라이더 */}
+                <div style={{ marginBottom: 16 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+                    <span style={{ color: "#888", fontSize: 13 }}>{t.shareRate}</span>
+                    <span style={{ fontSize: 13, fontWeight: 600 }}>{shareRate}%</span>
+                  </div>
+                  <input
+                    type="range"
+                    min={1}
+                    max={30}
+                    value={shareRate}
+                    onChange={(e) => setShareRate(Number(e.target.value))}
+                    style={{ width: "100%", accentColor: "#22c55e" }}
+                  />
+                  <div style={{ background: "#111", borderRadius: 8, padding: 12, textAlign: "center" as const, marginTop: 8 }}>
+                    <p style={{ color: "#888", fontSize: 11, marginBottom: 2 }}>{t.estimatedMonthlyRevenue} ({shareRate}%)</p>
+                    <p style={{ fontSize: 24, fontWeight: 700, color: "#22c55e" }}>
+                      ₩{fmt(Math.round(result.totalVolume * (result.avgCtr / 100) * result.avgCpc * (shareRate / 100)))}
+                    </p>
+                  </div>
+                </div>
+                <p style={{ color: "#555", fontSize: 11 }}>{t.revenueDisclaimer}</p>
+              </div>
             )}
 
             {/* 제목 패턴 분석 */}
-            {result.titlePattern && result.titlePattern.titles.length > 0 && (
-              <TitleAnalysis titlePattern={result.titlePattern} t={t} />
-            )}
+            {result.titlePattern && result.titlePattern.titles.length > 0 && (() => {
+              const tp = result.titlePattern!
+              const maxCount = Math.max(...tp.titleTypes.map(tt => tt.count))
+              return (
+                <div style={{ background: "#0a0a0a", border: "1px solid #1a1a1a", borderRadius: 12, padding: 20, marginBottom: 24 }}>
+                  <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 16 }}>{t.titleAnalysisTitle}</h3>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 16 }}>
+                    <div style={{ background: "#111", borderRadius: 8, padding: 12, textAlign: "center" as const }}>
+                      <p style={{ color: "#888", fontSize: 11, marginBottom: 4 }}>{t.avgTitleLength}</p>
+                      <p style={{ fontSize: 18, fontWeight: 700 }}>{tp.avgLength}<span style={{ fontSize: 12, color: "#888" }}>{t.charUnit}</span></p>
+                    </div>
+                    <div style={{ background: "#111", borderRadius: 8, padding: 12, textAlign: "center" as const }}>
+                      <p style={{ color: "#888", fontSize: 11, marginBottom: 4 }}>{t.topTitleType}</p>
+                      <p style={{ fontSize: 14, fontWeight: 700 }}>{tp.titleTypes[0]?.type || "-"}</p>
+                    </div>
+                    <div style={{ background: "#111", borderRadius: 8, padding: 12, textAlign: "center" as const }}>
+                      <p style={{ color: "#888", fontSize: 11, marginBottom: 4 }}>{t.topWords}</p>
+                      <p style={{ fontSize: 12, fontWeight: 600, color: "#ccc" }}>{tp.topWords.slice(0, 3).join(", ") || "-"}</p>
+                    </div>
+                  </div>
+
+                  <p style={{ color: "#888", fontSize: 12, marginBottom: 8 }}>{t.titleTypeDistribution}</p>
+                  <div style={{ marginBottom: 16 }}>
+                    {tp.titleTypes.map(tt => (
+                      <div key={tt.type} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+                        <span style={{ color: "#999", fontSize: 12, minWidth: 60 }}>{tt.type}</span>
+                        <div style={{ flex: 1, background: "#111", borderRadius: 4, height: 16, overflow: "hidden" }}>
+                          <div style={{ width: `${(tt.count / maxCount) * 100}%`, height: "100%", background: "#3b82f6", borderRadius: 4, transition: "width 0.3s" }} />
+                        </div>
+                        <span style={{ color: "#666", fontSize: 11, minWidth: 20 }}>{tt.count}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <p style={{ color: "#888", fontSize: 12, marginBottom: 8 }}>{t.topPostTitles}</p>
+                  <div>
+                    {tp.titles.map((title, i) => (
+                      <div key={i} style={{ display: "flex", gap: 8, padding: "6px 0", borderBottom: "1px solid #111" }}>
+                        <span style={{ color: "#555", fontSize: 12, minWidth: 20 }}>{i + 1}</span>
+                        <a href={tp.links[i]} target="_blank" rel="noopener noreferrer" style={{ fontSize: 13, color: "#ccc", lineHeight: 1.4, textDecoration: "none" }} onMouseEnter={e => (e.currentTarget.style.color = "#3b82f6")} onMouseLeave={e => (e.currentTarget.style.color = "#ccc")}>{title}</a>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )
+            })()}
 
             {/* AI 글 구조 추천 */}
-            <AiStructure
-              aiStructure={aiStructure}
-              aiLoading={aiLoading}
-              aiError={aiError}
-              onFetch={fetchAiStructure}
-              locale={locale}
-              t={t}
-            />
+            <div style={{ background: "#0a0a0a", border: "1px solid #1a1a1a", borderRadius: 12, padding: 20, marginBottom: 24 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                <h3 style={{ fontSize: 16, fontWeight: 600 }}>{t.aiStructureTitle}</h3>
+                <span style={{ color: "#555", fontSize: 11 }}>{t.aiStructureLimit}</span>
+              </div>
+              {!aiStructure && !aiLoading && (
+                <button
+                  onClick={fetchAiStructure}
+                  style={{
+                    width: "100%", padding: "12px", background: "linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)",
+                    border: "1px solid #333", borderRadius: 8, color: "#fff", fontSize: 14, fontWeight: 600, cursor: "pointer",
+                  }}
+                >
+                  {t.aiStructureBtn}
+                </button>
+              )}
+              {aiLoading && (
+                <div style={{ textAlign: "center" as const, padding: 20, color: "#888" }}>
+                  <div style={{ display: "inline-block", width: 20, height: 20, border: "2px solid #333", borderTopColor: "#3b82f6", borderRadius: "50%", animation: "spin 0.8s linear infinite", marginRight: 8 }} />
+                  {t.aiStructureLoading}
+                </div>
+              )}
+              {aiError && <p style={{ color: "#ef4444", fontSize: 13, marginTop: 8 }}>{aiError}</p>}
+              {aiStructure && (
+                <div style={{ marginTop: 4 }}>
+                  <div style={{ marginBottom: 12 }}>
+                    <p style={{ color: "#888", fontSize: 11, marginBottom: 4 }}>{t.aiStructureH1}</p>
+                    <p style={{ fontSize: 15, fontWeight: 600, color: "#fff", background: "#111", padding: "10px 14px", borderRadius: 8 }}>{aiStructure.h1}</p>
+                  </div>
+                  <div style={{ marginBottom: 12 }}>
+                    <p style={{ color: "#888", fontSize: 11, marginBottom: 6 }}>{t.aiStructureH2}</p>
+                    {aiStructure.h2.map((h, i) => (
+                      <div key={i} style={{ display: "flex", gap: 8, alignItems: "center", padding: "6px 0", borderBottom: "1px solid #111" }}>
+                        <span style={{ color: "#3b82f6", fontSize: 12, fontWeight: 600, minWidth: 24 }}>H2</span>
+                        <span style={{ fontSize: 13, color: "#ccc" }}>{h}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div style={{ marginBottom: 12 }}>
+                    <p style={{ color: "#888", fontSize: 11, marginBottom: 6 }}>{t.aiStructureLsi}</p>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                      {aiStructure.lsiKeywords.map((k, i) => (
+                        <span key={i} style={{ padding: "4px 10px", background: "#111", border: "1px solid #333", borderRadius: 16, fontSize: 12, color: "#aaa" }}>{k}</span>
+                      ))}
+                    </div>
+                  </div>
+                  <div style={{ display: "flex", gap: 12, marginBottom: 12 }}>
+                    <div style={{ flex: 1, background: "#111", borderRadius: 8, padding: 10, textAlign: "center" as const }}>
+                      <p style={{ color: "#888", fontSize: 11, marginBottom: 2 }}>{t.aiStructureLength}</p>
+                      <p style={{ fontSize: 15, fontWeight: 600 }}>{aiStructure.recommendedLength.toLocaleString()}{locale === "ko" ? "자" : " chars"}</p>
+                    </div>
+                  </div>
+                  <div style={{ background: "#111", borderRadius: 8, padding: 12 }}>
+                    <p style={{ color: "#888", fontSize: 11, marginBottom: 4 }}>{t.aiStructureTip}</p>
+                    <p style={{ fontSize: 13, color: "#ccc", lineHeight: 1.5 }}>{aiStructure.tip}</p>
+                  </div>
+                </div>
+              )}
+            </div>
 
             {/* 연관 키워드 */}
-            <RelatedKeywords
-              keywords={result.relatedKeywords}
-              onSelect={(kw) => {
-                setKeyword(kw)
-                analyze(kw)
-              }}
-              t={t}
-            />
+            {result.relatedKeywords.length > 0 && (
+              <div style={{ background: "#0a0a0a", border: "1px solid #1a1a1a", borderRadius: 12, padding: 20, marginBottom: 24 }}>
+                <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 12 }}>{t.relatedTitle}</h3>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                  {result.relatedKeywords.map((kw) => (
+                    <button
+                      key={kw}
+                      onClick={() => {
+                        setKeyword(kw)
+                        analyze(kw)
+                      }}
+                      style={{
+                        padding: "6px 14px",
+                        background: "#111",
+                        border: "1px solid #333",
+                        borderRadius: 20,
+                        color: "#ccc",
+                        fontSize: 13,
+                        cursor: "pointer",
+                      }}
+                    >
+                      {kw}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* 공유 버튼 */}
-            <div className="relative">
-              <p className="text-[#888] text-xs mb-2">{t.shareBonusText}</p>
-              <div className="flex gap-2 mb-10">
-                <button
-                  onClick={copyShare}
-                  className="flex-1 px-4 py-3 bg-[#111] border border-[#333] rounded-lg text-[#ccc] text-sm cursor-pointer flex items-center justify-center"
-                >
+            <div style={{ position: "relative" }}>
+              <p style={{ color: "#888", fontSize: 12, marginBottom: 8 }}>
+                {t.shareBonusText}
+              </p>
+              <div style={{ display: "flex", gap: 8, marginBottom: 40 }}>
+                <button onClick={copyShare} style={shareBtnStyle}>
                   {t.copyLink}
                 </button>
                 <a
@@ -356,31 +533,57 @@ export default function KeywordAnalyzer({ locale = "en" }: KeywordAnalyzerProps)
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={() => claimReward("twitter")}
-                  className="flex-1 px-4 py-3 bg-[#111] border border-[#333] rounded-lg text-[#ccc] text-sm no-underline flex items-center justify-center"
+                  style={{ ...shareBtnStyle, textDecoration: "none", textAlign: "center" as const }}
                 >
                   {t.twitterShare}
                 </a>
               </div>
               {toast && (
-                <div
-                  className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-[#22c55e] text-white px-5 py-2 rounded-lg text-[13px] font-semibold whitespace-nowrap"
-                  style={{ animation: "up 0.3s ease" }}
-                >
+                <div style={{
+                  position: "absolute",
+                  bottom: 8,
+                  left: "50%",
+                  transform: "translateX(-50%)",
+                  background: "#22c55e",
+                  color: "#fff",
+                  padding: "8px 20px",
+                  borderRadius: 8,
+                  fontSize: 13,
+                  fontWeight: 600,
+                  whiteSpace: "nowrap",
+                  animation: "up 0.3s ease",
+                }}>
                   {toast}
                 </div>
               )}
             </div>
 
             {/* 뉴스레터 CTA */}
-            <div
-              className="border border-[#222] rounded-xl p-6 text-center"
-              style={{ background: "linear-gradient(135deg, #111 0%, #0a0a0a 100%)" }}
-            >
-              <p className="text-base font-semibold mb-2">{t.nlCtaTitle}</p>
-              <p className="text-[#888] text-sm mb-4">{t.nlCtaDesc}</p>
+            <div style={{
+              background: "linear-gradient(135deg, #111 0%, #0a0a0a 100%)",
+              border: "1px solid #222",
+              borderRadius: 12,
+              padding: 24,
+              textAlign: "center" as const,
+            }}>
+              <p style={{ fontSize: 16, fontWeight: 600, marginBottom: 8 }}>
+                {t.nlCtaTitle}
+              </p>
+              <p style={{ color: "#888", fontSize: 14, marginBottom: 16 }}>
+                {t.nlCtaDesc}
+              </p>
               <a
                 href={nlHref}
-                className="inline-block px-8 py-3 bg-white text-black rounded-lg text-sm font-semibold no-underline"
+                style={{
+                  display: "inline-block",
+                  padding: "12px 32px",
+                  background: "#fff",
+                  color: "#000",
+                  borderRadius: 8,
+                  fontSize: 14,
+                  fontWeight: 600,
+                  textDecoration: "none",
+                }}
               >
                 {t.nlCtaBtn}
               </a>
@@ -394,19 +597,33 @@ export default function KeywordAnalyzer({ locale = "en" }: KeywordAnalyzerProps)
 
 function Card({ label, value, sub, color }: { label: string; value: string; sub: string; color?: string }) {
   return (
-    <div className="bg-[#0a0a0a] border border-[#1a1a1a] rounded-xl p-4">
-      <p className="text-[#888] text-xs mb-1.5">{label}</p>
-      <p className="text-xl font-bold mb-1" style={{ color: color || "#fff" }}>{value}</p>
-      <p className="text-[#666] text-[11px]">{sub}</p>
+    <div style={{ background: "#0a0a0a", border: "1px solid #1a1a1a", borderRadius: 12, padding: 16 }}>
+      <p style={{ color: "#888", fontSize: 12, marginBottom: 6 }}>{label}</p>
+      <p style={{ fontSize: 20, fontWeight: 700, color: color || "#fff", marginBottom: 4 }}>{value}</p>
+      <p style={{ color: "#666", fontSize: 11 }}>{sub}</p>
     </div>
   )
 }
 
 function Row({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex justify-between py-2 border-b border-[#111]">
-      <span className="text-[#888] text-sm">{label}</span>
-      <span className="text-sm font-medium">{value}</span>
+    <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid #111" }}>
+      <span style={{ color: "#888", fontSize: 13 }}>{label}</span>
+      <span style={{ fontSize: 13, fontWeight: 500 }}>{value}</span>
     </div>
   )
+}
+
+const shareBtnStyle: React.CSSProperties = {
+  flex: 1,
+  padding: "12px 16px",
+  background: "#111",
+  border: "1px solid #333",
+  borderRadius: 8,
+  color: "#ccc",
+  fontSize: 14,
+  cursor: "pointer",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
 }

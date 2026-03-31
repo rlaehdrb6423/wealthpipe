@@ -109,6 +109,23 @@ export interface I18nTexts {
     topWords: string;
     titleTypeDistribution: string;
     topPostTitles: string;
+    opportunityScore: string;
+    verdictGo: string;
+    verdictNiche: string;
+    verdictDiff: string;
+    verdictLong: string;
+    revenueConservative: string;
+    revenueRealistic: string;
+    revenueOptimistic: string;
+    aiStructureTitle: string;
+    aiStructureBtn: string;
+    aiStructureLoading: string;
+    aiStructureH1: string;
+    aiStructureH2: string;
+    aiStructureLsi: string;
+    aiStructureLength: string;
+    aiStructureTip: string;
+    aiStructureLimit: string;
   };
 }
 
@@ -235,6 +252,23 @@ const en: I18nTexts = {
     topWords: "Frequent Words",
     titleTypeDistribution: "Title Type Distribution",
     topPostTitles: "Top Blog Post Titles",
+    opportunityScore: "Opportunity Score",
+    verdictGo: "Go for it now",
+    verdictNiche: "Niche opportunity",
+    verdictDiff: "Differentiation needed",
+    verdictLong: "Long-term strategy needed",
+    revenueConservative: "Conservative (1%)",
+    revenueRealistic: "Realistic (5%)",
+    revenueOptimistic: "Optimistic (15%)",
+    aiStructureTitle: "AI Blog Structure",
+    aiStructureBtn: "Get AI Structure Recommendation",
+    aiStructureLoading: "AI is generating...",
+    aiStructureH1: "Recommended Title",
+    aiStructureH2: "Subtopics",
+    aiStructureLsi: "LSI Keywords",
+    aiStructureLength: "Recommended Length",
+    aiStructureTip: "Writing Tip",
+    aiStructureLimit: "3 free AI recommendations per day",
   },
 };
 
@@ -361,6 +395,23 @@ const ko: I18nTexts = {
     topWords: "자주 쓰는 단어",
     titleTypeDistribution: "제목 유형 분포",
     topPostTitles: "상위 블로그 포스트 제목",
+    opportunityScore: "기회 점수",
+    verdictGo: "지금 공략하세요",
+    verdictNiche: "틈새 공략 가능",
+    verdictDiff: "차별화 필요",
+    verdictLong: "장기 전략 필요",
+    revenueConservative: "보수적 (1%)",
+    revenueRealistic: "현실적 (5%)",
+    revenueOptimistic: "낙관적 (15%)",
+    aiStructureTitle: "AI 글 구조 추천",
+    aiStructureBtn: "AI 글 구조 추천받기",
+    aiStructureLoading: "AI가 분석 중...",
+    aiStructureH1: "추천 제목",
+    aiStructureH2: "소제목 구성",
+    aiStructureLsi: "LSI 키워드",
+    aiStructureLength: "추천 글자수",
+    aiStructureTip: "작성 팁",
+    aiStructureLimit: "AI 글 구조 추천은 하루 3회 무료",
   },
 };
 

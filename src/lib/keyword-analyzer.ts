@@ -95,6 +95,12 @@ export interface KeywordResult {
   mobileCpc: number
   avgCpc: number
   estimatedRevenue: number
+  revenueConservative: number
+  revenueRealistic: number
+  revenueOptimistic: number
+  opportunityScore: number
+  verdict: string
+  verdictKey: string
   titlePattern?: TitlePattern
 }
 
@@ -145,6 +151,42 @@ function calculateSuccessRate(totalVolume: number, totalCompetition: number): nu
   else if (totalVolume > 5000) base += 5
 
   return Math.min(99, Math.max(5, base))
+}
+
+function calcOpportunityScore(
+  competitionGrade: string,
+  profitGrade: string,
+  successRate: number,
+  totalVolume: number,
+  avgCpc: number,
+): { opportunityScore: number; verdict: string; verdictKey: string } {
+  // 경쟁도 점수 (0~30)
+  const compScore = { A: 30, B: 24, C: 16, D: 8, E: 0 }[competitionGrade] ?? 0
+  // 수익성 점수 (0~30)
+  const profScore = { A: 30, B: 22, C: 14, D: 6 }[profitGrade] ?? 0
+  // 성공률 점수 (0~20)
+  const successScore = Math.round(successRate * 0.2)
+  // 검색량 보너스 (0~10)
+  let volBonus = 0
+  if (totalVolume >= 500 && totalVolume <= 10000) volBonus = 10
+  else if (totalVolume >= 100) volBonus = 6
+  else if (totalVolume > 10000) volBonus = 4
+  // CPC 보너스 (0~10)
+  let cpcBonus = 0
+  if (avgCpc >= 500) cpcBonus = 10
+  else if (avgCpc >= 200) cpcBonus = 6
+  else if (avgCpc > 0) cpcBonus = 3
+
+  const score = Math.min(100, compScore + profScore + successScore + volBonus + cpcBonus)
+
+  let verdict: string
+  let verdictKey: string
+  if (score >= 80) { verdict = "지금 공략하세요"; verdictKey = "verdictGo" }
+  else if (score >= 60) { verdict = "틈새 공략 가능"; verdictKey = "verdictNiche" }
+  else if (score >= 40) { verdict = "차별화 필요"; verdictKey = "verdictDiff" }
+  else { verdict = "장기 전략 필요"; verdictKey = "verdictLong" }
+
+  return { opportunityScore: score, verdict, verdictKey }
 }
 
 // Supabase 캐시 (24시간 TTL)
@@ -201,7 +243,16 @@ export async function analyzeKeyword(keyword: string): Promise<KeywordResult | n
   const avgCpc = totalVolume > 0
     ? Math.round(pcCpc * (volumeData.pcVolume / totalVolume) + mobileCpc * (volumeData.mobileVolume / totalVolume))
     : 0
-  const estimatedRevenue = Math.round(totalVolume * (volumeData.avgCtr / 100) * avgCpc * 0.05)
+  const successRate = calculateSuccessRate(totalVolume, totalCompetition)
+  const { opportunityScore, verdict, verdictKey } = calcOpportunityScore(
+    competitionGrade, profitGrade, successRate, totalVolume, avgCpc
+  )
+
+  const revenueBase = totalVolume * (volumeData.avgCtr / 100) * avgCpc
+  const estimatedRevenue = Math.round(revenueBase * 0.05)
+  const revenueConservative = Math.round(revenueBase * 0.01)
+  const revenueRealistic = Math.round(revenueBase * 0.05)
+  const revenueOptimistic = Math.round(revenueBase * 0.15)
 
   const result: KeywordResult = {
     keyword: volumeData.keyword,
@@ -219,7 +270,7 @@ export async function analyzeKeyword(keyword: string): Promise<KeywordResult | n
     profitLabel,
     ratio,
     relatedKeywords: volumeData.relatedKeywords,
-    successRate: calculateSuccessRate(totalVolume, totalCompetition),
+    successRate,
     compIdx: volumeData.compIdx,
     avgClickCnt: volumeData.avgClickCnt,
     avgCtr: volumeData.avgCtr,
@@ -227,6 +278,12 @@ export async function analyzeKeyword(keyword: string): Promise<KeywordResult | n
     mobileCpc,
     avgCpc,
     estimatedRevenue,
+    revenueConservative,
+    revenueRealistic,
+    revenueOptimistic,
+    opportunityScore,
+    verdict,
+    verdictKey,
     titlePattern: blogResult?.posts ? analyzeTitlePatterns(blogResult.posts.map(p => p.title), blogResult.posts.map(p => p.link)) ?? undefined : undefined,
   }
 

@@ -53,10 +53,35 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
   }
 }
 
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  name: "WealthPipe Keyword Analyzer",
+  url: `${SITE_URL}/tools/keyword`,
+  applicationCategory: "SEO Tool",
+  operatingSystem: "Web",
+  offers: {
+    "@type": "Offer",
+    price: "0",
+    priceCurrency: "KRW",
+  },
+  description:
+    "Free Naver keyword analyzer — search volume, competition grade, profit estimate, and AI blog structure recommendations.",
+  inLanguage: ["en", "ko"],
+}
+
 export default function KeywordPage() {
   return (
-    <Suspense>
-      <KeywordAnalyzer locale="en" />
-    </Suspense>
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c"),
+        }}
+      />
+      <Suspense>
+        <KeywordAnalyzer locale="en" />
+      </Suspense>
+    </>
   )
 }

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { useSearchParams } from "next/navigation"
 import { type Locale, getTexts } from "@/lib/i18n"
+import AdSlot from "@/components/AdSlot"
 
 interface KeywordResult {
   keyword: string
@@ -590,6 +591,11 @@ export default function KeywordAnalyzer({ locale = "en" }: KeywordAnalyzerProps)
               >
                 {t.nlCtaBtn}
               </a>
+            </div>
+
+            {/* AdSense 인피드 광고 */}
+            <div style={{ marginTop: 16 }}>
+              <AdSlot slot="KEYWORD_RESULT_BOTTOM" format="auto" responsive />
             </div>
           </div>
         )}

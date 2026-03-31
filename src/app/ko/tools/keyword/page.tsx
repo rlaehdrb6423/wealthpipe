@@ -55,10 +55,35 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
   }
 }
 
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  name: "WealthPipe 키워드 분석기",
+  url: `${SITE_URL}/ko/tools/keyword`,
+  applicationCategory: "SEO Tool",
+  operatingSystem: "Web",
+  offers: {
+    "@type": "Offer",
+    price: "0",
+    priceCurrency: "KRW",
+  },
+  description:
+    "무료 네이버 키워드 분석기 — 검색량, 경쟁도, 수익성, AI 블로그 글 구조 추천까지 한 번에.",
+  inLanguage: ["ko", "en"],
+}
+
 export default function KoKeywordPage() {
   return (
-    <Suspense>
-      <KeywordAnalyzer locale="ko" />
-    </Suspense>
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c"),
+        }}
+      />
+      <Suspense>
+        <KeywordAnalyzer locale="ko" />
+      </Suspense>
+    </>
   )
 }

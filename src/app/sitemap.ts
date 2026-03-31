@@ -22,5 +22,29 @@ export default function sitemap(): MetadataRoute.Sitemap {
         languages: { en: SITE_URL, ko: `${SITE_URL}/ko` },
       },
     },
+    {
+      url: `${SITE_URL}/tools/keyword`,
+      lastModified: new Date(),
+      changeFrequency: "daily",
+      priority: 0.8,
+      alternates: {
+        languages: {
+          en: `${SITE_URL}/tools/keyword`,
+          ko: `${SITE_URL}/ko/tools/keyword`,
+        },
+      },
+    },
+    {
+      url: `${SITE_URL}/ko/tools/keyword`,
+      lastModified: new Date(),
+      changeFrequency: "daily",
+      priority: 0.7,
+      alternates: {
+        languages: {
+          en: `${SITE_URL}/tools/keyword`,
+          ko: `${SITE_URL}/ko/tools/keyword`,
+        },
+      },
+    },
   ];
 }

@@ -9,6 +9,7 @@ export async function GET(request: NextRequest) {
   const competitionGrade = searchParams.get("cg") || "C"
   const profit = searchParams.get("profit") || "보통"
   const profitGrade = searchParams.get("pg") || "C"
+  const score = searchParams.get("score") || ""
 
   function gradeColor(grade: string) {
     if (grade === "A") return "#22c55e"
@@ -126,7 +127,23 @@ export async function GET(request: NextRequest) {
         {/* 하단 CTA */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "40px" }}>
           <span style={{ color: "#666", fontSize: "18px" }}>wealthpipe.net/tools/keyword</span>
-          <span style={{ color: "#888", fontSize: "16px" }}>무료로 분석해보세요 →</span>
+          {score ? (
+            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              <span style={{ color: "#888", fontSize: "16px" }}>기회점수</span>
+              <span
+                style={{
+                  fontSize: "28px",
+                  fontWeight: 800,
+                  color: Number(score) >= 70 ? "#22c55e" : Number(score) >= 40 ? "#eab308" : "#ef4444",
+                }}
+              >
+                {score}
+              </span>
+              <span style={{ color: "#666", fontSize: "14px" }}>/100</span>
+            </div>
+          ) : (
+            <span style={{ color: "#888", fontSize: "16px" }}>무료로 분석해보세요 →</span>
+          )}
         </div>
       </div>
     ),

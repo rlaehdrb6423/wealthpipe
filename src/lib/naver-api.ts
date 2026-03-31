@@ -97,11 +97,16 @@ async function naverSearchCount(
     )
     clearTimeout(timeoutId)
 
-    if (!response.ok) return null
+    if (!response.ok) {
+      const text = await response.text()
+      console.error(`네이버 검색 API(${type}) 에러: status=${response.status}, body=${text}`)
+      return null
+    }
     const data = await response.json()
     return data.total
-  } catch {
+  } catch (error) {
     clearTimeout(timeoutId)
+    console.error(`네이버 검색 API(${type}) 예외:`, error)
     return null
   }
 }

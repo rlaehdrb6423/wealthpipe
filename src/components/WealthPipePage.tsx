@@ -112,7 +112,7 @@ export default function WealthPipePage({ locale }: WealthPipePageProps) {
                 </div>
                 <div className="tool-status-col">
                   <span className={`tool-status${tool.status === "LIVE" ? " tool-status-live" : ""}`}>{tool.status}</span>
-                  <span className="card-arrow">&nearr;</span>
+                  <span className="card-arrow">↗</span>
                 </div>
               </RevealOnScroll>
             );

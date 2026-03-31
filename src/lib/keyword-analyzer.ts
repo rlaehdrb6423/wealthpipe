@@ -12,6 +12,7 @@ export interface TitlePattern {
   topWords: string[]
   titleTypes: { type: string; count: number }[]
   titles: string[]
+  links: string[]
 }
 
 const STOP_WORDS = new Set([
@@ -20,7 +21,7 @@ const STOP_WORDS = new Set([
   "is", "are", "for", "and", "or", "in", "on", "to", "of", "with", "how", "what",
 ])
 
-function analyzeTitlePatterns(titles: string[]): TitlePattern | null {
+function analyzeTitlePatterns(titles: string[], links: string[]): TitlePattern | null {
   if (titles.length === 0) return null
 
   const avgLength = Math.round(titles.reduce((sum, t) => sum + t.length, 0) / titles.length)
@@ -67,7 +68,7 @@ function analyzeTitlePatterns(titles: string[]): TitlePattern | null {
     .map(([type, count]) => ({ type, count }))
     .sort((a, b) => b.count - a.count)
 
-  return { avgLength, topWords, titleTypes, titles }
+  return { avgLength, topWords, titleTypes, titles, links }
 }
 
 export interface KeywordResult {
@@ -226,7 +227,7 @@ export async function analyzeKeyword(keyword: string): Promise<KeywordResult | n
     mobileCpc,
     avgCpc,
     estimatedRevenue,
-    titlePattern: blogResult?.posts ? analyzeTitlePatterns(blogResult.posts.map(p => p.title)) ?? undefined : undefined,
+    titlePattern: blogResult?.posts ? analyzeTitlePatterns(blogResult.posts.map(p => p.title), blogResult.posts.map(p => p.link)) ?? undefined : undefined,
   }
 
   await setCache(keyword, result)

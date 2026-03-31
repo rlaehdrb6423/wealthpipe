@@ -33,6 +33,7 @@ interface KeywordResult {
     topWords: string[]
     titleTypes: { type: string; count: number }[]
     titles: string[]
+    links: string[]
   }
   remaining: number
 }
@@ -331,7 +332,7 @@ export default function KeywordAnalyzer({ locale = "en" }: KeywordAnalyzerProps)
                     {tp.titles.map((title, i) => (
                       <div key={i} style={{ display: "flex", gap: 8, padding: "6px 0", borderBottom: "1px solid #111" }}>
                         <span style={{ color: "#555", fontSize: 12, minWidth: 20 }}>{i + 1}</span>
-                        <span style={{ fontSize: 13, color: "#ccc", lineHeight: 1.4 }}>{title}</span>
+                        <a href={tp.links[i]} target="_blank" rel="noopener noreferrer" style={{ fontSize: 13, color: "#ccc", lineHeight: 1.4, textDecoration: "none" }} onMouseEnter={e => (e.currentTarget.style.color = "#3b82f6")} onMouseLeave={e => (e.currentTarget.style.color = "#ccc")}>{title}</a>
                       </div>
                     ))}
                   </div>

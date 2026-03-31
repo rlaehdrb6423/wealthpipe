@@ -99,7 +99,7 @@ export default function KeywordAnalyzer({ locale = "en" }: KeywordAnalyzerProps)
       const res = await fetch("/api/keyword", {
         method: "POST",
         headers,
-        body: JSON.stringify({ keyword: q }),
+        body: JSON.stringify({ keyword: q, admin: adminKey || undefined }),
       })
       let data
       try { data = await res.json() } catch { data = null }

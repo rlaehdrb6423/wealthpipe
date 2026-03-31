@@ -48,7 +48,8 @@ async function incrementUsage(ip: string) {
 export async function POST(request: NextRequest) {
   try {
     const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown"
-    const adminKey = request.headers.get("x-admin-key")
+    const body = await request.json()
+    const adminKey = request.headers.get("x-admin-key") || body.admin || ""
     const isAdmin = adminKey === process.env.ADMIN_SECRET
 
     let remaining = 999
@@ -63,7 +64,6 @@ export async function POST(request: NextRequest) {
       remaining = usage.remaining
     }
 
-    const body = await request.json()
     const keyword = body.keyword?.trim()
 
     if (!keyword) {

@@ -47,6 +47,30 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         },
       },
     },
+    {
+      url: `${SITE_URL}/tools/keyword/compare`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.7,
+      alternates: {
+        languages: {
+          en: `${SITE_URL}/tools/keyword/compare`,
+          ko: `${SITE_URL}/ko/tools/keyword/compare`,
+        },
+      },
+    },
+    {
+      url: `${SITE_URL}/ko/tools/keyword/compare`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.6,
+      alternates: {
+        languages: {
+          en: `${SITE_URL}/tools/keyword/compare`,
+          ko: `${SITE_URL}/ko/tools/keyword/compare`,
+        },
+      },
+    },
   ];
 
   // 캐시된 키워드 퍼머링크 페이지 동적 추가

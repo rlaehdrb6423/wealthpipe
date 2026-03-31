@@ -54,6 +54,48 @@ export interface I18nTexts {
     langSwitchLabel: string;
     langSwitchHref: string;
   };
+  keyword: {
+    title: string;
+    description: string;
+    backLink: string;
+    heading: string;
+    subheading: string;
+    placeholder: string;
+    analyzeBtn: string;
+    analyzingBtn: string;
+    remainingLabel: string;
+    totalVolume: string;
+    pcLabel: string;
+    mobileLabel: string;
+    competition: string;
+    profitability: string;
+    gradeLabel: string;
+    detailTitle: string;
+    blogDocs: string;
+    newsDocs: string;
+    cafeDocs: string;
+    webDocs: string;
+    totalCompetition: string;
+    ratio: string;
+    avgClicks: string;
+    avgCtr: string;
+    adCompIdx: string;
+    successRate: string;
+    relatedTitle: string;
+    shareBonusText: string;
+    copyLink: string;
+    twitterShare: string;
+    nlCtaTitle: string;
+    nlCtaDesc: string;
+    nlCtaBtn: string;
+    networkError: string;
+    ogTitle: string;
+    ogDesc: string;
+    ogTitleWithKeyword: string;
+    ogDescWithKeyword: string;
+    langSwitchHref: string;
+    langSwitchLabel: string;
+  };
 }
 
 const en: I18nTexts = {
@@ -64,14 +106,14 @@ const en: I18nTexts = {
     subscribeCta: "Subscribe Free",
   },
   hero: {
-    tagline: "— AI Pipeline Platform",
-    line1a: "DATA",
-    line1b: "FLOWS.",
-    line2a: "WEALTH",
-    line2b: "FOLLOWS.",
-    desc: "AI automatically collects and analyzes critical data across finance, investment, and marketing.",
-    descHighlight: "You just make the call.",
-    ctaPrimary: "Start Free Tools \u2192",
+    tagline: "— AI Monetization Tools",
+    line1a: "YOUR DATA,",
+    line1b: "YOUR REVENUE.",
+    line2a: "AI DOES",
+    line2b: "THE REST.",
+    desc: "Keyword analysis, market signals, and content strategy — all the tools you need to turn data into income.",
+    descHighlight: "100% free. Start earning smarter.",
+    ctaPrimary: "Try Free Tools \u2192",
     ctaSecondary: "Subscribe",
   },
   stats: [
@@ -124,6 +166,48 @@ const en: I18nTexts = {
     langSwitchLabel: "\ud55c\uad6d\uc5b4",
     langSwitchHref: "/ko",
   },
+  keyword: {
+    title: "Free Keyword Analyzer - WealthPipe",
+    description: "Analyze Naver search volume, competition, and profitability at a glance. Free keyword analysis tool for blog monetization.",
+    backLink: "\u2190 WealthPipe",
+    heading: "Keyword Analyzer",
+    subheading: "Analyze Naver search volume, competition, and profitability at a glance.",
+    placeholder: "Enter a keyword (e.g. stock investment)",
+    analyzeBtn: "Analyze",
+    analyzingBtn: "Analyzing...",
+    remainingLabel: "remaining today",
+    totalVolume: "Monthly Volume",
+    pcLabel: "PC",
+    mobileLabel: "Mobile",
+    competition: "Competition",
+    profitability: "Profitability",
+    gradeLabel: "Grade",
+    detailTitle: "Detailed Data",
+    blogDocs: "Blog Posts",
+    newsDocs: "News Articles",
+    cafeDocs: "Cafe Posts",
+    webDocs: "Web Documents",
+    totalCompetition: "Total Competition",
+    ratio: "Volume/Post Ratio",
+    avgClicks: "Avg. Clicks",
+    avgCtr: "Avg. CTR",
+    adCompIdx: "Ad Competition",
+    successRate: "Success Rate",
+    relatedTitle: "Related Keywords",
+    shareBonusText: "Share to get +3 bonus analyses (up to 3x/day)",
+    copyLink: "Copy Link",
+    twitterShare: "Share on X",
+    nlCtaTitle: "Get weekly hot keyword analysis via email",
+    nlCtaDesc: "WealthPipe Newsletter - Every Monday",
+    nlCtaBtn: "Subscribe Newsletter",
+    networkError: "A network error occurred.",
+    ogTitle: "Free Keyword Analyzer - WealthPipe",
+    ogDesc: "Analyze Naver search volume, competition, and profitability at a glance.",
+    ogTitleWithKeyword: "Keyword Analysis Result",
+    ogDescWithKeyword: "Naver search volume, competition, and profitability analysis",
+    langSwitchHref: "/ko/tools/keyword",
+    langSwitchLabel: "\ud55c\uad6d\uc5b4",
+  },
 };
 
 const ko: I18nTexts = {
@@ -134,15 +218,15 @@ const ko: I18nTexts = {
     subscribeCta: "\ubb34\ub8cc \uad6c\ub3c5",
   },
   hero: {
-    tagline: "— AI Pipeline Platform",
-    line1a: "DATA",
-    line1b: "FLOWS.",
-    line2a: "WEALTH",
-    line2b: "FOLLOWS.",
-    desc: "\uc7ac\ud14c\ud06c, \ud22c\uc790, \ub9c8\ucf00\ud305\uc758 \ud575\uc2ec \ub370\uc774\ud130\ub97c AI\uac00 \uc790\ub3d9\uc73c\ub85c \uc218\uc9d1\ud558\uace0 \ubd84\uc11d\ud569\ub2c8\ub2e4.",
-    descHighlight: "\ub2f9\uc2e0\uc740 \uacb0\uc815\ub9cc \ud558\uba74 \ub429\ub2c8\ub2e4.",
-    ctaPrimary: "\ubb34\ub8cc \ud234 \uc2dc\uc791\ud558\uae30 \u2192",
-    ctaSecondary: "\ub274\uc2a4\ub808\ud130 \uad6c\ub3c5",
+    tagline: "— AI 수익화 도구",
+    line1a: "데이터로",
+    line1b: "수익을 만드세요.",
+    line2a: "AI가",
+    line2b: "도와드립니다.",
+    desc: "키워드 분석, 시장 시그널, 콘텐츠 전략까지 — 블로그와 스마트스토어 수익화에 필요한 모든 도구.",
+    descHighlight: "100% 무료. 지금 바로 시작하세요.",
+    ctaPrimary: "무료 도구 시작하기 \u2192",
+    ctaSecondary: "뉴스레터 구독",
   },
   stats: [
     ["24/7", "AI \uc2dc\uc7a5 \ubaa8\ub2c8\ud130\ub9c1"],
@@ -193,6 +277,48 @@ const ko: I18nTexts = {
     copyright: "\u00a9 2026 WEALTHPIPE",
     langSwitchLabel: "English",
     langSwitchHref: "/",
+  },
+  keyword: {
+    title: "무료 키워드 분석기 - WealthPipe",
+    description: "네이버 검색량, 경쟁도, 수익성을 한눈에 분석하세요. 블로그 수익화를 위한 무료 키워드 분석 도구.",
+    backLink: "← WealthPipe",
+    heading: "키워드 분석기",
+    subheading: "네이버 검색량, 경쟁도, 수익성을 한눈에 분석하세요.",
+    placeholder: "분석할 키워드 입력 (예: 주식 투자)",
+    analyzeBtn: "분석",
+    analyzingBtn: "분석 중...",
+    remainingLabel: "회 남음",
+    totalVolume: "월간 검색량",
+    pcLabel: "PC",
+    mobileLabel: "모바일",
+    competition: "경쟁도",
+    profitability: "수익성",
+    gradeLabel: "등급",
+    detailTitle: "상세 데이터",
+    blogDocs: "블로그 발행량",
+    newsDocs: "뉴스 문서수",
+    cafeDocs: "카페 글수",
+    webDocs: "웹 문서수",
+    totalCompetition: "총 경쟁 문서",
+    ratio: "검색량/발행량 비율",
+    avgClicks: "평균 클릭수",
+    avgCtr: "평균 클릭률",
+    adCompIdx: "광고 경쟁지수",
+    successRate: "성공률",
+    relatedTitle: "연관 키워드",
+    shareBonusText: "공유하면 보너스 분석 +3회 (하루 3번까지)",
+    copyLink: "링크 복사",
+    twitterShare: "트위터 공유",
+    nlCtaTitle: "매주 핫 키워드 분석을 이메일로 받아보세요",
+    nlCtaDesc: "WealthPipe 뉴스레터 - 매주 월요일 발행",
+    nlCtaBtn: "뉴스레터 구독하기",
+    networkError: "네트워크 오류가 발생했습니다.",
+    ogTitle: "무료 키워드 분석기 - WealthPipe",
+    ogDesc: "네이버 검색량, 경쟁도, 수익성을 한눈에 분석하세요.",
+    ogTitleWithKeyword: "키워드 분석 결과",
+    ogDescWithKeyword: "네이버 검색량, 경쟁도, 수익성 분석 결과",
+    langSwitchHref: "/tools/keyword",
+    langSwitchLabel: "English",
   },
 };
 

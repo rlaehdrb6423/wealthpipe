@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useSearchParams } from "next/navigation"
+import { type Locale, getTexts } from "@/lib/i18n"
 
 interface KeywordResult {
   keyword: string
@@ -38,13 +39,19 @@ function fmt(n: number) {
   return n.toLocaleString("ko-KR")
 }
 
-export default function KeywordAnalyzer() {
+interface KeywordAnalyzerProps {
+  locale?: Locale
+}
+
+export default function KeywordAnalyzer({ locale = "en" }: KeywordAnalyzerProps) {
+  const t = getTexts(locale).keyword
   const searchParams = useSearchParams()
   const [keyword, setKeyword] = useState("")
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<KeywordResult | null>(null)
   const [error, setError] = useState("")
   const [initialized, setInitialized] = useState(false)
+  const [toast, setToast] = useState<string | null>(null)
 
   useEffect(() => {
     if (initialized) return
@@ -80,7 +87,7 @@ export default function KeywordAnalyzer() {
         setResult(data)
       }
     } catch {
-      setError("네트워크 오류가 발생했습니다.")
+      setError(t.networkError)
     } finally {
       setLoading(false)
     }
@@ -90,23 +97,59 @@ export default function KeywordAnalyzer() {
     ? `https://wealthpipe.net/tools/keyword?q=${encodeURIComponent(result.keyword)}`
     : ""
 
-  const copyShare = async () => {
-    await navigator.clipboard.writeText(shareUrl)
-    alert("링크가 복사되었습니다!")
+  const claimReward = async (platform: string) => {
+    if (!result) return
+    try {
+      const res = await fetch("/api/share/reward", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ keyword: result.keyword, platform }),
+      })
+      const data = await res.json()
+      if (res.ok) {
+        setToast(data.message)
+        if (data.rewarded && result) {
+          setResult({ ...result, remaining: result.remaining + data.bonusAdded })
+        }
+        setTimeout(() => setToast(null), 3000)
+      }
+    } catch { /* 보상 실패는 무시 */ }
   }
+
+  const copyShare = async () => {
+    try {
+      await navigator.clipboard.writeText(shareUrl)
+    } catch {
+      const input = document.createElement("input")
+      input.value = shareUrl
+      document.body.appendChild(input)
+      input.select()
+      document.execCommand("copy")
+      document.body.removeChild(input)
+    }
+    claimReward("copy")
+  }
+
+  const homeHref = locale === "ko" ? "/ko" : "/"
+  const nlHref = locale === "ko" ? "/ko#newsletter" : "/#newsletter"
 
   return (
     <div style={{ minHeight: "100vh", background: "#000", color: "#fff", padding: "80px 20px 60px" }}>
       <div style={{ maxWidth: 720, margin: "0 auto" }}>
-        <a href="/" style={{ color: "#666", fontSize: 14, textDecoration: "none" }}>
-          ← WealthPipe
-        </a>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <a href={homeHref} style={{ color: "#666", fontSize: 14, textDecoration: "none" }}>
+            {t.backLink}
+          </a>
+          <a href={t.langSwitchHref} style={{ color: "#666", fontSize: 13, textDecoration: "none", border: "1px solid #333", padding: "4px 12px", borderRadius: 6 }}>
+            {t.langSwitchLabel}
+          </a>
+        </div>
 
         <h1 style={{ fontSize: 28, fontWeight: 700, margin: "24px 0 8px" }}>
-          키워드 분석기
+          {t.heading}
         </h1>
         <p style={{ color: "#999", fontSize: 15, marginBottom: 32 }}>
-          네이버 검색량, 경쟁도, 수익성을 한눈에 분석하세요.
+          {t.subheading}
         </p>
 
         <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
@@ -115,7 +158,7 @@ export default function KeywordAnalyzer() {
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && analyze()}
-            placeholder="분석할 키워드 입력 (예: 주식 투자)"
+            placeholder={t.placeholder}
             style={{
               flex: 1,
               padding: "14px 16px",
@@ -141,7 +184,7 @@ export default function KeywordAnalyzer() {
               cursor: loading ? "not-allowed" : "pointer",
             }}
           >
-            {loading ? "분석 중..." : "분석"}
+            {loading ? t.analyzingBtn : t.analyzeBtn}
           </button>
         </div>
 
@@ -155,49 +198,49 @@ export default function KeywordAnalyzer() {
               <h2 style={{ fontSize: 22, fontWeight: 700 }}>{result.keyword}</h2>
               {result.remaining !== undefined && (
                 <span style={{ color: "#666", fontSize: 13 }}>
-                  오늘 {result.remaining}회 남음
+                  {locale === "ko" ? `오늘 ${result.remaining}${t.remainingLabel}` : `${result.remaining} ${t.remainingLabel}`}
                 </span>
               )}
             </div>
 
             {/* 핵심 지표 카드 */}
             <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 24 }}>
-              <Card label="월간 검색량" value={fmt(result.totalVolume)} sub={`PC ${fmt(result.pcVolume)} / 모바일 ${fmt(result.mobileVolume)}`} />
+              <Card label={t.totalVolume} value={fmt(result.totalVolume)} sub={`${t.pcLabel} ${fmt(result.pcVolume)} / ${t.mobileLabel} ${fmt(result.mobileVolume)}`} />
               <Card
-                label="경쟁도"
+                label={t.competition}
                 value={result.competitionLabel}
-                sub={`등급 ${result.competitionGrade}`}
+                sub={`${t.gradeLabel} ${result.competitionGrade}`}
                 color={gradeColor(result.competitionGrade)}
               />
               <Card
-                label="수익성"
+                label={t.profitability}
                 value={result.profitLabel}
-                sub={`등급 ${result.profitGrade}`}
+                sub={`${t.gradeLabel} ${result.profitGrade}`}
                 color={gradeColor(result.profitGrade)}
               />
             </div>
 
             {/* 상세 데이터 */}
             <div style={{ background: "#0a0a0a", border: "1px solid #1a1a1a", borderRadius: 12, padding: 20, marginBottom: 24 }}>
-              <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 16 }}>상세 데이터</h3>
+              <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 16 }}>{t.detailTitle}</h3>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 12 }}>
-                <Row label="블로그 발행량" value={fmt(result.blogDocCount)} />
-                <Row label="뉴스 문서수" value={fmt(result.newsCount)} />
-                <Row label="카페 글수" value={fmt(result.cafeCount)} />
-                <Row label="웹 문서수" value={fmt(result.webDocCount)} />
-                <Row label="총 경쟁 문서" value={fmt(result.totalCompetition)} />
-                <Row label="검색량/발행량 비율" value={result.ratio.toString()} />
-                <Row label="평균 클릭수" value={fmt(result.avgClickCnt)} />
-                <Row label="평균 클릭률" value={`${result.avgCtr}%`} />
-                <Row label="광고 경쟁지수" value={result.compIdx} />
-                <Row label="성공률" value={`${result.successRate}%`} />
+                <Row label={t.blogDocs} value={fmt(result.blogDocCount)} />
+                <Row label={t.newsDocs} value={fmt(result.newsCount)} />
+                <Row label={t.cafeDocs} value={fmt(result.cafeCount)} />
+                <Row label={t.webDocs} value={fmt(result.webDocCount)} />
+                <Row label={t.totalCompetition} value={fmt(result.totalCompetition)} />
+                <Row label={t.ratio} value={result.ratio.toString()} />
+                <Row label={t.avgClicks} value={fmt(result.avgClickCnt)} />
+                <Row label={t.avgCtr} value={`${result.avgCtr}%`} />
+                <Row label={t.adCompIdx} value={result.compIdx} />
+                <Row label={t.successRate} value={`${result.successRate}%`} />
               </div>
             </div>
 
             {/* 연관 키워드 */}
             {result.relatedKeywords.length > 0 && (
               <div style={{ background: "#0a0a0a", border: "1px solid #1a1a1a", borderRadius: 12, padding: 20, marginBottom: 24 }}>
-                <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 12 }}>연관 키워드</h3>
+                <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 12 }}>{t.relatedTitle}</h3>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                   {result.relatedKeywords.map((kw) => (
                     <button
@@ -224,18 +267,42 @@ export default function KeywordAnalyzer() {
             )}
 
             {/* 공유 버튼 */}
-            <div style={{ display: "flex", gap: 8, marginBottom: 40 }}>
-              <button onClick={copyShare} style={shareBtnStyle}>
-                링크 복사
-              </button>
-              <a
-                href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`"${result.keyword}" 키워드 분석 결과 - 경쟁도: ${result.competitionLabel}, 수익성: ${result.profitLabel}`)}&url=${encodeURIComponent(shareUrl)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ ...shareBtnStyle, textDecoration: "none", textAlign: "center" as const }}
-              >
-                트위터 공유
-              </a>
+            <div style={{ position: "relative" }}>
+              <p style={{ color: "#888", fontSize: 12, marginBottom: 8 }}>
+                {t.shareBonusText}
+              </p>
+              <div style={{ display: "flex", gap: 8, marginBottom: 40 }}>
+                <button onClick={copyShare} style={shareBtnStyle}>
+                  {t.copyLink}
+                </button>
+                <a
+                  href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`"${result.keyword}" ${t.ogTitleWithKeyword} - ${t.competition}: ${result.competitionLabel}, ${t.profitability}: ${result.profitLabel}`)}&url=${encodeURIComponent(shareUrl)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => claimReward("twitter")}
+                  style={{ ...shareBtnStyle, textDecoration: "none", textAlign: "center" as const }}
+                >
+                  {t.twitterShare}
+                </a>
+              </div>
+              {toast && (
+                <div style={{
+                  position: "absolute",
+                  bottom: 8,
+                  left: "50%",
+                  transform: "translateX(-50%)",
+                  background: "#22c55e",
+                  color: "#fff",
+                  padding: "8px 20px",
+                  borderRadius: 8,
+                  fontSize: 13,
+                  fontWeight: 600,
+                  whiteSpace: "nowrap",
+                  animation: "up 0.3s ease",
+                }}>
+                  {toast}
+                </div>
+              )}
             </div>
 
             {/* 뉴스레터 CTA */}
@@ -247,13 +314,13 @@ export default function KeywordAnalyzer() {
               textAlign: "center" as const,
             }}>
               <p style={{ fontSize: 16, fontWeight: 600, marginBottom: 8 }}>
-                매주 핫 키워드 분석을 이메일로 받아보세요
+                {t.nlCtaTitle}
               </p>
               <p style={{ color: "#888", fontSize: 14, marginBottom: 16 }}>
-                WealthPipe 뉴스레터 - 매주 월요일 발행
+                {t.nlCtaDesc}
               </p>
               <a
-                href="/#newsletter"
+                href={nlHref}
                 style={{
                   display: "inline-block",
                   padding: "12px 32px",
@@ -265,7 +332,7 @@ export default function KeywordAnalyzer() {
                   textDecoration: "none",
                 }}
               >
-                뉴스레터 구독하기
+                {t.nlCtaBtn}
               </a>
             </div>
           </div>

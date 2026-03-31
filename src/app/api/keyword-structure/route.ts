@@ -129,7 +129,9 @@ ${contextInfo}
     if (!isAdmin) await incrementStructureUsage(ip)
 
     return Response.json(structure)
-  } catch {
-    return Response.json({ error: "AI 서비스 오류가 발생했습니다." }, { status: 500 })
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err)
+    console.error("keyword-structure error:", msg)
+    return Response.json({ error: `AI 오류: ${msg}` }, { status: 500 })
   }
 }

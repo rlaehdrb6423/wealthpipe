@@ -68,10 +68,10 @@ body {
 /* ───── Typography ───── */
 
 .big {
-  font-size: clamp(76px, 13vw, 180px);
+  font-size: clamp(40px, 7vw, 96px);
   font-weight: 900;
-  line-height: 0.84;
-  letter-spacing: -0.045em;
+  line-height: 0.92;
+  letter-spacing: -0.035em;
   text-transform: uppercase;
 }
 
@@ -887,7 +887,7 @@ body {
   }
 
   .big {
-    font-size: clamp(48px, 13vw, 180px);
+    font-size: clamp(32px, 8vw, 96px);
   }
 
   .hero-bottom {

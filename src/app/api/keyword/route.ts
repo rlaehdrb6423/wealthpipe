@@ -48,13 +48,19 @@ async function incrementUsage(ip: string) {
 export async function POST(request: NextRequest) {
   try {
     const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown"
+    const adminKey = request.headers.get("x-admin-key")
+    const isAdmin = adminKey === process.env.ADMIN_SECRET
 
-    const { allowed, remaining } = await checkUsageLimit(ip)
-    if (!allowed) {
-      return Response.json(
-        { error: "오늘 무료 사용 횟수를 모두 사용했습니다. (5회/일)", remaining: 0 },
-        { status: 429 }
-      )
+    let remaining = 999
+    if (!isAdmin) {
+      const usage = await checkUsageLimit(ip)
+      if (!usage.allowed) {
+        return Response.json(
+          { error: "오늘 무료 사용 횟수를 모두 사용했습니다. (5회/일)", remaining: 0 },
+          { status: 429 }
+        )
+      }
+      remaining = usage.remaining
     }
 
     const body = await request.json()
@@ -76,7 +82,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    await incrementUsage(ip)
+    if (!isAdmin) await incrementUsage(ip)
 
     return Response.json({ ...result, remaining })
   } catch {

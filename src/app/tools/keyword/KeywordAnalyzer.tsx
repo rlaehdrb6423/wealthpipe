@@ -65,9 +65,12 @@ export default function KeywordAnalyzer() {
     setError("")
     setResult(null)
     try {
+      const adminKey = searchParams.get("admin") || ""
+      const headers: Record<string, string> = { "Content-Type": "application/json" }
+      if (adminKey) headers["x-admin-key"] = adminKey
       const res = await fetch("/api/keyword", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({ keyword: q }),
       })
       const data = await res.json()

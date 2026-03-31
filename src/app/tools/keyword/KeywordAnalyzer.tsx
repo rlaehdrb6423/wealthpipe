@@ -75,6 +75,7 @@ export default function KeywordAnalyzer({ locale = "en", initialKeyword }: Keywo
   const [aiStructure, setAiStructure] = useState<{ h1: string; h2: string[]; lsiKeywords: string[]; recommendedLength: number; tip: string } | null>(null)
   const [aiLoading, setAiLoading] = useState(false)
   const [aiError, setAiError] = useState("")
+  const [trend, setTrend] = useState<{ period: string; ratio: number }[] | null>(null)
 
   useEffect(() => {
     if (initialized) return
@@ -109,6 +110,12 @@ export default function KeywordAnalyzer({ locale = "en", initialKeyword }: Keywo
         setError(data?.error || `Error ${res.status}`)
       } else if (data) {
         setResult(data)
+        // Fetch trend data
+        fetch("/api/keyword/trend", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ keyword: q }),
+        }).then(r => r.ok ? r.json() : null).then(d => setTrend(d?.trend || null)).catch(() => {})
       } else {
         setError(t.networkError)
       }
@@ -563,6 +570,9 @@ export default function KeywordAnalyzer({ locale = "en", initialKeyword }: Keywo
               )}
             </div>
 
+            {/* 트렌드 차트 */}
+            {trend && trend.length > 0 && <TrendChart data={trend} locale={locale} />}
+
             {/* 뉴스레터 CTA */}
             <div style={{
               background: "linear-gradient(135deg, #111 0%, #0a0a0a 100%)",
@@ -600,6 +610,50 @@ export default function KeywordAnalyzer({ locale = "en", initialKeyword }: Keywo
             </div>
           </div>
         )}
+      </div>
+    </div>
+  )
+}
+
+function TrendChart({ data, locale }: { data: { period: string; ratio: number }[]; locale: string }) {
+  const maxRatio = Math.max(...data.map(d => d.ratio), 1)
+  const label = locale === "ko" ? "검색 트렌드 (12개월)" : "Search Trend (12 months)"
+  const isRising = data.length >= 2 && data[data.length - 1].ratio > data[data.length - 2].ratio
+  const trendLabel = locale === "ko"
+    ? (isRising ? "상승 추세" : "하락 추세")
+    : (isRising ? "Rising" : "Declining")
+
+  return (
+    <div style={{ background: "#0a0a0a", border: "1px solid #1a1a1a", borderRadius: 12, padding: 16, marginBottom: 16 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+        <p style={{ color: "#888", fontSize: 12 }}>{label}</p>
+        <span style={{ fontSize: 11, color: isRising ? "#22c55e" : "#ef4444", fontWeight: 600 }}>
+          {isRising ? "↑" : "↓"} {trendLabel}
+        </span>
+      </div>
+      <div style={{ display: "flex", alignItems: "flex-end", gap: 3, height: 80 }}>
+        {data.map((d, i) => {
+          const h = Math.max(4, (d.ratio / maxRatio) * 72)
+          const isLast = i === data.length - 1
+          return (
+            <div key={d.period} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
+              <div
+                style={{
+                  width: "100%",
+                  height: h,
+                  background: isLast ? "#22c55e" : "#333",
+                  borderRadius: "3px 3px 0 0",
+                  transition: "height 0.3s ease",
+                }}
+                title={`${d.period}: ${d.ratio}`}
+              />
+            </div>
+          )
+        })}
+      </div>
+      <div style={{ display: "flex", justifyContent: "space-between", marginTop: 4 }}>
+        <span style={{ fontSize: 10, color: "#555" }}>{data[0]?.period?.slice(0, 7)}</span>
+        <span style={{ fontSize: 10, color: "#555" }}>{data[data.length - 1]?.period?.slice(0, 7)}</span>
       </div>
     </div>
   )

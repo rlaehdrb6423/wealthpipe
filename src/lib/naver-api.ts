@@ -177,3 +177,58 @@ export async function getCafeCount(keyword: string): Promise<number | null> {
 export async function getWebDocCount(keyword: string): Promise<number | null> {
   return naverSearchCount(keyword, "webkr")
 }
+
+// ===== 네이버 데이터랩 API (검색 트렌드) =====
+
+export interface TrendPoint {
+  period: string
+  ratio: number
+}
+
+export async function getSearchTrend(keyword: string, months = 12): Promise<TrendPoint[] | null> {
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), 8000)
+
+  const endDate = new Date()
+  const startDate = new Date()
+  startDate.setMonth(startDate.getMonth() - months)
+
+  const formatDate = (d: Date) => d.toISOString().split("T")[0]
+
+  try {
+    const response = await fetch("https://openapi.naver.com/v1/datalab/search", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Naver-Client-Id": process.env.NAVER_CLIENT_ID!,
+        "X-Naver-Client-Secret": process.env.NAVER_CLIENT_SECRET!,
+      },
+      body: JSON.stringify({
+        startDate: formatDate(startDate),
+        endDate: formatDate(endDate),
+        timeUnit: "month",
+        keywordGroups: [
+          {
+            groupName: keyword,
+            keywords: [keyword],
+          },
+        ],
+      }),
+      signal: controller.signal,
+    })
+    clearTimeout(timeoutId)
+
+    if (!response.ok) return null
+    const data = await response.json()
+    const results = data.results?.[0]?.data
+    if (!results || results.length === 0) return null
+
+    return results.map((item: { period: string; ratio: number }) => ({
+      period: item.period,
+      ratio: item.ratio,
+    }))
+  } catch {
+    clearTimeout(timeoutId)
+    return null
+  }
+}

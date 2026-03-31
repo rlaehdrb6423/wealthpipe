@@ -94,3 +94,23 @@ ALTER TABLE structure_usage ENABLE ROW LEVEL SECURITY;
 
 -- API Route(서버)에서 service_role 키로 접근하므로 anon 정책은 필요 없음
 -- 클라이언트에서 직접 접근하는 테이블이 없으므로 RLS만 활성화해둠
+
+-- 8. 블로그 포스트 (콘텐츠 허브)
+CREATE TABLE blog_posts (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  slug TEXT NOT NULL UNIQUE,
+  title TEXT NOT NULL,
+  description TEXT NOT NULL,
+  content TEXT NOT NULL,
+  tags TEXT[] DEFAULT '{}',
+  locale TEXT DEFAULT 'ko' CHECK (locale IN ('ko', 'en')),
+  published BOOLEAN DEFAULT false,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE INDEX idx_blog_slug ON blog_posts (slug);
+CREATE INDEX idx_blog_published ON blog_posts (published, locale);
+CREATE INDEX idx_blog_created ON blog_posts (created_at DESC);
+
+ALTER TABLE blog_posts ENABLE ROW LEVEL SECURITY;

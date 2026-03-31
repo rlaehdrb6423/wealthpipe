@@ -71,12 +71,37 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         },
       },
     },
+    {
+      url: `${SITE_URL}/blog`,
+      lastModified: new Date(),
+      changeFrequency: "daily",
+      priority: 0.7,
+      alternates: {
+        languages: {
+          en: `${SITE_URL}/blog`,
+          ko: `${SITE_URL}/ko/blog`,
+        },
+      },
+    },
+    {
+      url: `${SITE_URL}/ko/blog`,
+      lastModified: new Date(),
+      changeFrequency: "daily",
+      priority: 0.6,
+      alternates: {
+        languages: {
+          en: `${SITE_URL}/blog`,
+          ko: `${SITE_URL}/ko/blog`,
+        },
+      },
+    },
   ];
+
+  const supabase = getServiceClient();
 
   // 캐시된 키워드 퍼머링크 페이지 동적 추가
   let keywordRoutes: MetadataRoute.Sitemap = [];
   try {
-    const supabase = getServiceClient();
     const { data } = await supabase
       .from("keyword_cache")
       .select("keyword, created_at")
@@ -118,5 +143,36 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Supabase 연결 실패 시 정적 라우트만 반환
   }
 
-  return [...staticRoutes, ...keywordRoutes];
+  // 블로그 포스트 동적 추가
+  let blogRoutes: MetadataRoute.Sitemap = [];
+  try {
+    const { data: posts } = await supabase
+      .from("blog_posts")
+      .select("slug, locale, updated_at")
+      .eq("published", true)
+      .order("created_at", { ascending: false })
+      .limit(200);
+
+    if (posts) {
+      blogRoutes = posts.map((post) => {
+        const prefix = post.locale === "ko" ? "/ko" : "";
+        return {
+          url: `${SITE_URL}${prefix}/blog/${post.slug}`,
+          lastModified: new Date(post.updated_at),
+          changeFrequency: "weekly" as const,
+          priority: 0.6,
+          alternates: {
+            languages: {
+              en: `${SITE_URL}/blog/${post.slug}`,
+              ko: `${SITE_URL}/ko/blog/${post.slug}`,
+            },
+          },
+        };
+      });
+    }
+  } catch {
+    // Blog query failed, continue without blog routes
+  }
+
+  return [...staticRoutes, ...keywordRoutes, ...blogRoutes];
 }

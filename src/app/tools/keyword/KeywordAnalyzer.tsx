@@ -101,11 +101,14 @@ export default function KeywordAnalyzer({ locale = "en" }: KeywordAnalyzerProps)
         headers,
         body: JSON.stringify({ keyword: q }),
       })
-      const data = await res.json()
+      let data
+      try { data = await res.json() } catch { data = null }
       if (!res.ok) {
-        setError(data.error)
-      } else {
+        setError(data?.error || `Error ${res.status}`)
+      } else if (data) {
         setResult(data)
+      } else {
+        setError(t.networkError)
       }
     } catch {
       setError(t.networkError)

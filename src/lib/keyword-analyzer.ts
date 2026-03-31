@@ -203,7 +203,21 @@ async function getCached(keyword: string): Promise<KeywordResult | null> {
   const age = Date.now() - new Date(data.created_at).getTime()
   if (age > 24 * 60 * 60 * 1000) return null
 
-  return data.data as KeywordResult
+  const cached = data.data as KeywordResult
+  // 이전 캐시에 새 필드가 없을 수 있으므로 기본값 보장
+  return {
+    ...cached,
+    pcCpc: cached.pcCpc ?? 0,
+    mobileCpc: cached.mobileCpc ?? 0,
+    avgCpc: cached.avgCpc ?? 0,
+    estimatedRevenue: cached.estimatedRevenue ?? 0,
+    revenueConservative: cached.revenueConservative ?? 0,
+    revenueRealistic: cached.revenueRealistic ?? 0,
+    revenueOptimistic: cached.revenueOptimistic ?? 0,
+    opportunityScore: cached.opportunityScore ?? 0,
+    verdict: cached.verdict ?? "",
+    verdictKey: cached.verdictKey ?? "verdictLong",
+  }
 }
 
 async function setCache(keyword: string, result: KeywordResult) {

@@ -155,8 +155,8 @@ body {
 }
 
 .nav-cta {
-  padding: 10px 28px;
-  font-size: 12px;
+  padding: 8px 20px !important;
+  font-size: 11px !important;
 }
 
 .lang-btn {

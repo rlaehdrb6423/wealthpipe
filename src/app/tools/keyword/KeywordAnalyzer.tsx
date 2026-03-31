@@ -144,6 +144,16 @@ export default function KeywordAnalyzer({ locale = "en" }: KeywordAnalyzerProps)
   const homeHref = locale === "ko" ? "/ko" : "/"
   const nlHref = locale === "ko" ? "/ko#newsletter" : "/#newsletter"
 
+  const langSwitchHref = (() => {
+    const params = new URLSearchParams()
+    const q = searchParams.get("q")
+    const admin = searchParams.get("admin")
+    if (q) params.set("q", q)
+    if (admin) params.set("admin", admin)
+    const qs = params.toString()
+    return `${t.langSwitchHref}${qs ? `?${qs}` : ""}`
+  })()
+
   return (
     <div style={{ minHeight: "100vh", background: "#000", color: "#fff", padding: "80px 20px 60px" }}>
       <div style={{ maxWidth: 720, margin: "0 auto" }}>
@@ -151,7 +161,7 @@ export default function KeywordAnalyzer({ locale = "en" }: KeywordAnalyzerProps)
           <a href={homeHref} style={{ color: "#666", fontSize: 14, textDecoration: "none" }}>
             {t.backLink}
           </a>
-          <a href={t.langSwitchHref} style={{ color: "#666", fontSize: 13, textDecoration: "none", border: "1px solid #333", padding: "4px 12px", borderRadius: 6 }}>
+          <a href={langSwitchHref} style={{ color: "#666", fontSize: 13, textDecoration: "none", border: "1px solid #333", padding: "4px 12px", borderRadius: 6 }}>
             {t.langSwitchLabel}
           </a>
         </div>

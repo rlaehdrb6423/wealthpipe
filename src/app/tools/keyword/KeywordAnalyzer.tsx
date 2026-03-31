@@ -24,6 +24,16 @@ interface KeywordResult {
   compIdx: string
   avgClickCnt: number
   avgCtr: number
+  pcCpc: number
+  mobileCpc: number
+  avgCpc: number
+  estimatedRevenue: number
+  titlePattern?: {
+    avgLength: number
+    topWords: string[]
+    titleTypes: { type: string; count: number }[]
+    titles: string[]
+  }
   remaining: number
 }
 
@@ -52,6 +62,7 @@ export default function KeywordAnalyzer({ locale = "en" }: KeywordAnalyzerProps)
   const [error, setError] = useState("")
   const [initialized, setInitialized] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
+  const [shareRate, setShareRate] = useState(5)
 
   useEffect(() => {
     if (initialized) return
@@ -236,6 +247,87 @@ export default function KeywordAnalyzer({ locale = "en" }: KeywordAnalyzerProps)
                 <Row label={t.successRate} value={`${result.successRate}%`} />
               </div>
             </div>
+
+            {/* 수익 계산기 */}
+            {result.avgCpc > 0 && (
+              <div style={{ background: "#0a0a0a", border: "1px solid #1a1a1a", borderRadius: 12, padding: 20, marginBottom: 24 }}>
+                <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 16 }}>{t.revenueTitle}</h3>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 12, marginBottom: 16 }}>
+                  <Row label={t.pcCpc} value={`₩${fmt(result.pcCpc)}`} />
+                  <Row label={t.mobileCpc} value={`₩${fmt(result.mobileCpc)}`} />
+                  <Row label={t.avgCpc} value={`₩${fmt(result.avgCpc)}`} />
+                </div>
+                <div style={{ marginBottom: 16 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+                    <span style={{ color: "#888", fontSize: 13 }}>{t.shareRate}</span>
+                    <span style={{ fontSize: 13, fontWeight: 600 }}>{shareRate}%</span>
+                  </div>
+                  <input
+                    type="range"
+                    min={1}
+                    max={30}
+                    value={shareRate}
+                    onChange={(e) => setShareRate(Number(e.target.value))}
+                    style={{ width: "100%", accentColor: "#22c55e" }}
+                  />
+                </div>
+                <div style={{ background: "#111", borderRadius: 8, padding: 16, textAlign: "center" as const }}>
+                  <p style={{ color: "#888", fontSize: 12, marginBottom: 4 }}>{t.estimatedMonthlyRevenue}</p>
+                  <p style={{ fontSize: 28, fontWeight: 700, color: "#22c55e" }}>
+                    ₩{fmt(Math.round(result.totalVolume * (result.avgCtr / 100) * result.avgCpc * (shareRate / 100)))}
+                  </p>
+                </div>
+                <p style={{ color: "#555", fontSize: 11, marginTop: 8 }}>{t.revenueDisclaimer}</p>
+              </div>
+            )}
+
+            {/* 제목 패턴 분석 */}
+            {result.titlePattern && result.titlePattern.titles.length > 0 && (() => {
+              const tp = result.titlePattern!
+              const maxCount = Math.max(...tp.titleTypes.map(tt => tt.count))
+              return (
+                <div style={{ background: "#0a0a0a", border: "1px solid #1a1a1a", borderRadius: 12, padding: 20, marginBottom: 24 }}>
+                  <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 16 }}>{t.titleAnalysisTitle}</h3>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 16 }}>
+                    <div style={{ background: "#111", borderRadius: 8, padding: 12, textAlign: "center" as const }}>
+                      <p style={{ color: "#888", fontSize: 11, marginBottom: 4 }}>{t.avgTitleLength}</p>
+                      <p style={{ fontSize: 18, fontWeight: 700 }}>{tp.avgLength}<span style={{ fontSize: 12, color: "#888" }}>{t.charUnit}</span></p>
+                    </div>
+                    <div style={{ background: "#111", borderRadius: 8, padding: 12, textAlign: "center" as const }}>
+                      <p style={{ color: "#888", fontSize: 11, marginBottom: 4 }}>{t.topTitleType}</p>
+                      <p style={{ fontSize: 14, fontWeight: 700 }}>{tp.titleTypes[0]?.type || "-"}</p>
+                    </div>
+                    <div style={{ background: "#111", borderRadius: 8, padding: 12, textAlign: "center" as const }}>
+                      <p style={{ color: "#888", fontSize: 11, marginBottom: 4 }}>{t.topWords}</p>
+                      <p style={{ fontSize: 12, fontWeight: 600, color: "#ccc" }}>{tp.topWords.slice(0, 3).join(", ") || "-"}</p>
+                    </div>
+                  </div>
+
+                  <p style={{ color: "#888", fontSize: 12, marginBottom: 8 }}>{t.titleTypeDistribution}</p>
+                  <div style={{ marginBottom: 16 }}>
+                    {tp.titleTypes.map(tt => (
+                      <div key={tt.type} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+                        <span style={{ color: "#999", fontSize: 12, minWidth: 60 }}>{tt.type}</span>
+                        <div style={{ flex: 1, background: "#111", borderRadius: 4, height: 16, overflow: "hidden" }}>
+                          <div style={{ width: `${(tt.count / maxCount) * 100}%`, height: "100%", background: "#3b82f6", borderRadius: 4, transition: "width 0.3s" }} />
+                        </div>
+                        <span style={{ color: "#666", fontSize: 11, minWidth: 20 }}>{tt.count}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <p style={{ color: "#888", fontSize: 12, marginBottom: 8 }}>{t.topPostTitles}</p>
+                  <div>
+                    {tp.titles.map((title, i) => (
+                      <div key={i} style={{ display: "flex", gap: 8, padding: "6px 0", borderBottom: "1px solid #111" }}>
+                        <span style={{ color: "#555", fontSize: 12, minWidth: 20 }}>{i + 1}</span>
+                        <span style={{ fontSize: 13, color: "#ccc", lineHeight: 1.4 }}>{title}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )
+            })()}
 
             {/* 연관 키워드 */}
             {result.relatedKeywords.length > 0 && (

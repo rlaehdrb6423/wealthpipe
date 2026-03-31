@@ -95,6 +95,20 @@ export interface I18nTexts {
     ogDescWithKeyword: string;
     langSwitchHref: string;
     langSwitchLabel: string;
+    revenueTitle: string;
+    pcCpc: string;
+    mobileCpc: string;
+    avgCpc: string;
+    shareRate: string;
+    estimatedMonthlyRevenue: string;
+    revenueDisclaimer: string;
+    titleAnalysisTitle: string;
+    avgTitleLength: string;
+    charUnit: string;
+    topTitleType: string;
+    topWords: string;
+    titleTypeDistribution: string;
+    topPostTitles: string;
   };
 }
 
@@ -207,6 +221,20 @@ const en: I18nTexts = {
     ogDescWithKeyword: "Naver search volume, competition, and profitability analysis",
     langSwitchHref: "/ko/tools/keyword",
     langSwitchLabel: "\ud55c\uad6d\uc5b4",
+    revenueTitle: "Estimated Monthly Revenue",
+    pcCpc: "PC CPC",
+    mobileCpc: "Mobile CPC",
+    avgCpc: "Avg. CPC",
+    shareRate: "Market Share",
+    estimatedMonthlyRevenue: "Est. Monthly Revenue",
+    revenueDisclaimer: "Based on Naver ad CPC. Actual revenue may vary by ad platform and niche.",
+    titleAnalysisTitle: "Top Post Title Analysis",
+    avgTitleLength: "Avg. Title Length",
+    charUnit: "chars",
+    topTitleType: "Top Title Type",
+    topWords: "Frequent Words",
+    titleTypeDistribution: "Title Type Distribution",
+    topPostTitles: "Top Blog Post Titles",
   },
 };
 
@@ -319,6 +347,20 @@ const ko: I18nTexts = {
     ogDescWithKeyword: "네이버 검색량, 경쟁도, 수익성 분석 결과",
     langSwitchHref: "/tools/keyword",
     langSwitchLabel: "English",
+    revenueTitle: "월 예상 수익",
+    pcCpc: "PC CPC",
+    mobileCpc: "모바일 CPC",
+    avgCpc: "평균 CPC",
+    shareRate: "예상 점유율",
+    estimatedMonthlyRevenue: "월 예상 수익",
+    revenueDisclaimer: "네이버 광고 CPC 기준 추정치입니다. 실제 수익은 광고 플랫폼과 주제에 따라 달라집니다.",
+    titleAnalysisTitle: "상위 포스트 제목 분석",
+    avgTitleLength: "평균 제목 길이",
+    charUnit: "자",
+    topTitleType: "주요 제목 유형",
+    topWords: "자주 쓰는 단어",
+    titleTypeDistribution: "제목 유형 분포",
+    topPostTitles: "상위 블로그 포스트 제목",
   },
 };
 

@@ -25,6 +25,8 @@ export interface KeywordVolume {
   compIdx: string
   avgClickCnt: number
   avgCtr: number
+  pcCpc: number
+  mobileCpc: number
 }
 
 export async function getSearchVolume(keyword: string): Promise<KeywordVolume | null> {
@@ -64,10 +66,12 @@ export async function getSearchVolume(keyword: string): Promise<KeywordVolume | 
       keyword: main.relKeyword,
       pcVolume: parseVolume(main.monthlyPcQcCnt),
       mobileVolume: parseVolume(main.monthlyMobileQcCnt),
-      relatedKeywords: items.slice(1, 11).map((item: { relKeyword: string }) => item.relKeyword),
+      relatedKeywords: items.slice(1, 21).map((item: { relKeyword: string }) => item.relKeyword),
       compIdx: main.compIdx || "정보없음",
       avgClickCnt: (main.monthlyAvePcClkCnt || 0) + (main.monthlyAveMobileClkCnt || 0),
       avgCtr: Math.round(((main.monthlyAvePcCtr || 0) + (main.monthlyAveMobileCtr || 0)) / 2 * 100) / 100,
+      pcCpc: main.monthlyAvePcCpc || 0,
+      mobileCpc: main.monthlyAveMobileCpc || 0,
     }
   } catch {
     clearTimeout(timeoutId)
@@ -111,8 +115,55 @@ async function naverSearchCount(
   }
 }
 
+export interface BlogPost {
+  title: string
+  link: string
+  bloggername: string
+  postdate: string
+}
+
+export interface BlogSearchResult {
+  total: number
+  posts: BlogPost[]
+}
+
+export async function getBlogSearchResult(keyword: string): Promise<BlogSearchResult | null> {
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), 8000)
+
+  try {
+    const response = await fetch(
+      `https://openapi.naver.com/v1/search/blog?query=${encodeURIComponent(keyword)}&display=10&sort=sim`,
+      {
+        headers: {
+          "X-Naver-Client-Id": process.env.NAVER_CLIENT_ID!,
+          "X-Naver-Client-Secret": process.env.NAVER_CLIENT_SECRET!,
+        },
+        signal: controller.signal,
+      }
+    )
+    clearTimeout(timeoutId)
+
+    if (!response.ok) return null
+    const data = await response.json()
+    return {
+      total: data.total,
+      posts: (data.items || []).map((item: { title: string; link: string; bloggername: string; postdate: string }) => ({
+        title: item.title.replace(/<[^>]*>/g, ""),
+        link: item.link,
+        bloggername: item.bloggername,
+        postdate: item.postdate,
+      })),
+    }
+  } catch {
+    clearTimeout(timeoutId)
+    return null
+  }
+}
+
 export async function getBlogDocCount(keyword: string): Promise<number | null> {
-  return naverSearchCount(keyword, "blog")
+  const result = await getBlogSearchResult(keyword)
+  return result ? result.total : null
 }
 
 export async function getNewsCount(keyword: string): Promise<number | null> {

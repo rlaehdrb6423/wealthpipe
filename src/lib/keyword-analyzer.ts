@@ -1,11 +1,74 @@
 import {
   getSearchVolume,
-  getBlogDocCount,
+  getBlogSearchResult,
   getNewsCount,
   getCafeCount,
   getWebDocCount,
 } from "@/lib/naver-api"
 import { getServiceClient } from "@/lib/supabase"
+
+export interface TitlePattern {
+  avgLength: number
+  topWords: string[]
+  titleTypes: { type: string; count: number }[]
+  titles: string[]
+}
+
+const STOP_WORDS = new Set([
+  "의", "를", "을", "에", "에서", "은", "는", "이", "가", "와", "과", "도", "로", "으로",
+  "한", "하는", "된", "할", "수", "것", "및", "더", "그", "이런", "저", "the", "a", "an",
+  "is", "are", "for", "and", "or", "in", "on", "to", "of", "with", "how", "what",
+])
+
+function analyzeTitlePatterns(titles: string[]): TitlePattern | null {
+  if (titles.length === 0) return null
+
+  const avgLength = Math.round(titles.reduce((sum, t) => sum + t.length, 0) / titles.length)
+
+  const wordCount = new Map<string, number>()
+  for (const title of titles) {
+    const words = title.replace(/[^가-힣a-zA-Z0-9\s]/g, "").split(/\s+/).filter(w => w.length >= 2)
+    for (const word of words) {
+      const lower = word.toLowerCase()
+      if (!STOP_WORDS.has(lower)) {
+        wordCount.set(lower, (wordCount.get(lower) || 0) + 1)
+      }
+    }
+  }
+  const topWords = [...wordCount.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5)
+    .map(([word]) => word)
+
+  const typePatterns: [string, RegExp][] = [
+    ["리스트형", /\d+가지|\d+개|\d+선|top\s?\d+|best\s?\d+|\d+종/i],
+    ["가이드형", /방법|가이드|하는\s?법|시작|입문|guide|how to/i],
+    ["후기형", /후기|리뷰|사용기|체험|review|경험/i],
+    ["비교형", /비교|vs|차이|versus|대결/i],
+    ["질문형", /\?|인가요|일까|할까|뭐가|왜/],
+    ["정보형", /정리|총정리|알아보|핵심|요약|정보|설명/i],
+  ]
+
+  const typeCounts = new Map<string, number>()
+  for (const title of titles) {
+    let matched = false
+    for (const [type, pattern] of typePatterns) {
+      if (pattern.test(title)) {
+        typeCounts.set(type, (typeCounts.get(type) || 0) + 1)
+        matched = true
+        break
+      }
+    }
+    if (!matched) {
+      typeCounts.set("일반형", (typeCounts.get("일반형") || 0) + 1)
+    }
+  }
+  const titleTypes = [...typeCounts.entries()]
+    .map(([type, count]) => ({ type, count }))
+    .sort((a, b) => b.count - a.count)
+
+  return { avgLength, topWords, titleTypes, titles }
+}
 
 export interface KeywordResult {
   keyword: string
@@ -27,6 +90,11 @@ export interface KeywordResult {
   compIdx: string
   avgClickCnt: number
   avgCtr: number
+  pcCpc: number
+  mobileCpc: number
+  avgCpc: number
+  estimatedRevenue: number
+  titlePattern?: TitlePattern
 }
 
 function calcCompetition(totalVolume: number, totalCompetition: number) {
@@ -106,9 +174,9 @@ export async function analyzeKeyword(keyword: string): Promise<KeywordResult | n
   const cached = await getCached(keyword)
   if (cached) return cached
 
-  const [volumeData, blogDocCount, newsCount, cafeCount, webDocCount] = await Promise.all([
+  const [volumeData, blogResult, newsCount, cafeCount, webDocCount] = await Promise.all([
     getSearchVolume(keyword),
-    getBlogDocCount(keyword),
+    getBlogSearchResult(keyword),
     getNewsCount(keyword),
     getCafeCount(keyword),
     getWebDocCount(keyword),
@@ -117,7 +185,7 @@ export async function analyzeKeyword(keyword: string): Promise<KeywordResult | n
   if (!volumeData) return null
 
   const totalVolume = volumeData.pcVolume + volumeData.mobileVolume
-  const blog = blogDocCount ?? 0
+  const blog = blogResult?.total ?? 0
   const news = newsCount ?? 0
   const cafe = cafeCount ?? 0
   const web = webDocCount ?? 0
@@ -126,6 +194,13 @@ export async function analyzeKeyword(keyword: string): Promise<KeywordResult | n
 
   const { competitionGrade, competitionLabel } = calcCompetition(totalVolume, totalCompetition)
   const { profitGrade, profitLabel } = calcProfitGrade(totalVolume, competitionGrade, volumeData.avgClickCnt)
+
+  const pcCpc = volumeData.pcCpc
+  const mobileCpc = volumeData.mobileCpc
+  const avgCpc = totalVolume > 0
+    ? Math.round(pcCpc * (volumeData.pcVolume / totalVolume) + mobileCpc * (volumeData.mobileVolume / totalVolume))
+    : 0
+  const estimatedRevenue = Math.round(totalVolume * (volumeData.avgCtr / 100) * avgCpc * 0.05)
 
   const result: KeywordResult = {
     keyword: volumeData.keyword,
@@ -147,6 +222,11 @@ export async function analyzeKeyword(keyword: string): Promise<KeywordResult | n
     compIdx: volumeData.compIdx,
     avgClickCnt: volumeData.avgClickCnt,
     avgCtr: volumeData.avgCtr,
+    pcCpc,
+    mobileCpc,
+    avgCpc,
+    estimatedRevenue,
+    titlePattern: blogResult?.posts ? analyzeTitlePatterns(blogResult.posts.map(p => p.title)) ?? undefined : undefined,
   }
 
   await setCache(keyword, result)

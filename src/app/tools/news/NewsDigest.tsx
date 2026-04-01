@@ -15,6 +15,8 @@ interface Article {
 interface DigestData {
   articles: Article[]
   aiInsight: string
+  articlesEn?: Article[]
+  aiInsightEn?: string
 }
 
 interface Digest {
@@ -138,7 +140,7 @@ export default function NewsDigest({ locale }: NewsDigestProps) {
             <p style={{ color: "#666", fontSize: 14 }}>{t.noDataText}</p>
           </div>
         ) : (
-          <DigestView digest={today} t={t} getCategoryLabel={getCategoryLabel} formatDate={formatDate} />
+          <DigestView digest={today} t={t} getCategoryLabel={getCategoryLabel} formatDate={formatDate} locale={locale} />
         )}
       </section>
 
@@ -172,7 +174,7 @@ export default function NewsDigest({ locale }: NewsDigestProps) {
                 </button>
                 {expandedDates.has(digest.date) && (
                   <div style={{ padding: "0 20px 20px" }}>
-                    <DigestView digest={digest} t={t} getCategoryLabel={getCategoryLabel} formatDate={formatDate} compact />
+                    <DigestView digest={digest} t={t} getCategoryLabel={getCategoryLabel} formatDate={formatDate} locale={locale} compact />
                   </div>
                 )}
               </div>
@@ -192,17 +194,23 @@ interface DigestViewProps {
   t: ReturnType<typeof getTexts>["news"]
   getCategoryLabel: (key: string) => string
   formatDate: (d: string) => string
+  locale: string
   compact?: boolean
 }
 
-function DigestView({ digest, t, getCategoryLabel, compact = false }: DigestViewProps) {
-  const { articles, aiInsight } = digest.data
+function DigestView({ digest, t, getCategoryLabel, locale, compact = false }: DigestViewProps) {
+  const displayArticles = locale === "en" && digest.data.articlesEn?.length
+    ? digest.data.articlesEn
+    : digest.data.articles
+  const displayInsight = locale === "en" && digest.data.aiInsightEn
+    ? digest.data.aiInsightEn
+    : digest.data.aiInsight
 
   return (
     <div>
       {/* Article cards */}
       <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 20 }}>
-        {articles.map((article, i) => {
+        {displayArticles.map((article, i) => {
           const color = CATEGORY_COLORS[article.category] ?? "#888"
           return (
             <div
@@ -244,12 +252,12 @@ function DigestView({ digest, t, getCategoryLabel, compact = false }: DigestView
       </div>
 
       {/* AI Insight */}
-      {aiInsight && (
+      {displayInsight && (
         <div style={{ background: "#0d0d0d", border: "1px solid #1a1a1a", borderRadius: 12, padding: compact ? "16px" : "20px" }}>
           <p style={{ fontSize: 11, fontWeight: 700, color: "#666", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 10 }}>
             {t.aiInsightLabel}
           </p>
-          <p style={{ fontSize: 14, color: "#ccc", lineHeight: 1.8 }}>{aiInsight}</p>
+          <p style={{ fontSize: 14, color: "#ccc", lineHeight: 1.8 }}>{displayInsight}</p>
         </div>
       )}
     </div>

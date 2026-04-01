@@ -25,6 +25,13 @@ interface ArticleData {
   url: string
 }
 
+interface DigestOutput {
+  summaries: string[]
+  summariesEn: string[]
+  insight: string
+  insightEn: string
+}
+
 async function fetchNaverNews(query: string): Promise<NaverNewsItem | null> {
   const controller = new AbortController()
   const timeoutId = setTimeout(() => controller.abort(), 8000)
@@ -121,26 +128,30 @@ export async function GET(request: Request) {
     .join("\n\n")
 
   let articles: ArticleData[] = []
+  let articlesEn: ArticleData[] = []
   let aiInsight = ""
+  let aiInsightEn = ""
 
   try {
     const aiResponse = await anthropic.messages.create({
       model: "claude-haiku-4-5-20251001",
-      max_tokens: 1200,
+      max_tokens: 2000,
       messages: [
         {
           role: "user",
-          content: `다음은 오늘의 주요 경제 뉴스 ${collected.length}건입니다. 각 뉴스를 2~3문장으로 요약하고, 마지막에 전체 시장 인사이트를 3~4문장으로 작성해주세요.
+          content: `다음은 오늘의 주요 경제 뉴스 ${collected.length}건입니다. 각 뉴스를 2~3문장으로 요약하고, 마지막에 전체 시장 인사이트를 3~4문장으로 작성해주세요. 한국어와 영어 두 버전을 모두 작성하세요.
 
 ${newsForAI}
 
 응답 형식 (JSON):
 {
-  "summaries": ["뉴스1 요약", "뉴스2 요약", ...],
-  "insight": "전체 시장 인사이트"
+  "summaries": ["뉴스1 한국어 요약", ...],
+  "summariesEn": ["News1 English summary", ...],
+  "insight": "전체 시장 인사이트 (한국어)",
+  "insightEn": "Overall market insight (English)"
 }
 
-중요: 반드시 위 JSON 형식으로만 응답하세요. 한국어로 작성하세요.`,
+중요: 반드시 위 JSON 형식으로만 응답하세요.`,
         },
       ],
     })
@@ -148,13 +159,22 @@ ${newsForAI}
     const raw = aiResponse.content[0].type === "text" ? aiResponse.content[0].text : ""
     const jsonMatch = raw.match(/\{[\s\S]*\}/)
     if (jsonMatch) {
-      const parsed = JSON.parse(jsonMatch[0])
+      const parsed: DigestOutput = JSON.parse(jsonMatch[0])
       const summaries: string[] = parsed.summaries || []
+      const summariesEn: string[] = parsed.summariesEn || []
       aiInsight = parsed.insight || ""
+      aiInsightEn = parsed.insightEn || ""
 
       articles = collected.map((c, i) => ({
         title: stripHtml(c.item.title),
         summary: summaries[i] || stripHtml(c.item.description),
+        source: extractSource(c.item.originallink || c.item.link),
+        category: c.category,
+        url: c.item.originallink || c.item.link,
+      }))
+      articlesEn = collected.map((c, i) => ({
+        title: stripHtml(c.item.title),
+        summary: summariesEn[i] || stripHtml(c.item.description),
         source: extractSource(c.item.originallink || c.item.link),
         category: c.category,
         url: c.item.originallink || c.item.link,
@@ -187,7 +207,7 @@ ${newsForAI}
   const { error: upsertError } = await supabase.from("news_digest").upsert(
     {
       date: today,
-      data: { articles, aiInsight },
+      data: { articles, aiInsight, articlesEn, aiInsightEn },
     },
     { onConflict: "date" }
   )

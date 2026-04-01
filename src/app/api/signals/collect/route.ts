@@ -10,6 +10,7 @@ interface AssetSignal {
   changePercent: number
   signal: "bullish" | "bearish" | "neutral"
   signalReason: string
+  signalReasonEn?: string
   news: string
 }
 
@@ -100,28 +101,30 @@ export async function GET(request: Request) {
 
   let signalData: AssetSignal[] = []
   let aiInsight = ""
+  let aiInsightEn = ""
 
   try {
     const aiResponse = await anthropic.messages.create({
       model: "claude-haiku-4-5-20251001",
-      max_tokens: 1200,
+      max_tokens: 2000,
       messages: [
         {
           role: "user",
-          content: `다음은 오늘의 주요 자산 시세입니다. 각 자산에 대해 시그널(bullish/bearish/neutral)과 이유를 판단하고, 전체 시장 인사이트를 작성해주세요.
+          content: `다음은 오늘의 주요 자산 시세입니다. 각 자산에 대해 시그널(bullish/bearish/neutral)과 이유를 판단하고, 전체 시장 인사이트를 작성해주세요. 한국어와 영어 두 버전을 모두 작성하세요.
 
 ${assetSummary}
 
 응답 형식 (JSON):
 {
   "signals": [
-    {"ticker": "^KS11", "signal": "bullish|bearish|neutral", "reason": "시그널 이유 1문장"},
+    {"ticker": "^KS11", "signal": "bullish|bearish|neutral", "reason": "시그널 이유 (한국어)", "reasonEn": "Signal reason (English)"},
     ...
   ],
-  "insight": "전체 시장 인사이트 3~4문장"
+  "insight": "전체 시장 인사이트 (한국어)",
+  "insightEn": "Overall market insight (English)"
 }
 
-중요: 반드시 위 JSON 형식으로만 응답하세요. 한국어로 작성하세요.`,
+중요: 반드시 위 JSON 형식으로만 응답하세요.`,
         },
       ],
     })
@@ -130,8 +133,9 @@ ${assetSummary}
     const jsonMatch = raw.match(/\{[\s\S]*\}/)
     if (jsonMatch) {
       const parsed = JSON.parse(jsonMatch[0])
-      const signals: Array<{ ticker: string; signal: string; reason: string }> = parsed.signals || []
+      const signals: Array<{ ticker: string; signal: string; reason: string; reasonEn?: string }> = parsed.signals || []
       aiInsight = parsed.insight || ""
+      aiInsightEn = parsed.insightEn || ""
 
       signalData = assets.map((a: AssetData) => {
         const sig = signals.find((s) => s.ticker === a.ticker)
@@ -143,6 +147,7 @@ ${assetSummary}
           changePercent: a.changePercent,
           signal: (sig?.signal as "bullish" | "bearish" | "neutral") || "neutral",
           signalReason: sig?.reason || "",
+          signalReasonEn: sig?.reasonEn || "",
           news: newsMap[a.ticker] || "",
         }
       })
@@ -179,7 +184,7 @@ ${assetSummary}
   const { error: upsertError } = await supabase.from("asset_signals").upsert(
     {
       date: today,
-      data: { assets: signalData, aiInsight, updatedAt: new Date().toISOString() },
+      data: { assets: signalData, aiInsight, aiInsightEn, updatedAt: new Date().toISOString() },
     },
     { onConflict: "date" }
   )

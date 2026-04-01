@@ -12,6 +12,7 @@ interface AssetSignal {
   changePercent: number
   signal: "bullish" | "bearish" | "neutral"
   signalReason: string
+  signalReasonEn?: string
   news: string
 }
 
@@ -20,6 +21,7 @@ interface SignalDay {
   data: {
     assets: AssetSignal[]
     aiInsight: string
+    aiInsightEn?: string
     updatedAt: string
   }
   created_at: string
@@ -202,8 +204,11 @@ interface SignalDayViewProps {
   compact?: boolean
 }
 
-function SignalDayView({ day, t, getSignalLabel, compact = false }: SignalDayViewProps) {
-  const { assets, aiInsight } = day.data
+function SignalDayView({ day, t, locale, getSignalLabel, compact = false }: SignalDayViewProps) {
+  const { assets } = day.data
+  const aiInsight = locale === "en" && day.data.aiInsightEn
+    ? day.data.aiInsightEn
+    : day.data.aiInsight
 
   return (
     <div>
@@ -220,6 +225,9 @@ function SignalDayView({ day, t, getSignalLabel, compact = false }: SignalDayVie
           const isUp = asset.changePercent >= 0
           const changeColor = isUp ? "#22c55e" : "#ef4444"
           const signalColor = SIGNAL_COLORS[asset.signal] || "#eab308"
+          const reason = locale === "en" && asset.signalReasonEn
+            ? asset.signalReasonEn
+            : asset.signalReason
 
           return (
             <div
@@ -258,7 +266,7 @@ function SignalDayView({ day, t, getSignalLabel, compact = false }: SignalDayVie
               </div>
 
               {/* Change */}
-              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: asset.signalReason ? 10 : 0 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: reason ? 10 : 0 }}>
                 <span style={{ fontSize: 13, color: changeColor, fontWeight: 600 }}>
                   {isUp ? "+" : ""}{asset.change.toFixed(2)}
                 </span>
@@ -268,9 +276,9 @@ function SignalDayView({ day, t, getSignalLabel, compact = false }: SignalDayVie
               </div>
 
               {/* Signal reason */}
-              {asset.signalReason && (
+              {reason && (
                 <p style={{ fontSize: 11, color: "#888", lineHeight: 1.5, marginTop: 8, borderTop: "1px solid #1a1a1a", paddingTop: 8 }}>
-                  {asset.signalReason}
+                  {reason}
                 </p>
               )}
 

@@ -7,7 +7,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes: MetadataRoute.Sitemap = [
     {
       url: SITE_URL,
-      lastModified: new Date(),
+      lastModified: new Date("2026-04-01"),
       changeFrequency: "weekly",
       priority: 1,
       alternates: {
@@ -16,7 +16,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
     {
       url: `${SITE_URL}/ko`,
-      lastModified: new Date(),
+      lastModified: new Date("2026-04-01"),
       changeFrequency: "weekly",
       priority: 0.9,
       alternates: {
@@ -25,7 +25,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
     {
       url: `${SITE_URL}/tools/keyword`,
-      lastModified: new Date(),
+      lastModified: new Date("2026-04-01"),
       changeFrequency: "daily",
       priority: 0.8,
       alternates: {
@@ -37,7 +37,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
     {
       url: `${SITE_URL}/ko/tools/keyword`,
-      lastModified: new Date(),
+      lastModified: new Date("2026-04-01"),
       changeFrequency: "daily",
       priority: 0.7,
       alternates: {
@@ -49,7 +49,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
     {
       url: `${SITE_URL}/tools/keyword/compare`,
-      lastModified: new Date(),
+      lastModified: new Date("2026-04-01"),
       changeFrequency: "weekly",
       priority: 0.7,
       alternates: {
@@ -61,7 +61,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
     {
       url: `${SITE_URL}/ko/tools/keyword/compare`,
-      lastModified: new Date(),
+      lastModified: new Date("2026-04-01"),
       changeFrequency: "weekly",
       priority: 0.6,
       alternates: {
@@ -73,7 +73,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
     {
       url: `${SITE_URL}/tools/news`,
-      lastModified: new Date(),
+      lastModified: new Date("2026-04-01"),
       changeFrequency: "daily",
       priority: 0.8,
       alternates: {
@@ -85,7 +85,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
     {
       url: `${SITE_URL}/ko/tools/news`,
-      lastModified: new Date(),
+      lastModified: new Date("2026-04-01"),
       changeFrequency: "daily",
       priority: 0.7,
       alternates: {
@@ -97,7 +97,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
     {
       url: `${SITE_URL}/tools/signals`,
-      lastModified: new Date(),
+      lastModified: new Date("2026-04-01"),
       changeFrequency: "daily",
       priority: 0.8,
       alternates: {
@@ -109,7 +109,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
     {
       url: `${SITE_URL}/ko/tools/signals`,
-      lastModified: new Date(),
+      lastModified: new Date("2026-04-01"),
       changeFrequency: "daily",
       priority: 0.7,
       alternates: {
@@ -121,7 +121,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
     {
       url: `${SITE_URL}/tools/ranking`,
-      lastModified: new Date(),
+      lastModified: new Date("2026-04-01"),
       changeFrequency: "weekly",
       priority: 0.8,
       alternates: {
@@ -133,7 +133,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
     {
       url: `${SITE_URL}/ko/tools/ranking`,
-      lastModified: new Date(),
+      lastModified: new Date("2026-04-01"),
       changeFrequency: "weekly",
       priority: 0.7,
       alternates: {
@@ -145,7 +145,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
     {
       url: `${SITE_URL}/blog`,
-      lastModified: new Date(),
+      lastModified: new Date("2026-04-01"),
       changeFrequency: "daily",
       priority: 0.7,
       alternates: {
@@ -157,7 +157,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
     {
       url: `${SITE_URL}/ko/blog`,
-      lastModified: new Date(),
+      lastModified: new Date("2026-04-01"),
       changeFrequency: "daily",
       priority: 0.6,
       alternates: {

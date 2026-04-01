@@ -5,6 +5,7 @@ import { useEffect, useRef } from "react";
 export default function HeroCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animRef = useRef<number>(0);
+  const visibleRef = useRef(true);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -13,12 +14,25 @@ export default function HeroCanvas() {
     if (!ctx) return;
 
     const resize = () => {
-      canvas.width = canvas.offsetWidth * window.devicePixelRatio;
-      canvas.height = canvas.offsetHeight * window.devicePixelRatio;
-      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+      const dpr = window.devicePixelRatio;
+      canvas.width = canvas.offsetWidth * dpr;
+      canvas.height = canvas.offsetHeight * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
     resize();
     window.addEventListener("resize", resize);
+
+    // Pause animation when not visible
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        visibleRef.current = entry.isIntersecting;
+        if (entry.isIntersecting && !animRef.current) {
+          animRef.current = requestAnimationFrame(loop);
+        }
+      },
+      { threshold: 0.1 }
+    );
+    observer.observe(canvas);
 
     const draw = (t: number) => {
       const w = canvas.offsetWidth;
@@ -79,13 +93,18 @@ export default function HeroCanvas() {
 
     const loop = (t: number) => {
       draw(t);
-      animRef.current = requestAnimationFrame(loop);
+      if (visibleRef.current) {
+        animRef.current = requestAnimationFrame(loop);
+      } else {
+        animRef.current = 0;
+      }
     };
     animRef.current = requestAnimationFrame(loop);
 
     return () => {
       cancelAnimationFrame(animRef.current);
       window.removeEventListener("resize", resize);
+      observer.disconnect();
     };
   }, []);
 

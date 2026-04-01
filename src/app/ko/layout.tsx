@@ -1,11 +1,13 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  other: { "html-lang": "ko" },
+};
+
 export default function KoLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <html lang="ko" suppressHydrationWarning>
-      <body>{children}</body>
-    </html>
-  );
+  return <div lang="ko">{children}</div>;
 }

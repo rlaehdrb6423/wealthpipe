@@ -53,13 +53,17 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
+  params,
 }: Readonly<{
   children: React.ReactNode;
+  params: Promise<{ locale?: string }>;
 }>) {
+  const { locale } = await params;
+  const lang = locale === "ko" ? "ko" : "en";
   return (
-    <html lang="en" className={dmSans.className}>
+    <html lang={lang} className={dmSans.className}>
       <head>
         {GA_ID && (
           <>

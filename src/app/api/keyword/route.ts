@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server"
+import { timingSafeEqual } from "crypto"
 import { analyzeKeyword } from "@/lib/keyword-analyzer"
 import { getServiceClient } from "@/lib/supabase"
 
@@ -49,8 +50,10 @@ export async function POST(request: NextRequest) {
   try {
     const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown"
     const body = await request.json()
-    const adminKey = request.headers.get("x-admin-key") || body.admin || ""
-    const isAdmin = adminKey === process.env.ADMIN_SECRET
+    const adminKey = request.headers.get("x-admin-key") || ""
+    const isAdmin = adminKey.length > 0 && process.env.ADMIN_SECRET && adminKey.length === process.env.ADMIN_SECRET.length
+      ? timingSafeEqual(Buffer.from(adminKey), Buffer.from(process.env.ADMIN_SECRET))
+      : false
 
     let remaining = 999
     if (!isAdmin) {

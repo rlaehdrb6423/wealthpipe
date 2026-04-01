@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 import { getServiceClient } from "@/lib/supabase"
+import { sanitizeBlogContent } from "@/lib/sanitize"
 import AdSlot from "@/components/AdSlot"
 
 const SITE_URL = "https://wealthpipe.net"
@@ -95,7 +96,7 @@ export default async function BlogPostPage({ params }: Props) {
 
           <div
             style={{ fontSize: 15, lineHeight: 2.0, color: "#ccc", textAlign: "center" }}
-            dangerouslySetInnerHTML={{ __html: post.content }}
+            dangerouslySetInnerHTML={{ __html: sanitizeBlogContent(post.content) }}
           />
         </article>
 

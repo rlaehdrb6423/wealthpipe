@@ -15,8 +15,10 @@ export default function HeroCanvasLoader() {
 
   useEffect(() => {
     if (isMobile()) return;
-    const id = requestIdleCallback(() => setShow(true), { timeout: 400 });
-    return () => cancelIdleCallback(id);
+    const rIC = window.requestIdleCallback || ((cb: () => void) => setTimeout(cb, 200));
+    const cIC = window.cancelIdleCallback || clearTimeout;
+    const id = rIC(() => setShow(true), { timeout: 400 });
+    return () => cIC(id);
   }, []);
 
   return show ? <HeroCanvas /> : null;

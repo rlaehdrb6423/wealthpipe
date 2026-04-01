@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
           .delete()
           .eq("user_id", userId)
 
-        await supabase.from("subscriptions").insert({
+        const { error: insertError } = await supabase.from("subscriptions").insert({
           user_id: userId,
           stripe_customer_id: session.customer as string,
           stripe_subscription_id: subscriptionId,
@@ -53,10 +53,19 @@ export async function POST(request: NextRequest) {
           updated_at: new Date().toISOString(),
         })
 
-        await supabase
+        if (insertError) {
+          console.error("Failed to insert subscription:", insertError)
+          return Response.json({ error: "Subscription insert failed" }, { status: 500 })
+        }
+
+        const { error: profileError } = await supabase
           .from("profiles")
           .update({ tier })
           .eq("id", userId)
+
+        if (profileError) {
+          console.error("Failed to update profile tier:", profileError)
+        }
 
         break
       }

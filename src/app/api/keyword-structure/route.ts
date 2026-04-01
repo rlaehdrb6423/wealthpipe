@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server"
+import { timingSafeEqual } from "crypto"
 import Anthropic from "@anthropic-ai/sdk"
 import { getServiceClient } from "@/lib/supabase"
 
@@ -67,8 +68,10 @@ interface BlogStructure {
 export async function POST(request: NextRequest) {
   try {
     const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown"
-    const adminKey = request.headers.get("x-admin-key")
-    const isAdmin = adminKey === process.env.ADMIN_SECRET
+    const adminKey = request.headers.get("x-admin-key") || ""
+    const isAdmin = adminKey.length > 0 && process.env.ADMIN_SECRET && adminKey.length === process.env.ADMIN_SECRET.length
+      ? timingSafeEqual(Buffer.from(adminKey), Buffer.from(process.env.ADMIN_SECRET))
+      : false
 
     if (!isAdmin) {
       const allowed = await checkStructureLimit(ip)
@@ -132,6 +135,6 @@ ${contextInfo}
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err)
     console.error("keyword-structure error:", msg)
-    return Response.json({ error: `AI 오류: ${msg}` }, { status: 500 })
+    return Response.json({ error: "AI 처리 중 오류가 발생했습니다." }, { status: 500 })
   }
 }

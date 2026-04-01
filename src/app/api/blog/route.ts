@@ -1,9 +1,12 @@
 import { NextRequest } from "next/server"
+import { timingSafeEqual } from "crypto"
 import { getServiceClient } from "@/lib/supabase"
 
 export async function POST(request: NextRequest) {
   const adminKey = request.headers.get("x-admin-key") || ""
-  if (adminKey !== process.env.ADMIN_SECRET) {
+  const secret = process.env.ADMIN_SECRET || ""
+  if (!adminKey || !secret || adminKey.length !== secret.length ||
+      !timingSafeEqual(Buffer.from(adminKey), Buffer.from(secret))) {
     return Response.json({ error: "Unauthorized" }, { status: 401 })
   }
 

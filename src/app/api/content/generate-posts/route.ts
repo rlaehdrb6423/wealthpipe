@@ -1,6 +1,7 @@
 import { getServiceClient } from "@/lib/supabase"
 import Anthropic from "@anthropic-ai/sdk"
 import type { KeywordResult } from "@/lib/keyword-analyzer"
+import { sanitizeBlogContent } from "@/lib/sanitize"
 
 const MAX_POSTS_PER_RUN = 3
 
@@ -97,12 +98,8 @@ async function generatePost(
 
   try {
     const parsed = JSON.parse(jsonMatch[1] || jsonMatch[0]) as GeneratedPost
-    // Sanitize HTML: strip all tags except safe ones
     if (parsed.content) {
-      parsed.content = parsed.content.replace(
-        /<(?!\/?(?:p|h[2-4]|ul|ol|li|strong|em|br|a)\b)[^>]*>/gi,
-        ""
-      )
+      parsed.content = sanitizeBlogContent(parsed.content)
     }
     return parsed
   } catch {

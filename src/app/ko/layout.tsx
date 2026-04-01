@@ -3,5 +3,9 @@ export default function KoLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <div lang="ko">{children}</div>;
+  return (
+    <html lang="ko" suppressHydrationWarning>
+      <body>{children}</body>
+    </html>
+  );
 }

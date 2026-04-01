@@ -54,6 +54,18 @@ export interface I18nTexts {
     langSwitchLabel: string;
     langSwitchHref: string;
   };
+  auth: {
+    loginTitle: string;
+    loginDesc: string;
+    emailPlaceholder: string;
+    sendMagicLink: string;
+    sending: string;
+    checkEmail: string;
+    checkEmailDesc: string;
+    loginBtn: string;
+    logoutBtn: string;
+    backLink: string;
+  };
   keyword: {
     title: string;
     description: string;
@@ -126,6 +138,96 @@ export interface I18nTexts {
     aiStructureLength: string;
     aiStructureTip: string;
     aiStructureLimit: string;
+    limitTitle: string;
+    limitDesc: string;
+    limitProCta: string;
+    limitShareCta: string;
+    limitEmailPlaceholder: string;
+    limitEmailBtn: string;
+    limitEmailSuccess: string;
+    shareNative: string;
+  };
+  news: {
+    title: string;
+    description: string;
+    backLink: string;
+    heading: string;
+    subheading: string;
+    todayLabel: string;
+    archiveLabel: string;
+    aiInsightLabel: string;
+    categories: {
+      stock: string;
+      realestate: string;
+      exchange: string;
+      rate: string;
+      crypto: string;
+    };
+    readMore: string;
+    loadingText: string;
+    errorText: string;
+    noDataText: string;
+    nlCtaTitle: string;
+    nlCtaDesc: string;
+    nlCtaBtn: string;
+    ogTitle: string;
+    ogDesc: string;
+    langSwitchHref: string;
+    langSwitchLabel: string;
+  };
+  signals: {
+    title: string;
+    description: string;
+    backLink: string;
+    heading: string;
+    subheading: string;
+    todayLabel: string;
+    archiveLabel: string;
+    aiInsightLabel: string;
+    signalLabels: {
+      bullish: string;
+      bearish: string;
+      neutral: string;
+    };
+    loadingText: string;
+    errorText: string;
+    noDataText: string;
+    nlCtaTitle: string;
+    nlCtaDesc: string;
+    nlCtaBtn: string;
+    ogTitle: string;
+    ogDesc: string;
+    langSwitchHref: string;
+    langSwitchLabel: string;
+  };
+  ranking: {
+    title: string;
+    description: string;
+    heading: string;
+    subheading: string;
+    backLink: string;
+    rankLabel: string;
+    keywordLabel: string;
+    volumeLabel: string;
+    competitionLabel: string;
+    scoreLabel: string;
+    sharesLabel: string;
+    shareThisPage: string;
+    kakaoShare: string;
+    loadingText: string;
+    errorText: string;
+    noDataText: string;
+    nlCtaTitle: string;
+    nlCtaBtn: string;
+    ogTitle: string;
+    ogDesc: string;
+    langSwitchHref: string;
+    langSwitchLabel: string;
+    referralTitle: string;
+    referralDesc: string;
+    referralLink: string;
+    referralCopied: string;
+    referralStats: string;
   };
 }
 
@@ -159,8 +261,8 @@ const en: I18nTexts = {
     subtext: "No login. No credit card.\nUse right now.",
     items: [
       { n: "01", tag: "SEO", title: "Keyword Analyzer", desc: "Search volume, competition, and revenue potential in one shot. Essential for bloggers and marketers.", status: "LIVE" },
-      { n: "02", tag: "MARKET", title: "Economic News Digest", desc: "AI distills global economic headlines daily. Get the full picture in under 10 minutes.", status: "SOON" },
-      { n: "03", tag: "INVEST", title: "Asset Signal Tracker", desc: "AI detects signals across stocks, crypto, and real estate before the crowd moves.", status: "SOON" },
+      { n: "02", tag: "MARKET", title: "Economic News Digest", desc: "AI distills global economic headlines daily. Get the full picture in under 10 minutes.", status: "LIVE" },
+      { n: "03", tag: "INVEST", title: "Asset Signal Tracker", desc: "AI detects signals across stocks, crypto, and real estate before the crowd moves.", status: "LIVE" },
     ],
   },
   newsletter: {
@@ -196,6 +298,18 @@ const en: I18nTexts = {
     copyright: "\u00a9 2026 WEALTHPIPE \u00b7 AI Intelligence for Wealth",
     langSwitchLabel: "\ud55c\uad6d\uc5b4",
     langSwitchHref: "/ko",
+  },
+  auth: {
+    loginTitle: "Sign in to WealthPipe",
+    loginDesc: "Enter your email and we'll send you a magic link to sign in.",
+    emailPlaceholder: "Email address",
+    sendMagicLink: "Send Magic Link",
+    sending: "Sending...",
+    checkEmail: "Check your email",
+    checkEmailDesc: "We sent a magic link to your email. Click it to sign in.",
+    loginBtn: "Login",
+    logoutBtn: "Logout",
+    backLink: "\u2190 Back to WealthPipe",
   },
   keyword: {
     title: "Free Keyword Analyzer - WealthPipe",
@@ -269,6 +383,96 @@ const en: I18nTexts = {
     aiStructureLength: "Recommended Length",
     aiStructureTip: "Writing Tip",
     aiStructureLimit: "3 free AI recommendations per day",
+    limitTitle: "You've used all free analyses today",
+    limitDesc: "Upgrade to Pro for unlimited keyword analysis, AI blog structures, and keyword history.",
+    limitProCta: "Get notified when Pro launches",
+    limitShareCta: "Share to get +3 bonus analyses",
+    limitEmailPlaceholder: "Enter your email for Pro launch alert",
+    limitEmailBtn: "Notify Me",
+    limitEmailSuccess: "We'll notify you when Pro launches!",
+    shareNative: "Share",
+  },
+  news: {
+    title: "Economic News Digest - WealthPipe",
+    description: "AI-curated daily economic news digest. Get key market signals across stocks, real estate, FX, rates, and crypto in under 10 minutes.",
+    backLink: "\u2190 WealthPipe",
+    heading: "Economic News Digest",
+    subheading: "AI distills global economic headlines daily. Get the full picture in under 10 minutes.",
+    todayLabel: "Today's Digest",
+    archiveLabel: "Archive (Last 7 Days)",
+    aiInsightLabel: "AI Market Insight",
+    categories: {
+      stock: "Stock Market",
+      realestate: "Real Estate",
+      exchange: "FX / Exchange Rate",
+      rate: "Interest Rate",
+      crypto: "Crypto",
+    },
+    readMore: "Read Full Article \u2192",
+    loadingText: "Loading news digest...",
+    errorText: "Failed to load news. Please try again later.",
+    noDataText: "No digest available for today yet. Check back after 08:00 KST.",
+    nlCtaTitle: "Get daily economic insights via email",
+    nlCtaDesc: "WealthPipe Newsletter \u2014 Every Monday",
+    nlCtaBtn: "Subscribe Newsletter",
+    ogTitle: "Economic News Digest - WealthPipe",
+    ogDesc: "AI-curated daily economic news digest. Stocks, real estate, FX, rates, and crypto \u2014 all in one place.",
+    langSwitchHref: "/ko/tools/news",
+    langSwitchLabel: "\ud55c\uad6d\uc5b4",
+  },
+  signals: {
+    title: "Asset Signal Tracker - WealthPipe",
+    description: "AI-powered daily market signals for KOSPI, S&P 500, NASDAQ, Bitcoin, Gold, and USD/KRW.",
+    backLink: "\u2190 WealthPipe",
+    heading: "Asset Signal Tracker",
+    subheading: "AI detects signals across stocks, crypto, and commodities before the crowd moves.",
+    todayLabel: "Today's Signals",
+    archiveLabel: "Archive (Last 7 Days)",
+    aiInsightLabel: "AI Market Insight",
+    signalLabels: {
+      bullish: "Bullish",
+      bearish: "Bearish",
+      neutral: "Neutral",
+    },
+    loadingText: "Loading market signals...",
+    errorText: "Failed to load signals. Please try again later.",
+    noDataText: "No signals available for today yet. Check back after 18:00 KST.",
+    nlCtaTitle: "Get weekly market signals via email",
+    nlCtaDesc: "WealthPipe Newsletter \u2014 Every Monday",
+    nlCtaBtn: "Subscribe Newsletter",
+    ogTitle: "Asset Signal Tracker - WealthPipe",
+    ogDesc: "AI-powered daily market signals for KOSPI, S&P 500, NASDAQ, Bitcoin, Gold, and USD/KRW.",
+    langSwitchHref: "/ko/tools/signals",
+    langSwitchLabel: "\ud55c\uad6d\uc5b4",
+  },
+  ranking: {
+    title: "Weekly Hot Keywords TOP 20 - WealthPipe",
+    description: "The most analyzed keywords of the week. Find trending SEO opportunities on WealthPipe.",
+    heading: "Weekly Keyword Ranking",
+    subheading: "Top 20 most analyzed keywords this week.",
+    backLink: "\u2190 WealthPipe",
+    rankLabel: "Rank",
+    keywordLabel: "Keyword",
+    volumeLabel: "Monthly Volume",
+    competitionLabel: "Competition",
+    scoreLabel: "Opportunity",
+    sharesLabel: "Shares",
+    shareThisPage: "Share this ranking",
+    kakaoShare: "Share on KakaoTalk",
+    loadingText: "Loading keyword rankings...",
+    errorText: "Failed to load rankings. Please try again later.",
+    noDataText: "No ranking data available yet.",
+    nlCtaTitle: "Get weekly hot keyword analysis via email",
+    nlCtaBtn: "Subscribe Newsletter",
+    ogTitle: "Weekly Hot Keywords TOP 20 - WealthPipe",
+    ogDesc: "The most analyzed keywords of the week. Find SEO opportunities now.",
+    langSwitchHref: "/ko/tools/ranking",
+    langSwitchLabel: "\ud55c\uad6d\uc5b4",
+    referralTitle: "Invite friends, get bonus analyses",
+    referralDesc: "Both you and your friend get +5 bonus analyses when they sign up with your link.",
+    referralLink: "Your referral link",
+    referralCopied: "Copied!",
+    referralStats: "referrals completed",
   },
 };
 
@@ -302,8 +506,8 @@ const ko: I18nTexts = {
     subtext: "\ub85c\uadf8\uc778 \uc5c6\uc74c. \uce74\ub4dc \uc5c6\uc74c.\n\uc9c0\uae08 \ubc14\ub85c \uc0ac\uc6a9.",
     items: [
       { n: "01", tag: "SEO", title: "\ud0a4\uc6cc\ub4dc \ubd84\uc11d\uae30", desc: "\uac80\uc0c9\ub7c9\u00b7\uacbd\uc7c1\ub3c4\u00b7\uc218\uc775\uc131 \ubd84\uc11d. \ube14\ub85c\uac70\uc640 \ub9c8\ucf00\ud130\uc758 \ud544\uc218 \ud234.", status: "LIVE" },
-      { n: "02", tag: "MARKET", title: "\uacbd\uc81c \ub274\uc2a4 \ub2e4\uc774\uc81c\uc2a4\ud2b8", desc: "\uae00\ub85c\ubc8c \uacbd\uc81c \ud575\uc2ec\uc744 \ub9e4\uc77c AI\uac00 \uc694\uc57d. 10\ubd84 \uc548\uc5d0 \uc2dc\uc7a5 \uc804\uccb4 \ud30c\uc545.", status: "SOON" },
-      { n: "03", tag: "INVEST", title: "\uc790\uc0b0 \uc2dc\uadf8\ub110 \ud2b8\ub798\ucee4", desc: "\uc8fc\uc2dd\u00b7\ucf54\uc778\u00b7\ubd80\ub3d9\uc0b0 \uc2e0\ud638\ub97c AI\uac00 \uba3c\uc800 \uac10\uc9c0.", status: "SOON" },
+      { n: "02", tag: "MARKET", title: "\uacbd\uc81c \ub274\uc2a4 \ub2e4\uc774\uc81c\uc2a4\ud2b8", desc: "\uae00\ub85c\ubc8c \uacbd\uc81c \ud575\uc2ec\uc744 \ub9e4\uc77c AI\uac00 \uc694\uc57d. 10\ubd84 \uc548\uc5d0 \uc2dc\uc7a5 \uc804\uccb4 \ud30c\uc545.", status: "LIVE" },
+      { n: "03", tag: "INVEST", title: "\uc790\uc0b0 \uc2dc\uadf8\ub110 \ud2b8\ub798\ucee4", desc: "\uc8fc\uc2dd\u00b7\ucf54\uc778\u00b7\ubd80\ub3d9\uc0b0 \uc2e0\ud638\ub97c AI\uac00 \uba3c\uc800 \uac10\uc9c0.", status: "LIVE" },
     ],
   },
   newsletter: {
@@ -339,6 +543,18 @@ const ko: I18nTexts = {
     copyright: "\u00a9 2026 WEALTHPIPE",
     langSwitchLabel: "English",
     langSwitchHref: "/",
+  },
+  auth: {
+    loginTitle: "WealthPipe 로그인",
+    loginDesc: "이메일을 입력하면 로그인 링크를 보내드립니다.",
+    emailPlaceholder: "이메일 주소",
+    sendMagicLink: "매직 링크 전송",
+    sending: "전송 중...",
+    checkEmail: "이메일을 확인해주세요",
+    checkEmailDesc: "입력하신 이메일로 매직 링크를 보냈습니다. 링크를 클릭해 로그인하세요.",
+    loginBtn: "로그인",
+    logoutBtn: "로그아웃",
+    backLink: "\u2190 WealthPipe로 돌아가기",
   },
   keyword: {
     title: "무료 키워드 분석기 - WealthPipe",
@@ -412,6 +628,96 @@ const ko: I18nTexts = {
     aiStructureLength: "추천 글자수",
     aiStructureTip: "작성 팁",
     aiStructureLimit: "AI 글 구조 추천은 하루 3회 무료",
+    limitTitle: "오늘 무료 분석을 모두 사용했어요",
+    limitDesc: "Pro 플랜에서 무제한 키워드 분석, AI 글 구조 추천, 키워드 히스토리를 이용하세요.",
+    limitProCta: "Pro 출시 알림 받기",
+    limitShareCta: "공유하고 +3회 더 분석하기",
+    limitEmailPlaceholder: "이메일을 입력하세요",
+    limitEmailBtn: "알림 받기",
+    limitEmailSuccess: "Pro 출시 시 알려드리겠습니다!",
+    shareNative: "공유하기",
+  },
+  news: {
+    title: "경제 뉴스 다이제스트 - WealthPipe",
+    description: "AI가 매일 경제 핵심 뉴스를 요약합니다. 주식, 부동산, 환율, 금리, 암호화폐 — 10분 안에 시장 전체 파악.",
+    backLink: "\u2190 WealthPipe",
+    heading: "경제 뉴스 다이제스트",
+    subheading: "AI가 매일 글로벌 경제 핵심을 요약합니다. 10분 안에 시장 전체를 파악하세요.",
+    todayLabel: "오늘의 다이제스트",
+    archiveLabel: "지난 7일 아카이브",
+    aiInsightLabel: "AI 시장 인사이트",
+    categories: {
+      stock: "주식시장",
+      realestate: "부동산",
+      exchange: "환율",
+      rate: "금리",
+      crypto: "암호화폐",
+    },
+    readMore: "원문 보기 \u2192",
+    loadingText: "뉴스 다이제스트 불러오는 중...",
+    errorText: "뉴스를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.",
+    noDataText: "오늘 다이제스트가 아직 준비되지 않았습니다. KST 08:00 이후 다시 확인해주세요.",
+    nlCtaTitle: "매일 경제 인사이트를 이메일로 받아보세요",
+    nlCtaDesc: "WealthPipe 뉴스레터 \u2014 매주 월요일 발행",
+    nlCtaBtn: "뉴스레터 구독하기",
+    ogTitle: "경제 뉴스 다이제스트 - WealthPipe",
+    ogDesc: "AI가 매일 경제 핵심을 요약합니다. 주식, 부동산, 환율, 금리, 암호화폐를 한곳에서.",
+    langSwitchHref: "/tools/news",
+    langSwitchLabel: "English",
+  },
+  signals: {
+    title: "자산 시그널 트래커 - WealthPipe",
+    description: "코스피, S&P 500, 나스닥, 비트코인, 금, 원달러 환율 — AI 시그널을 매일 분석합니다.",
+    backLink: "\u2190 WealthPipe",
+    heading: "자산 시그널 트래커",
+    subheading: "주식, 코인, 원자재 시그널을 AI가 먼저 감지합니다.",
+    todayLabel: "오늘의 시그널",
+    archiveLabel: "지난 7일 아카이브",
+    aiInsightLabel: "AI 시장 인사이트",
+    signalLabels: {
+      bullish: "상승",
+      bearish: "하락",
+      neutral: "중립",
+    },
+    loadingText: "시그널 불러오는 중...",
+    errorText: "시그널을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.",
+    noDataText: "오늘 시그널이 아직 준비되지 않았습니다. KST 18:00 이후 다시 확인해주세요.",
+    nlCtaTitle: "매주 시장 시그널을 이메일로 받아보세요",
+    nlCtaDesc: "WealthPipe 뉴스레터 \u2014 매주 월요일 발행",
+    nlCtaBtn: "뉴스레터 구독하기",
+    ogTitle: "자산 시그널 트래커 - WealthPipe",
+    ogDesc: "코스피, S&P 500, 나스닥, 비트코인, 금, 환율 — AI가 매일 시그널을 분석합니다.",
+    langSwitchHref: "/tools/signals",
+    langSwitchLabel: "English",
+  },
+  ranking: {
+    title: "이번 주 인기 키워드 TOP 20 - WealthPipe",
+    description: "이번 주 가장 많이 분석된 키워드 TOP 20. WealthPipe에서 트렌드 SEO 기회를 찾아보세요.",
+    heading: "주간 키워드 랭킹",
+    subheading: "이번 주 가장 많이 분석된 키워드 TOP 20.",
+    backLink: "\u2190 WealthPipe",
+    rankLabel: "순위",
+    keywordLabel: "키워드",
+    volumeLabel: "월간 검색량",
+    competitionLabel: "경쟁도",
+    scoreLabel: "기회점수",
+    sharesLabel: "공유수",
+    shareThisPage: "이 랭킹 공유하기",
+    kakaoShare: "카카오톡 공유",
+    loadingText: "키워드 랭킹 불러오는 중...",
+    errorText: "랭킹을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.",
+    noDataText: "랭킹 데이터가 아직 없습니다.",
+    nlCtaTitle: "매주 핫 키워드 분석을 이메일로 받아보세요",
+    nlCtaBtn: "뉴스레터 구독하기",
+    ogTitle: "이번 주 인기 키워드 TOP 20 - WealthPipe",
+    ogDesc: "이번 주 가장 많이 분석된 키워드. 지금 SEO 기회를 확인하세요.",
+    langSwitchHref: "/tools/ranking",
+    langSwitchLabel: "English",
+    referralTitle: "친구 초대하고 보너스 분석 받기",
+    referralDesc: "친구가 내 링크로 가입하면 양쪽 모두 보너스 분석 +5회를 받습니다.",
+    referralLink: "내 추천 링크",
+    referralCopied: "복사됨!",
+    referralStats: "추천 완료",
   },
 };
 

@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { type Locale, getTexts } from "@/lib/i18n"
+import AdSlot from "@/components/AdSlot"
 
 interface CompareResult {
   keyword: string
@@ -344,6 +345,11 @@ export default function KeywordCompare({ locale = "en" }: KeywordCompareProps) {
                 </div>
               )
             })()}
+
+            {/* AdSense */}
+            <div style={{ marginTop: 24 }}>
+              <AdSlot slot="COMPARE_BOTTOM" format="auto" responsive />
+            </div>
           </div>
         )}
       </div>

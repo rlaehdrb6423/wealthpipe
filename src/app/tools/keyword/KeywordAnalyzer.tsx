@@ -76,6 +76,9 @@ export default function KeywordAnalyzer({ locale = "en", initialKeyword }: Keywo
   const [aiLoading, setAiLoading] = useState(false)
   const [aiError, setAiError] = useState("")
   const [trend, setTrend] = useState<{ period: string; ratio: number }[] | null>(null)
+  const [limitReached, setLimitReached] = useState(false)
+  const [waitlistEmail, setWaitlistEmail] = useState("")
+  const [waitlistSubmitted, setWaitlistSubmitted] = useState(false)
 
   useEffect(() => {
     if (initialized) return
@@ -94,6 +97,7 @@ export default function KeywordAnalyzer({ locale = "en", initialKeyword }: Keywo
     if (!q) return
     setLoading(true)
     setError("")
+    setLimitReached(false)
     setResult(null)
     try {
       const adminKey = searchParams.get("admin") || ""
@@ -107,7 +111,11 @@ export default function KeywordAnalyzer({ locale = "en", initialKeyword }: Keywo
       let data
       try { data = await res.json() } catch { data = null }
       if (!res.ok) {
-        setError(data?.error || `Error ${res.status}`)
+        if (res.status === 429) {
+          setLimitReached(true)
+        } else {
+          setError(data?.error || `Error ${res.status}`)
+        }
       } else if (data) {
         setResult(data)
         // Fetch trend data
@@ -195,6 +203,40 @@ export default function KeywordAnalyzer({ locale = "en", initialKeyword }: Keywo
     claimReward("copy")
   }
 
+  const submitWaitlist = async () => {
+    if (!waitlistEmail || waitlistSubmitted) return
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(waitlistEmail)) {
+      setError(locale === "ko" ? "올바른 이메일을 입력해주세요." : "Please enter a valid email.")
+      return
+    }
+    try {
+      const res = await fetch("/api/newsletter", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: "Pro Waitlist", email: waitlistEmail }),
+      })
+      if (res.ok || res.status === 409) {
+        setWaitlistSubmitted(true)
+      }
+    } catch { /* ignore */ }
+  }
+
+  const nativeShare = async () => {
+    if (!result) return
+    const text = locale === "ko"
+      ? `"${result.keyword}" 키워드 분석 결과 - 경쟁도: ${result.competitionLabel}, 수익성: ${result.profitLabel}`
+      : `"${result.keyword}" ${t.ogTitleWithKeyword} - ${t.competition}: ${result.competitionLabel}, ${t.profitability}: ${result.profitLabel}`
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: t.ogTitleWithKeyword, text, url: shareUrl })
+        claimReward("kakao")
+      } catch { /* user cancelled */ }
+    } else {
+      await navigator.clipboard.writeText(shareUrl)
+      claimReward("kakao")
+    }
+  }
+
   const homeHref = locale === "ko" ? "/ko" : "/"
   const nlHref = locale === "ko" ? "/ko#newsletter" : "/#newsletter"
 
@@ -263,8 +305,79 @@ export default function KeywordAnalyzer({ locale = "en", initialKeyword }: Keywo
           </button>
         </div>
 
-        {error && (
+        {error && !limitReached && (
           <p style={{ color: "#ef4444", fontSize: 14, marginBottom: 16 }}>{error}</p>
+        )}
+
+        {/* 한도 도달 시 업그레이드 CTA */}
+        {limitReached && (
+          <div style={{
+            background: "linear-gradient(135deg, #1a1a2e 0%, #0a0a0a 100%)",
+            border: "1px solid #333",
+            borderRadius: 16,
+            padding: 28,
+            marginBottom: 24,
+            animation: "up 0.4s ease",
+          }}>
+            <div style={{ textAlign: "center", marginBottom: 20 }}>
+              <div style={{ fontSize: 32, marginBottom: 8 }}>🔒</div>
+              <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>{t.limitTitle}</h3>
+              <p style={{ color: "#888", fontSize: 14, lineHeight: 1.6 }}>{t.limitDesc}</p>
+            </div>
+
+            {/* Pro 대기자 이메일 수집 */}
+            <div style={{ background: "#111", borderRadius: 12, padding: 16, marginBottom: 12 }}>
+              <p style={{ fontSize: 13, fontWeight: 600, marginBottom: 8 }}>{t.limitProCta}</p>
+              {!waitlistSubmitted ? (
+                <div style={{ display: "flex", gap: 8 }}>
+                  <input
+                    type="email"
+                    value={waitlistEmail}
+                    onChange={(e) => setWaitlistEmail(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && submitWaitlist()}
+                    placeholder={t.limitEmailPlaceholder}
+                    style={{
+                      flex: 1, padding: "10px 14px", background: "#0a0a0a", border: "1px solid #333",
+                      borderRadius: 8, color: "#fff", fontSize: 13, outline: "none",
+                    }}
+                  />
+                  <button
+                    onClick={submitWaitlist}
+                    style={{
+                      padding: "10px 20px", background: "#fff", color: "#000", border: "none",
+                      borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap",
+                    }}
+                  >
+                    {t.limitEmailBtn}
+                  </button>
+                </div>
+              ) : (
+                <p style={{ color: "#22c55e", fontSize: 13, fontWeight: 600 }}>{t.limitEmailSuccess}</p>
+              )}
+            </div>
+
+            {/* 공유 보너스 안내 - 한도 도달 후 다음 분석을 유도 */}
+            <div style={{
+              width: "100%", padding: "12px", background: "#0a0a0a", border: "1px solid #333",
+              borderRadius: 12, color: "#888", fontSize: 13, marginBottom: 12, textAlign: "center",
+            }}>
+              🔗 {locale === "ko"
+                ? "다음 분석 결과에서 공유하면 +3회 보너스를 받을 수 있어요"
+                : "Share your next analysis result to earn +3 bonus analyses"}
+            </div>
+
+            {/* Pricing 페이지 링크 */}
+            <a
+              href={locale === "ko" ? "/ko/pricing" : "/pricing"}
+              style={{
+                display: "block", width: "100%", padding: "12px", background: "transparent",
+                border: "1px solid #222", borderRadius: 12, color: "#666", fontSize: 13,
+                textDecoration: "none", textAlign: "center",
+              }}
+            >
+              {locale === "ko" ? "요금제 비교 보기 →" : "Compare Plans →"}
+            </a>
+          </div>
         )}
 
         {result && (
@@ -532,7 +645,7 @@ export default function KeywordAnalyzer({ locale = "en", initialKeyword }: Keywo
             )}
 
             {/* 공유 버튼 */}
-            <div style={{ position: "relative" }}>
+            <div id="share-section" style={{ position: "relative" }}>
               <p style={{ color: "#888", fontSize: 12, marginBottom: 8 }}>
                 {t.shareBonusText}
               </p>
@@ -549,6 +662,9 @@ export default function KeywordAnalyzer({ locale = "en", initialKeyword }: Keywo
                 >
                   {t.twitterShare}
                 </a>
+                <button onClick={nativeShare} style={shareBtnStyle}>
+                  {t.shareNative}
+                </button>
               </div>
               {toast && (
                 <div style={{

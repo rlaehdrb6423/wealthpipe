@@ -117,7 +117,14 @@ export default function WealthPipePage({ locale }: WealthPipePageProps) {
               </RevealOnScroll>
             );
             if (tool.status === "LIVE") {
-              return <a key={i} href={isKo ? "/ko/tools/keyword" : "/tools/keyword"} style={{ textDecoration: "none", color: "inherit" }}>{content}</a>;
+              const toolPaths: Record<string, string> = {
+                "01": "/tools/keyword",
+                "02": "/tools/news",
+                "03": "/tools/signals",
+              };
+              const path = toolPaths[tool.n] || "/tools/keyword";
+              const href = isKo ? `/ko${path}` : path;
+              return <a key={i} href={href} style={{ textDecoration: "none", color: "inherit" }}>{content}</a>;
             }
             return content;
           })}

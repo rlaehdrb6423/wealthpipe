@@ -72,6 +72,78 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       },
     },
     {
+      url: `${SITE_URL}/tools/news`,
+      lastModified: new Date(),
+      changeFrequency: "daily",
+      priority: 0.8,
+      alternates: {
+        languages: {
+          en: `${SITE_URL}/tools/news`,
+          ko: `${SITE_URL}/ko/tools/news`,
+        },
+      },
+    },
+    {
+      url: `${SITE_URL}/ko/tools/news`,
+      lastModified: new Date(),
+      changeFrequency: "daily",
+      priority: 0.7,
+      alternates: {
+        languages: {
+          en: `${SITE_URL}/tools/news`,
+          ko: `${SITE_URL}/ko/tools/news`,
+        },
+      },
+    },
+    {
+      url: `${SITE_URL}/tools/signals`,
+      lastModified: new Date(),
+      changeFrequency: "daily",
+      priority: 0.8,
+      alternates: {
+        languages: {
+          en: `${SITE_URL}/tools/signals`,
+          ko: `${SITE_URL}/ko/tools/signals`,
+        },
+      },
+    },
+    {
+      url: `${SITE_URL}/ko/tools/signals`,
+      lastModified: new Date(),
+      changeFrequency: "daily",
+      priority: 0.7,
+      alternates: {
+        languages: {
+          en: `${SITE_URL}/tools/signals`,
+          ko: `${SITE_URL}/ko/tools/signals`,
+        },
+      },
+    },
+    {
+      url: `${SITE_URL}/tools/ranking`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.8,
+      alternates: {
+        languages: {
+          en: `${SITE_URL}/tools/ranking`,
+          ko: `${SITE_URL}/ko/tools/ranking`,
+        },
+      },
+    },
+    {
+      url: `${SITE_URL}/ko/tools/ranking`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.7,
+      alternates: {
+        languages: {
+          en: `${SITE_URL}/tools/ranking`,
+          ko: `${SITE_URL}/ko/tools/ranking`,
+        },
+      },
+    },
+    {
       url: `${SITE_URL}/blog`,
       lastModified: new Date(),
       changeFrequency: "daily",

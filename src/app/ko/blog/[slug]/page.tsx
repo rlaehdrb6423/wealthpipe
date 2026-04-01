@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 import { getServiceClient } from "@/lib/supabase"
+import AdSlot from "@/components/AdSlot"
 
 const SITE_URL = "https://wealthpipe.net"
 
@@ -100,9 +101,14 @@ export default async function KoBlogPostPage({ params }: Props) {
           />
         </article>
 
+        {/* AdSense */}
+        <div style={{ marginTop: 32 }}>
+          <AdSlot slot="BLOG_POST_BOTTOM" format="auto" responsive />
+        </div>
+
         {/* 키워드 분석기 CTA */}
         <div style={{
-          marginTop: 48,
+          marginTop: 24,
           padding: 24,
           background: "linear-gradient(135deg, #111 0%, #0a0a0a 100%)",
           border: "1px solid #222",

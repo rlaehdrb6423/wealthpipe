@@ -13,8 +13,8 @@ export async function GET(request: Request) {
 
   const supabase = getServiceClient()
 
-  // 1. 지난 7일 인기 키워드 TOP 5 집계
-  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
+  // 1. 지난 24시간 인기 키워드 TOP 5 집계
+  const sevenDaysAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
   const { data: keywords } = await supabase
     .from("keyword_cache")
     .select("keyword, data")
@@ -23,7 +23,7 @@ export async function GET(request: Request) {
     .limit(50)
 
   if (!keywords || keywords.length === 0) {
-    return Response.json({ skipped: true, reason: "No keywords this week" })
+    return Response.json({ skipped: true, reason: "No keywords today" })
   }
 
   // 검색량 기준 TOP 5
@@ -38,7 +38,7 @@ export async function GET(request: Request) {
     .sort((a, b) => b.volume - a.volume)
     .slice(0, 5)
 
-  // 2. Claude로 주간 트렌드 요약 생성
+  // 2. Claude로 일일 트렌드 요약 생성
   const anthropic = new Anthropic()
   const keywordSummary = sorted
     .map((k, i) => `${i + 1}. "${k.keyword}" — 월간 검색량 ${k.volume?.toLocaleString()}, 경쟁 ${k.grade}등급, 기회점수 ${k.score}/100`)
@@ -50,7 +50,7 @@ export async function GET(request: Request) {
     messages: [
       {
         role: "user",
-        content: `다음은 이번 주 WealthPipe에서 가장 많이 분석된 키워드 TOP 5입니다:\n\n${keywordSummary}\n\n이 키워드들을 바탕으로 블로거/마케터를 위한 주간 트렌드 인사이트를 3~4문장으로 작성해주세요. 톤: 실용적이고 간결하게. 한국어로 작성.`,
+        content: `다음은 오늘 WealthPipe에서 가장 많이 분석된 키워드 TOP 5입니다:\n\n${keywordSummary}\n\n이 키워드들을 바탕으로 블로거/마케터를 위한 오늘의 트렌드 인사이트를 3~4문장으로 작성해주세요. 톤: 실용적이고 간결하게. 한국어로 작성.`,
       },
     ],
   })
@@ -58,7 +58,7 @@ export async function GET(request: Request) {
   const trendInsight =
     aiResponse.content[0].type === "text"
       ? aiResponse.content[0].text
-      : "이번 주 트렌드 분석을 확인해보세요."
+      : "오늘의 트렌드 분석을 확인해보세요."
 
   // 3. 이메일 HTML 생성
   const keywordCards = sorted
@@ -85,10 +85,10 @@ export async function GET(request: Request) {
     <div style="max-width:560px;margin:0 auto;font-family:-apple-system,sans-serif;color:#e0e0e0;background:#0a0a0a;padding:32px;border-radius:12px;">
       <div style="margin-bottom:24px;">
         <span style="display:inline-block;width:28px;height:28px;border-radius:6px;background:#fff;text-align:center;line-height:28px;font-weight:800;color:#000;font-size:14px;margin-right:10px;">W</span>
-        <span style="color:#888;font-size:14px;">WealthPipe Weekly</span>
+        <span style="color:#888;font-size:14px;">WealthPipe Daily</span>
       </div>
 
-      <h1 style="font-size:22px;color:#fff;margin-bottom:8px;">이번 주 인기 키워드 TOP 5</h1>
+      <h1 style="font-size:22px;color:#fff;margin-bottom:8px;">오늘의 인기 키워드 TOP 5</h1>
       <p style="font-size:13px;color:#666;margin-bottom:24px;">${new Date().toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric" })}</p>
 
       <table style="width:100%;border-collapse:collapse;margin-bottom:24px;">
@@ -133,7 +133,7 @@ export async function GET(request: Request) {
     const emails = batch.map((sub) => ({
       from: "WealthPipe <noreply@wealthpipe.net>" as const,
       to: sub.email,
-      subject: `[WealthPipe] 이번 주 인기 키워드 TOP 5 — ${sorted[0].keyword}`,
+      subject: `[WealthPipe] 오늘의 인기 키워드 TOP 5 — ${sorted[0].keyword}`,
       html: emailHtml,
     }))
 

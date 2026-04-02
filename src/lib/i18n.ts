@@ -229,6 +229,41 @@ export interface I18nTexts {
     referralCopied: string;
     referralStats: string;
   };
+  screener: {
+    backLink: string;
+    heading: string;
+    subheading: string;
+    stocksLabel: string;
+    updatedLabel: string;
+    searchPlaceholder: string;
+    searchBtn: string;
+    filterToggle: string;
+    maxLabel: string;
+    minLabel: string;
+    divLabel: string;
+    capLabel: string;
+    marketLabel: string;
+    marketAll: string;
+    applyBtn: string;
+    colName: string;
+    colScore: string;
+    colDiv: string;
+    colCap: string;
+    colPrice: string;
+    loadingText: string;
+    errorText: string;
+    resultsLabel: string;
+    noResultText: string;
+    scoreGuideTitle: string;
+    scoreGuideDesc: string;
+    nlCtaDesc: string;
+    nlCtaTitle: string;
+    nlCtaBtn: string;
+    ogTitle: string;
+    ogDesc: string;
+    langSwitchHref: string;
+    langSwitchLabel: string;
+  };
 }
 
 const en: I18nTexts = {
@@ -252,7 +287,7 @@ const en: I18nTexts = {
   stats: [
     ["24/7", "AI market monitoring"],
     ["100%", "Automated pipeline"],
-    ["3+", "Free intelligence tools"],
+    ["4+", "Free intelligence tools"],
     ["Global", "Korea \u00b7 Global Markets"],
   ],
   tools: {
@@ -263,6 +298,7 @@ const en: I18nTexts = {
       { n: "01", tag: "KOREA SEO", title: "Korean Market Keyword Analyzer", desc: "Unlock Naver search data — volume, competition, and revenue potential. The essential tool for global sellers entering the Korean market.", status: "LIVE" },
       { n: "02", tag: "MARKET", title: "Economic News Digest", desc: "AI distills global economic headlines daily. Stocks, FX, crypto, and rates — the full picture in under 10 minutes.", status: "LIVE" },
       { n: "03", tag: "SIGNALS", title: "Asset Signal Tracker", desc: "AI detects buy/sell signals across KOSPI, S&P 500, NASDAQ, Bitcoin, and Gold before the crowd moves.", status: "LIVE" },
+      { n: "04", tag: "SCREENER", title: "KRX Factor Screener", desc: "Screen 2,700+ KOSPI & KOSDAQ stocks by PER, PBR, ROE, dividend yield — ranked by AI factor score.", status: "LIVE" },
     ],
   },
   newsletter: {
@@ -474,6 +510,41 @@ const en: I18nTexts = {
     referralCopied: "Copied!",
     referralStats: "referrals completed",
   },
+  screener: {
+    backLink: "← WealthPipe",
+    heading: "KRX Factor Screener",
+    subheading: "Screen all KRX-listed stocks by valuation, profitability, and AI score. Find undervalued, high-dividend, and quality stocks instantly.",
+    stocksLabel: "stocks tracked",
+    updatedLabel: "Updated",
+    searchPlaceholder: "Search by name or ticker...",
+    searchBtn: "Search",
+    filterToggle: "Advanced Filters",
+    maxLabel: "Max",
+    minLabel: "Min",
+    divLabel: "Dividend %",
+    capLabel: "Market Cap (억)",
+    marketLabel: "Market",
+    marketAll: "All Markets",
+    applyBtn: "Apply",
+    colName: "Stock",
+    colScore: "AI Score",
+    colDiv: "Div %",
+    colCap: "Mkt Cap",
+    colPrice: "Price",
+    loadingText: "Screening stocks...",
+    errorText: "Failed to load data. Please try again.",
+    resultsLabel: "results",
+    noResultText: "No stocks match your filters. Try adjusting the criteria.",
+    scoreGuideTitle: "About AI Score",
+    scoreGuideDesc: "The AI Score is a composite factor score (0–100) calculated from valuation (PER, PBR), profitability (ROE), dividend yield, and earnings stability. Higher scores indicate stronger factor characteristics.",
+    nlCtaDesc: "Weekly market intelligence",
+    nlCtaTitle: "Get top-scored KRX stocks in your inbox every week",
+    nlCtaBtn: "Subscribe Free",
+    ogTitle: "KRX Factor Screener - WealthPipe",
+    ogDesc: "AI-scored KRX stock screener — filter KOSPI and KOSDAQ stocks by PER, PBR, ROE, dividend yield, and AI factor score.",
+    langSwitchHref: "/ko/tools/screener",
+    langSwitchLabel: "\ud55c\uad6d\uc5b4",
+  },
 };
 
 const ko: I18nTexts = {
@@ -497,7 +568,7 @@ const ko: I18nTexts = {
   stats: [
     ["24/7", "AI \uc2dc\uc7a5 \ubaa8\ub2c8\ud130\ub9c1"],
     ["100%", "\uc790\ub3d9\ud654 \ud30c\uc774\ud504\ub77c\uc778"],
-    ["3+", "\ubb34\ub8cc \ubd84\uc11d \ud234"],
+    ["4+", "\ubb34\ub8cc \ubd84\uc11d \ud234"],
     ["Global", "\ud55c\uad6d + \uc804 \uc138\uacc4"],
   ],
   tools: {
@@ -508,6 +579,7 @@ const ko: I18nTexts = {
       { n: "01", tag: "SEO", title: "\ud0a4\uc6cc\ub4dc \ubd84\uc11d\uae30", desc: "\uac80\uc0c9\ub7c9\u00b7\uacbd\uc7c1\ub3c4\u00b7\uc218\uc775\uc131 \ubd84\uc11d. \ube14\ub85c\uac70\uc640 \ub9c8\ucf00\ud130\uc758 \ud544\uc218 \ud234.", status: "LIVE" },
       { n: "02", tag: "MARKET", title: "\uacbd\uc81c \ub274\uc2a4 \ub2e4\uc774\uc81c\uc2a4\ud2b8", desc: "\uae00\ub85c\ubc8c \uacbd\uc81c \ud575\uc2ec\uc744 \ub9e4\uc77c AI\uac00 \uc694\uc57d. 10\ubd84 \uc548\uc5d0 \uc2dc\uc7a5 \uc804\uccb4 \ud30c\uc545.", status: "LIVE" },
       { n: "03", tag: "INVEST", title: "\uc790\uc0b0 \uc2dc\uadf8\ub110 \ud2b8\ub798\ucee4", desc: "\uc8fc\uc2dd\u00b7\ucf54\uc778\u00b7\ubd80\ub3d9\uc0b0 \uc2e0\ud638\ub97c AI\uac00 \uba3c\uc800 \uac10\uc9c0.", status: "LIVE" },
+      { n: "04", tag: "SCREENER", title: "KRX \ud329\ud130 \uc2a4\ud06c\ub9ac\ub108", desc: "KOSPI\u00b7KOSDAQ 2,700+ \uc885\ubaa9\uc758 PER, PBR, ROE, \ubc30\ub2f9\uc218\uc775\ub960\uc744 AI\uac00 \uc810\uc218\ud654.", status: "LIVE" },
     ],
   },
   newsletter: {
@@ -718,6 +790,41 @@ const ko: I18nTexts = {
     referralLink: "내 추천 링크",
     referralCopied: "복사됨!",
     referralStats: "추천 완료",
+  },
+  screener: {
+    backLink: "← WealthPipe",
+    heading: "KRX 팩터 스크리너",
+    subheading: "KRX 상장 전 종목을 밸류에이션, 수익성, AI 점수로 스크리닝하세요. 저평가주, 고배당주, 퀄리티주를 즉시 찾아보세요.",
+    stocksLabel: "종목 추적 중",
+    updatedLabel: "업데이트",
+    searchPlaceholder: "종목명 또는 티커 검색...",
+    searchBtn: "검색",
+    filterToggle: "상세 필터",
+    maxLabel: "이하",
+    minLabel: "이상",
+    divLabel: "배당수익률 %",
+    capLabel: "시가총액 (억원)",
+    marketLabel: "시장",
+    marketAll: "전체",
+    applyBtn: "적용",
+    colName: "종목",
+    colScore: "AI 점수",
+    colDiv: "배당 %",
+    colCap: "시총",
+    colPrice: "현재가",
+    loadingText: "종목 스크리닝 중...",
+    errorText: "데이터를 불러오지 못했습니다. 다시 시도해주세요.",
+    resultsLabel: "개 종목",
+    noResultText: "조건에 맞는 종목이 없습니다. 필터를 조정해보세요.",
+    scoreGuideTitle: "AI 점수 안내",
+    scoreGuideDesc: "AI 점수는 밸류에이션(PER, PBR), 수익성(ROE), 배당수익률, 실적 안정성을 종합한 팩터 점수(0~100)입니다. 높을수록 팩터 특성이 우수합니다.",
+    nlCtaDesc: "매주 시장 인사이트 이메일",
+    nlCtaTitle: "고점수 KRX 종목을 매주 이메일로 받아보세요",
+    nlCtaBtn: "무료 구독",
+    ogTitle: "KRX 팩터 스크리너 - WealthPipe",
+    ogDesc: "KOSPI·KOSDAQ 전종목 PER, PBR, ROE, 배당수익률을 AI가 분석합니다. 무료 팩터 스크리너.",
+    langSwitchHref: "/tools/screener",
+    langSwitchLabel: "English",
   },
 };
 

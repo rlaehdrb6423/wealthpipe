@@ -121,6 +121,7 @@ export default function WealthPipePage({ locale }: WealthPipePageProps) {
                 "01": "/tools/keyword",
                 "02": "/tools/news",
                 "03": "/tools/signals",
+                "04": "/tools/screener",
               };
               const path = toolPaths[tool.n] || "/tools/keyword";
               const href = isKo ? `/ko${path}` : path;

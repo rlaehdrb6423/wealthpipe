@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { type Locale, getTexts } from "@/lib/i18n"
+import { initKakao, shareSignals } from "@/lib/kakao-share"
 import AdSlot from "@/components/AdSlot"
 
 interface AssetSignal {
@@ -80,6 +81,8 @@ export default function SignalTracker({ locale }: SignalTrackerProps) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
   const [expandedDates, setExpandedDates] = useState<Set<string>>(new Set())
+
+  useEffect(() => { initKakao() }, [])
 
   useEffect(() => {
     async function fetchSignals() {
@@ -177,6 +180,16 @@ export default function SignalTracker({ locale }: SignalTrackerProps) {
           <SignalDayView day={today} t={t} locale={locale} getSignalLabel={getSignalLabel} />
         )}
       </section>
+
+      {/* Kakao Share */}
+      <div style={{ marginBottom: 24, display: "flex", gap: 8 }}>
+        <button
+          onClick={() => shareSignals()}
+          style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 16px", background: "#FEE500", color: "#000", border: "none", borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: "pointer" }}
+        >
+          <span style={{ fontSize: 16 }}>&#x1F4E2;</span> {locale === "ko" ? "카카오톡 공유" : "Share on KakaoTalk"}
+        </button>
+      </div>
 
       {/* Newsletter CTA */}
       <div style={{ background: "#111", border: "1px solid #222", borderRadius: 12, padding: 28, marginBottom: 48, display: "flex", flexDirection: "column", gap: 12 }}>

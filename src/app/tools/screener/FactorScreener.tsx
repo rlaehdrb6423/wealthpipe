@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { type Locale, getTexts } from "@/lib/i18n"
+import { initKakao, shareScreener } from "@/lib/kakao-share"
 import AdSlot from "@/components/AdSlot"
 
 interface Stock {
@@ -84,6 +85,8 @@ export default function FactorScreener({ locale }: ScreenerProps) {
   const [capMin, setCapMin] = useState("")
   const [scoreMin, setScoreMin] = useState("")
   const [market, setMarket] = useState("")
+
+  useEffect(() => { initKakao() }, [])
 
   // Fetch stats on mount
   useEffect(() => {
@@ -533,6 +536,16 @@ export default function FactorScreener({ locale }: ScreenerProps) {
             )
           })}
         </div>
+      </div>
+
+      {/* Kakao Share */}
+      <div style={{ marginBottom: 24, display: "flex", gap: 8 }}>
+        <button
+          onClick={() => shareScreener()}
+          style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 16px", background: "#FEE500", color: "#000", border: "none", borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: "pointer" }}
+        >
+          <span style={{ fontSize: 16 }}>&#x1F4E2;</span> {locale === "ko" ? "카카오톡 공유" : "Share on KakaoTalk"}
+        </button>
       </div>
 
       {/* Newsletter CTA */}

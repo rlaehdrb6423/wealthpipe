@@ -44,7 +44,9 @@ export async function GET(request: Request) {
         "Cache-Control": endpoint === "stats" ? "public, s-maxage=300, stale-while-revalidate=60" : "public, s-maxage=30, stale-while-revalidate=10",
       },
     })
-  } catch {
-    return Response.json({ error: "Failed to reach screener API" }, { status: 502 })
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err)
+    console.error("Screener API error:", message, "URL:", `${SCREENER_API}/api/${endpoint}`)
+    return Response.json({ error: "Failed to reach screener API", detail: message }, { status: 502 })
   }
 }

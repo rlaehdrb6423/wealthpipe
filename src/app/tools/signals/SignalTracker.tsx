@@ -47,6 +47,33 @@ const SIGNAL_COLORS = {
   neutral: "#eab308",
 }
 
+const CHART_URLS: Record<string, { ko: string; en: string }> = {
+  "^KS11": {
+    ko: "https://finance.naver.com/sise/sise_index.naver?code=KOSPI",
+    en: "https://finance.yahoo.com/quote/%5EKS11/",
+  },
+  "^GSPC": {
+    ko: "https://finance.yahoo.com/quote/%5EGSPC/",
+    en: "https://finance.yahoo.com/quote/%5EGSPC/",
+  },
+  "^IXIC": {
+    ko: "https://finance.yahoo.com/quote/%5EIXIC/",
+    en: "https://finance.yahoo.com/quote/%5EIXIC/",
+  },
+  "BTC-USD": {
+    ko: "https://finance.yahoo.com/quote/BTC-USD/",
+    en: "https://finance.yahoo.com/quote/BTC-USD/",
+  },
+  "GC=F": {
+    ko: "https://finance.yahoo.com/quote/GC%3DF/",
+    en: "https://finance.yahoo.com/quote/GC%3DF/",
+  },
+  "KRW=X": {
+    ko: "https://finance.naver.com/marketindex/exchangeDetail.naver?marketindexCd=FX_USDKRW",
+    en: "https://finance.yahoo.com/quote/KRW%3DX/",
+  },
+}
+
 export default function SignalTracker({ locale }: SignalTrackerProps) {
   const t = getTexts(locale).signals
   const [days, setDays] = useState<SignalDay[]>([])
@@ -228,15 +255,31 @@ function SignalDayView({ day, t, locale, getSignalLabel, compact = false }: Sign
           const reason = locale === "en" && asset.signalReasonEn
             ? asset.signalReasonEn
             : asset.signalReason
+          const chartUrl = CHART_URLS[asset.ticker]?.[locale] || CHART_URLS[asset.ticker]?.en
 
           return (
-            <div
+            <a
               key={asset.ticker}
+              href={chartUrl}
+              target="_blank"
+              rel="noopener noreferrer"
               style={{
                 background: "#111",
                 border: "1px solid #222",
                 borderRadius: 12,
                 padding: compact ? "14px" : "18px",
+                textDecoration: "none",
+                color: "inherit",
+                display: "block",
+                transition: "border-color 0.2s, background 0.2s",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = "#444"
+                e.currentTarget.style.background = "#161616"
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = "#222"
+                e.currentTarget.style.background = "#111"
               }}
             >
               {/* Header: name + signal badge */}
@@ -288,7 +331,7 @@ function SignalDayView({ day, t, locale, getSignalLabel, compact = false }: Sign
                   {asset.news}
                 </p>
               )}
-            </div>
+            </a>
           )
         })}
       </div>

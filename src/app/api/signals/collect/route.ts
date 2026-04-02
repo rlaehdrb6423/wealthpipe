@@ -1,5 +1,5 @@
 import { getServiceClient } from "@/lib/supabase"
-import { fetchAllAssets, type AssetData } from "@/lib/yahoo-finance"
+import { fetchAssetsByTickers, fetchAllAssets, type AssetData } from "@/lib/yahoo-finance"
 import Anthropic from "@anthropic-ai/sdk"
 
 interface AssetSignal {
@@ -12,6 +12,12 @@ interface AssetSignal {
   signalReason: string
   signalReasonEn?: string
   news: string
+}
+
+const ASSET_GROUPS: Record<string, string[]> = {
+  kr: ["^KS11", "KRW=X"],
+  us: ["^GSPC", "^IXIC", "GC=F"],
+  crypto: ["BTC-USD"],
 }
 
 async function fetchAssetNews(query: string): Promise<string> {
@@ -57,28 +63,23 @@ export async function GET(request: Request) {
     return Response.json({ error: "Unauthorized" }, { status: 401 })
   }
 
+  const { searchParams } = new URL(request.url)
+  const group = searchParams.get("group") // kr, us, crypto, or null (all)
+
   const today = new Date().toISOString().split("T")[0]
   const supabase = getServiceClient()
 
-  // 오늘 데이터 이미 있으면 스킵
-  const { data: existing } = await supabase
-    .from("asset_signals")
-    .select("id")
-    .eq("date", today)
-    .maybeSingle()
-
-  if (existing) {
-    return Response.json({ skipped: true, reason: "Already collected today", date: today })
-  }
-
-  // 1. Yahoo Finance 데이터 수집
-  const assets = await fetchAllAssets()
+  // 그룹별 또는 전체 자산 수집
+  const targetTickers = group && ASSET_GROUPS[group] ? ASSET_GROUPS[group] : null
+  const assets = targetTickers
+    ? await fetchAssetsByTickers(targetTickers)
+    : await fetchAllAssets()
 
   if (assets.length === 0) {
     return Response.json({ error: "No asset data collected" }, { status: 502 })
   }
 
-  // 2. 네이버 뉴스 수집 (병렬)
+  // 네이버 뉴스 수집 (병렬)
   const newsResults = await Promise.allSettled(
     assets.map((a) => fetchAssetNews(NEWS_QUERIES[a.ticker] || a.name))
   )
@@ -89,7 +90,7 @@ export async function GET(request: Request) {
     newsMap[a.ticker] = result.status === "fulfilled" ? result.value : ""
   })
 
-  // 3. Claude Haiku로 시그널 판단 + 인사이트
+  // Claude Haiku로 시그널 판단 + 인사이트
   const anthropic = new Anthropic()
 
   const assetSummary = assets
@@ -99,9 +100,9 @@ export async function GET(request: Request) {
     )
     .join("\n")
 
-  let signalData: AssetSignal[] = []
-  let aiInsight = ""
-  let aiInsightEn = ""
+  let newSignals: AssetSignal[] = []
+  let groupInsight = ""
+  let groupInsightEn = ""
 
   try {
     const aiResponse = await anthropic.messages.create({
@@ -134,10 +135,10 @@ ${assetSummary}
     if (jsonMatch) {
       const parsed = JSON.parse(jsonMatch[0])
       const signals: Array<{ ticker: string; signal: string; reason: string; reasonEn?: string }> = parsed.signals || []
-      aiInsight = parsed.insight || ""
-      aiInsightEn = parsed.insightEn || ""
+      groupInsight = parsed.insight || ""
+      groupInsightEn = parsed.insightEn || ""
 
-      signalData = assets.map((a: AssetData) => {
+      newSignals = assets.map((a: AssetData) => {
         const sig = signals.find((s) => s.ticker === a.ticker)
         return {
           name: a.name,
@@ -152,8 +153,7 @@ ${assetSummary}
         }
       })
     } else {
-      // 파싱 실패 시 neutral 기본값
-      signalData = assets.map((a: AssetData) => ({
+      newSignals = assets.map((a: AssetData) => ({
         name: a.name,
         ticker: a.ticker,
         price: a.price,
@@ -163,11 +163,11 @@ ${assetSummary}
         signalReason: "",
         news: newsMap[a.ticker] || "",
       }))
-      aiInsight = "시장 인사이트를 분석 중입니다."
+      groupInsight = "시장 인사이트를 분석 중입니다."
     }
   } catch (error) {
     console.error("Claude AI error:", error)
-    signalData = assets.map((a: AssetData) => ({
+    newSignals = assets.map((a: AssetData) => ({
       name: a.name,
       ticker: a.ticker,
       price: a.price,
@@ -177,14 +177,55 @@ ${assetSummary}
       signalReason: "",
       news: newsMap[a.ticker] || "",
     }))
-    aiInsight = "시장 인사이트를 분석 중입니다."
+    groupInsight = "시장 인사이트를 분석 중입니다."
   }
 
-  // 4. Supabase 저장
+  // 기존 데이터 로드 후 병합
+  const { data: existing } = await supabase
+    .from("asset_signals")
+    .select("data")
+    .eq("date", today)
+    .maybeSingle()
+
+  let mergedAssets: AssetSignal[] = []
+  let mergedInsight = groupInsight
+  let mergedInsightEn = groupInsightEn
+
+  if (existing?.data) {
+    const existingAssets: AssetSignal[] = existing.data.assets || []
+    // 기존 자산 중 이번에 업데이트하지 않는 것은 유지
+    const updatedTickers = new Set(newSignals.map((s) => s.ticker))
+    const kept = existingAssets.filter((a) => !updatedTickers.has(a.ticker))
+    mergedAssets = [...kept, ...newSignals]
+
+    // 인사이트: 전체 수집이 아니면 기존 인사이트에 그룹 인사이트 추가
+    if (group) {
+      const existingInsight = existing.data.aiInsight || ""
+      const existingInsightEn = existing.data.aiInsightEn || ""
+      mergedInsight = existingInsight
+        ? `${existingInsight} | ${groupInsight}`
+        : groupInsight
+      mergedInsightEn = existingInsightEn
+        ? `${existingInsightEn} | ${groupInsightEn}`
+        : groupInsightEn
+    }
+  } else {
+    mergedAssets = newSignals
+  }
+
+  // 자산 순서 정렬 (KOSPI, S&P500, NASDAQ, Bitcoin, Gold, USD/KRW)
+  const TICKER_ORDER = ["^KS11", "^GSPC", "^IXIC", "BTC-USD", "GC=F", "KRW=X"]
+  mergedAssets.sort((a, b) => {
+    const ai = TICKER_ORDER.indexOf(a.ticker)
+    const bi = TICKER_ORDER.indexOf(b.ticker)
+    return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi)
+  })
+
+  // Supabase 저장
   const { error: upsertError } = await supabase.from("asset_signals").upsert(
     {
       date: today,
-      data: { assets: signalData, aiInsight, aiInsightEn, updatedAt: new Date().toISOString() },
+      data: { assets: mergedAssets, aiInsight: mergedInsight, aiInsightEn: mergedInsightEn, updatedAt: new Date().toISOString() },
     },
     { onConflict: "date" }
   )
@@ -197,6 +238,8 @@ ${assetSummary}
   return Response.json({
     success: true,
     date: today,
-    assetsCount: signalData.length,
+    group: group || "all",
+    assetsUpdated: newSignals.length,
+    totalAssets: mergedAssets.length,
   })
 }

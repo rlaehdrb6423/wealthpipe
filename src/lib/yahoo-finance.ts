@@ -65,3 +65,11 @@ export async function fetchAllAssets(): Promise<AssetData[]> {
   )
   return results.filter((r): r is AssetData => r !== null)
 }
+
+export async function fetchAssetsByTickers(tickers: string[]): Promise<AssetData[]> {
+  const filtered = ASSETS.filter((a) => tickers.includes(a.ticker))
+  const results = await Promise.all(
+    filtered.map((a) => fetchAssetData(a.ticker, a.name))
+  )
+  return results.filter((r): r is AssetData => r !== null)
+}

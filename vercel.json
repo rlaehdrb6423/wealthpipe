@@ -9,8 +9,24 @@
       "schedule": "0 23 * * *"
     },
     {
-      "path": "/api/signals/collect",
-      "schedule": "0 9 * * *"
+      "path": "/api/signals/collect?group=kr",
+      "schedule": "0 0 * * 1-5"
+    },
+    {
+      "path": "/api/signals/collect?group=kr",
+      "schedule": "30 6 * * 1-5"
+    },
+    {
+      "path": "/api/signals/collect?group=us",
+      "schedule": "30 13 * * 1-5"
+    },
+    {
+      "path": "/api/signals/collect?group=us",
+      "schedule": "0 20 * * 1-5"
+    },
+    {
+      "path": "/api/signals/collect?group=crypto",
+      "schedule": "0 */2 * * *"
     },
     {
       "path": "/api/content/collect-keywords",

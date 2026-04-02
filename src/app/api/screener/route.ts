@@ -1,7 +1,7 @@
 const SCREENER_API = process.env.SCREENER_API_URL || ""
 
 const ALLOWED_PARAMS: Record<string, string[]> = {
-  screener: ["market", "sort", "order", "limit", "offset"],
+  screener: ["market", "sort", "order", "limit", "offset", "per_max", "pbr_max", "roe_min", "div_min", "cap_min", "score_min", "preset"],
   stats: [],
   search: ["q", "market"],
   distribution: ["factor", "market"],

@@ -35,6 +35,14 @@
     {
       "path": "/api/content/generate-posts",
       "schedule": "0 7 * * *"
+    },
+    {
+      "path": "/api/screener/crawl",
+      "schedule": "50 23 * * 0-4"
+    },
+    {
+      "path": "/api/screener/crawl",
+      "schedule": "40 6 * * 1-5"
     }
   ]
 }

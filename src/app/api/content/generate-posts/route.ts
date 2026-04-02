@@ -1,4 +1,6 @@
 import { getServiceClient } from "@/lib/supabase"
+import { getAnthropicClient } from "@/lib/anthropic"
+import { verifyCronAuth } from "@/lib/auth"
 import Anthropic from "@anthropic-ai/sdk"
 import type { KeywordResult } from "@/lib/keyword-analyzer"
 import { sanitizeBlogContent } from "@/lib/sanitize"
@@ -108,8 +110,7 @@ async function generatePost(
 }
 
 export async function GET(request: Request) {
-  const authHeader = request.headers.get("authorization")
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!verifyCronAuth(request)) {
     return Response.json({ error: "Unauthorized" }, { status: 401 })
   }
 
@@ -131,7 +132,7 @@ export async function GET(request: Request) {
     return Response.json({ skipped: true, reason: "No pending items in queue" })
   }
 
-  const anthropic = new Anthropic()
+  const anthropic = getAnthropicClient()
   const results: { keyword: string; status: string; slug?: string }[] = []
 
   for (const item of queueItems) {
@@ -146,8 +147,12 @@ export async function GET(request: Request) {
     try {
       const data = keyword_data as KeywordResult
 
-      // 한국어 글 생성
-      const koPost = await generatePost(anthropic, buildPrompt(keyword, data))
+      // KO + EN 병렬 생성
+      const [koPost, enPost] = await Promise.all([
+        generatePost(anthropic, buildPrompt(keyword, data)),
+        generatePost(anthropic, buildEnPrompt(keyword, data)),
+      ])
+
       if (!koPost) {
         await supabase
           .from("content_queue")
@@ -182,8 +187,6 @@ export async function GET(request: Request) {
         continue
       }
 
-      // 영문 글 생성
-      const enPost = await generatePost(anthropic, buildEnPrompt(keyword, data))
       if (enPost) {
         const enSlug = `${slugify(keyword)}-en-${Date.now()}`
         await supabase.from("blog_posts").upsert(

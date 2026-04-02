@@ -117,10 +117,10 @@ function calcCompetition(totalVolume: number, totalCompetition: number) {
 function calcProfitGrade(totalVolume: number, competitionGrade: string, avgClickCnt: number) {
   let score = 0
 
-  // 검색량 점수
-  if (totalVolume >= 1000 && totalVolume <= 10000) score += 3
+  // 검색량 점수 (큰 범위부터 체크)
+  if (totalVolume >= 10000) score += 1
+  else if (totalVolume >= 1000) score += 3
   else if (totalVolume >= 100) score += 2
-  else if (totalVolume >= 10000) score += 1
 
   // 경쟁도 점수 (낮을수록 수익성 높음)
   if (competitionGrade === "A") score += 3
@@ -201,7 +201,11 @@ async function getCached(keyword: string): Promise<KeywordResult | null> {
   if (!data) return null
 
   const age = Date.now() - new Date(data.created_at).getTime()
-  if (age > 24 * 60 * 60 * 1000) return null
+  if (age > 24 * 60 * 60 * 1000) {
+    // 만료된 캐시 행 백그라운드 삭제
+    supabase.from("keyword_cache").delete().eq("keyword", keyword).lt("created_at", new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()).then(() => {})
+    return null
+  }
 
   const cached = data.data as KeywordResult
   // 이전 캐시에 새 필드가 없으면 캐시 무효화 → 재분석

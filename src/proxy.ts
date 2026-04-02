@@ -27,7 +27,8 @@ function checkRateLimit(ip: string, path: string): boolean {
     rateLimitMap.set(key, { count: 1, reset: now + limit.windowMs });
   }
 
-  if (rateLimitMap.size > 10_000) {
+  // 분산 환경에서는 Vercel KV 등 외부 저장소 전환 권장
+  if (rateLimitMap.size > 1_000) {
     for (const [k, v] of rateLimitMap) {
       if (now > v.reset) rateLimitMap.delete(k);
     }
@@ -37,7 +38,7 @@ function checkRateLimit(ip: string, path: string): boolean {
 }
 
 export async function proxy(request: NextRequest) {
-  const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+  const ip = request.headers.get("x-real-ip") || request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
   const path = request.nextUrl.pathname;
 
   // Rate limiting for API routes

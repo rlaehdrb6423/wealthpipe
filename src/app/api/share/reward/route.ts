@@ -7,7 +7,7 @@ const MAX_DAILY_SHARES = 3
 
 export async function POST(request: NextRequest) {
   try {
-    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown"
+    const ip = request.headers.get("x-real-ip") || request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown"
     const body = await request.json()
     const { keyword, platform } = body
 
@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
     const supabase = getServiceClient()
     const today = new Date().toISOString().split("T")[0]
 
-    // 오늘 공유 횟수 확인
+    // 오늘 공유 횟수 확인 + IP+keyword+platform 중복 체크
     const { count } = await supabase
       .from("shares")
       .select("*", { count: "exact", head: true })
@@ -41,6 +41,25 @@ export async function POST(request: NextRequest) {
       })
     }
 
+    // 동일 IP+keyword+platform 중복 공유 방지
+    const { data: duplicate } = await supabase
+      .from("shares")
+      .select("id", { count: "exact", head: true })
+      .eq("sharer_ip", ip)
+      .eq("keyword", keyword.slice(0, 50))
+      .eq("platform", platform)
+      .gte("created_at", `${today}T00:00:00`)
+      .lte("created_at", `${today}T23:59:59`)
+
+    if (duplicate) {
+      return Response.json({
+        rewarded: false,
+        message: "이미 이 키워드를 해당 플랫폼으로 공유하셨습니다.",
+        todayShares,
+        maxShares: MAX_DAILY_SHARES,
+      })
+    }
+
     // 공유 기록 저장
     await supabase.from("shares").insert({
       keyword: keyword.slice(0, 50),
@@ -48,19 +67,20 @@ export async function POST(request: NextRequest) {
       sharer_ip: ip,
     })
 
-    // 보너스 분석 횟수 부여
+    // 보너스 분석 횟수 부여 (원자적 upsert)
     const { data: usage } = await supabase
       .from("usage_limits")
-      .select("id, bonus_count")
+      .select("id")
       .eq("ip_address", ip)
       .eq("date", today)
       .single()
 
     if (usage) {
-      await supabase
-        .from("usage_limits")
-        .update({ bonus_count: (usage.bonus_count || 0) + BONUS_PER_SHARE })
-        .eq("id", usage.id)
+      await supabase.rpc("increment_bonus_count", {
+        p_ip: ip,
+        p_date: today,
+        p_amount: BONUS_PER_SHARE,
+      })
     } else {
       await supabase
         .from("usage_limits")

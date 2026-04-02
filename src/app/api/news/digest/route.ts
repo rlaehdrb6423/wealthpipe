@@ -1,5 +1,6 @@
 import { getServiceClient } from "@/lib/supabase"
-import Anthropic from "@anthropic-ai/sdk"
+import { getAnthropicClient } from "@/lib/anthropic"
+import { verifyCronAuth } from "@/lib/auth"
 
 const CATEGORIES = [
   { key: "stock", query: "주식시장 증시" },
@@ -82,9 +83,7 @@ async function fetchNaverNews(query: string): Promise<NaverNewsItem | null> {
   }
 }
 
-function stripHtml(html: string): string {
-  return html.replace(/<[^>]*>/g, "").replace(/&quot;/g, '"').replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&#39;/g, "'").trim()
-}
+import { stripHtml } from "@/lib/sanitize"
 
 function extractSource(url: string): string {
   try {
@@ -125,9 +124,8 @@ async function fetchGNews(query: string): Promise<GNewsArticle | null> {
 }
 
 export async function GET(request: Request) {
-  // Vercel Cron 인증
-  const authHeader = request.headers.get("authorization")
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  // Vercel Cron 인증 (timing-safe)
+  if (!verifyCronAuth(request)) {
     return Response.json({ error: "Unauthorized" }, { status: 401 })
   }
 
@@ -171,70 +169,101 @@ export async function GET(request: Request) {
     return Response.json({ error: "No news collected from any source" }, { status: 502 })
   }
 
-  const anthropic = new Anthropic()
+  const anthropic = getAnthropicClient()
 
   let articles: ArticleData[] = []
   let articlesEn: ArticleData[] = []
   let aiInsight = ""
   let aiInsightEn = ""
 
-  // --- KO: Naver 뉴스 요약 ---
+  // --- KO + EN 병렬 AI 요약 ---
+  const koPromise = collected.length > 0
+    ? (async () => {
+        const newsForAI = collected
+          .map(
+            (c, i) =>
+              `[${i + 1}] 카테고리: ${c.category}\n제목: ${stripHtml(c.item.title)}\n내용: ${stripHtml(c.item.description)}`
+          )
+          .join("\n\n")
+
+        try {
+          const aiResponse = await anthropic.messages.create({
+            model: "claude-haiku-4-5-20251001",
+            max_tokens: 1500,
+            messages: [{
+              role: "user",
+              content: `다음은 오늘의 주요 한국 경제 뉴스 ${collected.length}건입니다. 각 뉴스를 2~3문장으로 요약하고, 마지막에 전체 시장 인사이트를 3~4문장으로 작성해주세요.\n\n${newsForAI}\n\n응답 형식 (JSON):\n{\n  "summaries": ["뉴스1 요약", ...],\n  "insight": "전체 시장 인사이트"\n}\n\n중요: 반드시 위 JSON 형식으로만 응답하세요.`,
+            }],
+          })
+
+          const raw = aiResponse.content[0].type === "text" ? aiResponse.content[0].text : ""
+          const jsonMatch = raw.match(/\{[\s\S]*\}/)
+          if (jsonMatch) {
+            const parsed = JSON.parse(jsonMatch[0])
+            if (!Array.isArray(parsed.summaries) || typeof parsed.insight !== "string") {
+              throw new Error("Invalid KO AI response schema")
+            }
+            return { summaries: parsed.summaries as string[], insight: parsed.insight as string }
+          }
+          return null
+        } catch (error) {
+          console.error("Claude AI error (KO):", error)
+          return null
+        }
+      })()
+    : Promise.resolve(null)
+
+  const enPromise = collectedGlobal.length > 0
+    ? (async () => {
+        const globalNewsForAI = collectedGlobal
+          .map(
+            (c, i) =>
+              `[${i + 1}] Category: ${c.category}\nTitle: ${c.item.title}\nDescription: ${c.item.description || "N/A"}`
+          )
+          .join("\n\n")
+
+        try {
+          const aiResponse = await anthropic.messages.create({
+            model: "claude-haiku-4-5-20251001",
+            max_tokens: 1500,
+            messages: [{
+              role: "user",
+              content: `Here are ${collectedGlobal.length} global economic news articles from today. Summarize each in 2-3 sentences and provide an overall market insight in 3-4 sentences.\n\n${globalNewsForAI}\n\nResponse format (JSON):\n{\n  "summaries": ["Article 1 summary", ...],\n  "insight": "Overall market insight"\n}\n\nImportant: Respond ONLY with the JSON above.`,
+            }],
+          })
+
+          const raw = aiResponse.content[0].type === "text" ? aiResponse.content[0].text : ""
+          const jsonMatch = raw.match(/\{[\s\S]*\}/)
+          if (jsonMatch) {
+            const parsed = JSON.parse(jsonMatch[0])
+            if (!Array.isArray(parsed.summaries) || typeof parsed.insight !== "string") {
+              throw new Error("Invalid EN AI response schema")
+            }
+            return { summaries: parsed.summaries as string[], insight: parsed.insight as string }
+          }
+          return null
+        } catch (error) {
+          console.error("Claude AI error (EN):", error)
+          return null
+        }
+      })()
+    : Promise.resolve(null)
+
+  // KO/EN 병렬 실행
+  const [koResult, enResult] = await Promise.all([koPromise, enPromise])
+
+  // KO 결과 처리
   if (collected.length > 0) {
-    const newsForAI = collected
-      .map(
-        (c, i) =>
-          `[${i + 1}] 카테고리: ${c.category}\n제목: ${stripHtml(c.item.title)}\n내용: ${stripHtml(c.item.description)}`
-      )
-      .join("\n\n")
-
-    try {
-      const aiResponse = await anthropic.messages.create({
-        model: "claude-haiku-4-5-20251001",
-        max_tokens: 1500,
-        messages: [
-          {
-            role: "user",
-            content: `다음은 오늘의 주요 한국 경제 뉴스 ${collected.length}건입니다. 각 뉴스를 2~3문장으로 요약하고, 마지막에 전체 시장 인사이트를 3~4문장으로 작성해주세요.
-
-${newsForAI}
-
-응답 형식 (JSON):
-{
-  "summaries": ["뉴스1 요약", ...],
-  "insight": "전체 시장 인사이트"
-}
-
-중요: 반드시 위 JSON 형식으로만 응답하세요.`,
-          },
-        ],
-      })
-
-      const raw = aiResponse.content[0].type === "text" ? aiResponse.content[0].text : ""
-      const jsonMatch = raw.match(/\{[\s\S]*\}/)
-      if (jsonMatch) {
-        const parsed = JSON.parse(jsonMatch[0])
-        const summaries: string[] = parsed.summaries || []
-        aiInsight = parsed.insight || ""
-
-        articles = collected.map((c, i) => ({
-          title: stripHtml(c.item.title),
-          summary: summaries[i] || stripHtml(c.item.description),
-          source: extractSource(c.item.originallink || c.item.link),
-          category: c.category,
-          url: c.item.originallink || c.item.link,
-        }))
-      } else {
-        articles = collected.map((c) => ({
-          title: stripHtml(c.item.title),
-          summary: stripHtml(c.item.description),
-          source: extractSource(c.item.originallink || c.item.link),
-          category: c.category,
-          url: c.item.originallink || c.item.link,
-        }))
-        aiInsight = "오늘의 시장 인사이트를 불러오는 중입니다."
-      }
-    } catch (error) {
-      console.error("Claude AI error (KO):", error)
+    if (koResult) {
+      aiInsight = koResult.insight
+      articles = collected.map((c, i) => ({
+        title: stripHtml(c.item.title),
+        summary: koResult.summaries[i] || stripHtml(c.item.description),
+        source: extractSource(c.item.originallink || c.item.link),
+        category: c.category,
+        url: c.item.originallink || c.item.link,
+      }))
+    } else {
       articles = collected.map((c) => ({
         title: stripHtml(c.item.title),
         summary: stripHtml(c.item.description),
@@ -246,63 +275,18 @@ ${newsForAI}
     }
   }
 
-  // --- EN: GNews 글로벌 뉴스 요약 ---
+  // EN 결과 처리
   if (collectedGlobal.length > 0) {
-    const globalNewsForAI = collectedGlobal
-      .map(
-        (c, i) =>
-          `[${i + 1}] Category: ${c.category}\nTitle: ${c.item.title}\nDescription: ${c.item.description || "N/A"}`
-      )
-      .join("\n\n")
-
-    try {
-      const aiResponse = await anthropic.messages.create({
-        model: "claude-haiku-4-5-20251001",
-        max_tokens: 1500,
-        messages: [
-          {
-            role: "user",
-            content: `Here are ${collectedGlobal.length} global economic news articles from today. Summarize each in 2-3 sentences and provide an overall market insight in 3-4 sentences.
-
-${globalNewsForAI}
-
-Response format (JSON):
-{
-  "summaries": ["Article 1 summary", ...],
-  "insight": "Overall market insight"
-}
-
-Important: Respond ONLY with the JSON above.`,
-          },
-        ],
-      })
-
-      const raw = aiResponse.content[0].type === "text" ? aiResponse.content[0].text : ""
-      const jsonMatch = raw.match(/\{[\s\S]*\}/)
-      if (jsonMatch) {
-        const parsed = JSON.parse(jsonMatch[0])
-        const summaries: string[] = parsed.summaries || []
-        aiInsightEn = parsed.insight || ""
-
-        articlesEn = collectedGlobal.map((c, i) => ({
-          title: c.item.title,
-          summary: summaries[i] || c.item.description || "",
-          source: c.item.source.name,
-          category: c.category,
-          url: c.item.url,
-        }))
-      } else {
-        articlesEn = collectedGlobal.map((c) => ({
-          title: c.item.title,
-          summary: c.item.description || "",
-          source: c.item.source.name,
-          category: c.category,
-          url: c.item.url,
-        }))
-        aiInsightEn = "Loading today's market insight."
-      }
-    } catch (error) {
-      console.error("Claude AI error (EN):", error)
+    if (enResult) {
+      aiInsightEn = enResult.insight
+      articlesEn = collectedGlobal.map((c, i) => ({
+        title: c.item.title,
+        summary: enResult.summaries[i] || c.item.description || "",
+        source: c.item.source.name,
+        category: c.category,
+        url: c.item.url,
+      }))
+    } else {
       articlesEn = collectedGlobal.map((c) => ({
         title: c.item.title,
         summary: c.item.description || "",

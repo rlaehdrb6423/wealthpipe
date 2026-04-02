@@ -1,5 +1,12 @@
 const SCREENER_API = process.env.SCREENER_API_URL || ""
 
+const ALLOWED_PARAMS: Record<string, string[]> = {
+  screener: ["market", "sort", "order", "limit", "offset"],
+  stats: [],
+  search: ["q", "market"],
+  distribution: ["factor", "market"],
+}
+
 export async function GET(request: Request) {
   if (!SCREENER_API) {
     return Response.json({ error: "SCREENER_API_URL not configured" }, { status: 500 })
@@ -13,8 +20,13 @@ export async function GET(request: Request) {
     return Response.json({ error: "Invalid endpoint" }, { status: 400 })
   }
 
-  const params = new URLSearchParams(searchParams)
-  params.delete("endpoint")
+  // 허용된 파라미터만 전달 (SSRF 방지)
+  const safeParams = new URLSearchParams()
+  for (const key of (ALLOWED_PARAMS[endpoint] || [])) {
+    const val = searchParams.get(key)
+    if (val) safeParams.set(key, val)
+  }
+  const params = safeParams
 
   try {
     const res = await fetch(`${SCREENER_API}/api/${endpoint}?${params}`, {

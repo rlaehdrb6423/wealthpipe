@@ -7,5 +7,19 @@ export function sanitizeBlogContent(html: string): string {
       a: ["href", "title"],
     },
     allowedSchemes: ["http", "https"],
+    allowedSchemesByTag: {
+      a: ["http", "https", "mailto"],
+    },
   })
+}
+
+export function stripHtml(html: string): string {
+  return html
+    .replace(/<[^>]*>/g, "")
+    .replace(/&quot;/g, '"')
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&#39;/g, "'")
+    .trim()
 }

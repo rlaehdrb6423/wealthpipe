@@ -6,11 +6,16 @@ function getEnv(name: string): string {
   return value
 }
 
+let _anonClient: SupabaseClient | null = null
+
 export function getAnonClient(): SupabaseClient {
-  return createClient(
-    getEnv('NEXT_PUBLIC_SUPABASE_URL'),
-    getEnv('NEXT_PUBLIC_SUPABASE_ANON_KEY')
-  )
+  if (!_anonClient) {
+    _anonClient = createClient(
+      getEnv('NEXT_PUBLIC_SUPABASE_URL'),
+      getEnv('NEXT_PUBLIC_SUPABASE_ANON_KEY')
+    )
+  }
+  return _anonClient
 }
 
 let _serviceClient: SupabaseClient | null = null

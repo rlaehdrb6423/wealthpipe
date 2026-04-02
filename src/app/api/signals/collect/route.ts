@@ -1,6 +1,8 @@
 import { getServiceClient } from "@/lib/supabase"
 import { fetchAssetsByTickers, fetchAllAssets, type AssetData } from "@/lib/yahoo-finance"
-import Anthropic from "@anthropic-ai/sdk"
+import { getAnthropicClient } from "@/lib/anthropic"
+import { verifyCronAuth } from "@/lib/auth"
+import { stripHtml } from "@/lib/sanitize"
 
 interface AssetSignal {
   name: string
@@ -41,7 +43,7 @@ async function fetchAssetNews(query: string): Promise<string> {
     const data = await response.json()
     const item = data.items?.[0]
     if (!item) return ""
-    return item.title.replace(/<[^>]*>/g, "").replace(/&quot;/g, '"').replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&#39;/g, "'").trim()
+    return stripHtml(item.title)
   } catch {
     clearTimeout(timeoutId)
     return ""
@@ -58,8 +60,7 @@ const NEWS_QUERIES: Record<string, string> = {
 }
 
 export async function GET(request: Request) {
-  const authHeader = request.headers.get("authorization")
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!verifyCronAuth(request)) {
     return Response.json({ error: "Unauthorized" }, { status: 401 })
   }
 
@@ -91,7 +92,7 @@ export async function GET(request: Request) {
   })
 
   // Claude Haiku로 시그널 판단 + 인사이트
-  const anthropic = new Anthropic()
+  const anthropic = getAnthropicClient()
 
   const assetSummary = assets
     .map(

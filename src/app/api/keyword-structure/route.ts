@@ -1,11 +1,7 @@
 import { NextRequest } from "next/server"
 import { timingSafeEqual } from "crypto"
-import Anthropic from "@anthropic-ai/sdk"
+import { getAnthropicClient } from "@/lib/anthropic"
 import { getServiceClient } from "@/lib/supabase"
-
-function getClient() {
-  return new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY || "" })
-}
 
 const DAILY_LIMIT = 3
 
@@ -24,17 +20,21 @@ async function checkStructureLimit(ip: string): Promise<boolean> {
 async function incrementStructureUsage(ip: string) {
   const supabase = getServiceClient()
   const today = new Date().toISOString().split("T")[0]
-  const { data } = await supabase
+  // 원자적 upsert: race condition 방지
+  await supabase
     .from("structure_usage")
-    .select("id, count")
-    .eq("ip_address", ip)
-    .eq("date", today)
-    .single()
-  if (data) {
-    await supabase.from("structure_usage").update({ count: data.count + 1 }).eq("id", data.id)
-  } else {
-    await supabase.from("structure_usage").insert({ ip_address: ip, date: today, count: 1 })
-  }
+    .upsert(
+      { ip_address: ip, date: today, count: 1 },
+      { onConflict: "ip_address,date" }
+    )
+    .then(async (res) => {
+      if (res.error?.code === "23505" || !res.error) {
+        await supabase.rpc("increment_structure_usage_count", {
+          p_ip: ip,
+          p_date: today,
+        })
+      }
+    })
 }
 
 async function getCachedStructure(keyword: string): Promise<BlogStructure | null> {
@@ -67,7 +67,7 @@ interface BlogStructure {
 
 export async function POST(request: NextRequest) {
   try {
-    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown"
+    const ip = request.headers.get("x-real-ip") || request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown"
     const adminKey = request.headers.get("x-admin-key") || ""
     const isAdmin = adminKey.length > 0 && process.env.ADMIN_SECRET && adminKey.length === process.env.ADMIN_SECRET.length
       ? timingSafeEqual(Buffer.from(adminKey), Buffer.from(process.env.ADMIN_SECRET))
@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
       context.topWords?.length ? `자주 쓰이는 단어: ${context.topWords.join(", ")}` : "",
     ].filter(Boolean).join("\n")
 
-    const message = await getClient().messages.create({
+    const message = await getAnthropicClient().messages.create({
       model: "claude-haiku-4-5-20251001",
       max_tokens: 800,
       messages: [{
@@ -127,7 +127,12 @@ ${contextInfo}
       return Response.json({ error: "AI 응답 파싱 실패" }, { status: 500 })
     }
 
-    const structure: BlogStructure = JSON.parse(jsonMatch[0])
+    const parsed = JSON.parse(jsonMatch[0])
+    // 스키마 검증
+    if (typeof parsed.h1 !== "string" || !Array.isArray(parsed.h2) || !Array.isArray(parsed.lsiKeywords)) {
+      return Response.json({ error: "AI 응답 형식이 올바르지 않습니다." }, { status: 500 })
+    }
+    const structure: BlogStructure = parsed
     await setCacheStructure(keyword, structure)
     if (!isAdmin) await incrementStructureUsage(ip)
 

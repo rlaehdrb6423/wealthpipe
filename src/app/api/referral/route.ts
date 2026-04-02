@@ -80,19 +80,8 @@ export async function POST(request: NextRequest) {
       return Response.json({ error: "Cannot refer yourself" }, { status: 400 })
     }
 
-    // 이미 추천 처리됐는지 확인
-    const { data: existing } = await service
-      .from("referrals")
-      .select("id")
-      .eq("referred_id", user.id)
-      .single()
-
-    if (existing) {
-      return Response.json({ error: "Already referred" }, { status: 400 })
-    }
-
-    // referral 레코드 생성
-    await service.from("referrals").insert({
+    // referral 레코드 생성 (중복 시 DB unique 제약으로 방지)
+    const { error: insertError } = await service.from("referrals").insert({
       referrer_id: referrer.id,
       referred_email: user.email ?? "",
       referred_id: user.id,
@@ -100,29 +89,24 @@ export async function POST(request: NextRequest) {
       bonus_granted: true,
     })
 
-    // 추천인(referrer)에게 영구 보너스 +5 (profiles.referral_bonus에 저장)
-    const { data: referrerProfile } = await service
-      .from("profiles")
-      .select("referral_bonus")
-      .eq("id", referrer.id)
-      .single()
+    if (insertError) {
+      if (insertError.code === "23505") {
+        return Response.json({ error: "Already referred" }, { status: 400 })
+      }
+      return Response.json({ error: "Failed to create referral" }, { status: 500 })
+    }
 
-    await service
-      .from("profiles")
-      .update({ referral_bonus: (referrerProfile?.referral_bonus || 0) + REFERRAL_BONUS })
-      .eq("id", referrer.id)
+    // 추천인(referrer)에게 영구 보너스 +5 (원자적 증가)
+    await service.rpc("increment_referral_bonus", {
+      user_id: referrer.id,
+      amount: REFERRAL_BONUS,
+    })
 
-    // 피추천인(referred)에게 영구 보너스 +5
-    const { data: referredProfile } = await service
-      .from("profiles")
-      .select("referral_bonus")
-      .eq("id", user.id)
-      .single()
-
-    await service
-      .from("profiles")
-      .update({ referral_bonus: (referredProfile?.referral_bonus || 0) + REFERRAL_BONUS })
-      .eq("id", user.id)
+    // 피추천인(referred)에게 영구 보너스 +5 (원자적 증가)
+    await service.rpc("increment_referral_bonus", {
+      user_id: user.id,
+      amount: REFERRAL_BONUS,
+    })
 
     return Response.json({
       success: true,

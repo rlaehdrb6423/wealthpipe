@@ -27,28 +27,27 @@ async function incrementUsage(ip: string) {
   const supabase = getServiceClient()
   const today = new Date().toISOString().split("T")[0]
 
-  const { data } = await supabase
+  // 원자적 upsert: race condition 방지
+  await supabase
     .from("usage_limits")
-    .select("id, count")
-    .eq("ip_address", ip)
-    .eq("date", today)
-    .single()
-
-  if (data) {
-    await supabase
-      .from("usage_limits")
-      .update({ count: data.count + 1 })
-      .eq("id", data.id)
-  } else {
-    await supabase
-      .from("usage_limits")
-      .insert({ ip_address: ip, date: today, count: 1 })
-  }
+    .upsert(
+      { ip_address: ip, date: today, count: 1 },
+      { onConflict: "ip_address,date" }
+    )
+    .then(async (res) => {
+      if (res.error?.code === "23505" || !res.error) {
+        // 이미 존재하면 원자적 증가
+        await supabase.rpc("increment_usage_count", {
+          p_ip: ip,
+          p_date: today,
+        })
+      }
+    })
 }
 
 export async function POST(request: NextRequest) {
   try {
-    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown"
+    const ip = request.headers.get("x-real-ip") || request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown"
     const body = await request.json()
     const adminKey = request.headers.get("x-admin-key") || ""
     const isAdmin = adminKey.length > 0 && process.env.ADMIN_SECRET && adminKey.length === process.env.ADMIN_SECRET.length

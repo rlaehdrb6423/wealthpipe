@@ -22,5 +22,10 @@ export async function GET(request: Request) {
     return Response.json({ error: "Failed to fetch news" }, { status: 500 })
   }
 
-  return Response.json({ digests: data || [] })
+  return new Response(JSON.stringify({ digests: data || [] }), {
+    headers: {
+      "Content-Type": "application/json",
+      "Cache-Control": "public, s-maxage=300, stale-while-revalidate=60",
+    },
+  })
 }

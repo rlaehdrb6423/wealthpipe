@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { createBrowserSupabaseClient } from "@/lib/supabase-auth";
 
@@ -27,9 +27,10 @@ export default function AuthProvider({
 }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const supabaseRef = useRef(createBrowserSupabaseClient());
 
   useEffect(() => {
-    const supabase = createBrowserSupabaseClient();
+    const supabase = supabaseRef.current;
 
     supabase.auth.getUser().then(({ data }) => {
       setUser(data.user ?? null);
@@ -46,8 +47,7 @@ export default function AuthProvider({
   }, []);
 
   async function signOut() {
-    const supabase = createBrowserSupabaseClient();
-    await supabase.auth.signOut();
+    await supabaseRef.current.auth.signOut();
     setUser(null);
   }
 

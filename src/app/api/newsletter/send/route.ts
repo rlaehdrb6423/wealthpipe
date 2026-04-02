@@ -1,24 +1,21 @@
 import { getServiceClient } from "@/lib/supabase"
-import { Resend } from "resend"
-import Anthropic from "@anthropic-ai/sdk"
-
-const resend = new Resend(process.env.RESEND_API_KEY)
+import { getResendClient } from "@/lib/resend"
+import { getAnthropicClient } from "@/lib/anthropic"
+import { verifyCronAuth } from "@/lib/auth"
 
 export async function GET(request: Request) {
-  // Vercel Cron 인증
-  const authHeader = request.headers.get("authorization")
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!verifyCronAuth(request)) {
     return Response.json({ error: "Unauthorized" }, { status: 401 })
   }
 
   const supabase = getServiceClient()
 
   // 1. 지난 24시간 인기 키워드 TOP 5 집계
-  const sevenDaysAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+  const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
   const { data: keywords } = await supabase
     .from("keyword_cache")
     .select("keyword, data")
-    .gte("created_at", sevenDaysAgo)
+    .gte("created_at", oneDayAgo)
     .order("created_at", { ascending: false })
     .limit(50)
 
@@ -39,7 +36,7 @@ export async function GET(request: Request) {
     .slice(0, 5)
 
   // 2. Claude로 일일 트렌드 요약 생성
-  const anthropic = new Anthropic()
+  const anthropic = getAnthropicClient()
   const keywordSummary = sorted
     .map((k, i) => `${i + 1}. "${k.keyword}" — 월간 검색량 ${k.volume?.toLocaleString()}, 경쟁 ${k.grade}등급, 기회점수 ${k.score}/100`)
     .join("\n")
@@ -137,6 +134,7 @@ export async function GET(request: Request) {
       html: emailHtml,
     }))
 
+    const resend = getResendClient()
     await resend.batch.send(emails)
     sent += batch.length
   }

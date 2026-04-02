@@ -366,7 +366,6 @@ export default function FactorScreener({ locale }: ScreenerProps) {
             <div style={{ width: 40, height: 40, border: "2px solid #222", borderTop: "2px solid #fff", borderRadius: "50%", margin: "0 auto 16px", animation: "spin 0.8s linear infinite" }} />
             <p style={{ fontSize: 14 }}>{t.loadingText}</p>
           </div>
-          <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
         </div>
       ) : error ? (
         <div style={{ minHeight: "40vh", display: "flex", alignItems: "center", justifyContent: "center" }}>

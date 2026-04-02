@@ -113,7 +113,6 @@ export default function RankingPage({ locale }: RankingPageProps) {
           />
           <p style={{ fontSize: 14 }}>{t.loadingText}</p>
         </div>
-        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
     )
   }

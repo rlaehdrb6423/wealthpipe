@@ -13,6 +13,10 @@ export async function POST(request: NextRequest) {
       return Response.json({ error: '유효한 이메일을 입력해주세요.' }, { status: 400 })
     }
 
+    if (name.length > 100 || email.length > 254 || message.length > 5000) {
+      return Response.json({ error: '입력이 너무 깁니다.' }, { status: 400 })
+    }
+
     const supabase = getServiceClient()
 
     await supabase.from('contact_inquiries').insert({

@@ -1,5 +1,6 @@
 import { getServiceClient } from "@/lib/supabase"
 import { analyzeKeyword } from "@/lib/keyword-analyzer"
+import { verifyCronAuth } from "@/lib/auth"
 
 const SEED_KEYWORDS = [
   "블로그 수익화",
@@ -27,8 +28,7 @@ const SEED_KEYWORDS = [
 const BATCH_SIZE = 5
 
 export async function GET(request: Request) {
-  const authHeader = request.headers.get("authorization")
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!verifyCronAuth(request)) {
     return Response.json({ error: "Unauthorized" }, { status: 401 })
   }
 
@@ -55,33 +55,32 @@ export async function GET(request: Request) {
     return Response.json({ skipped: true, reason: "No keywords in batch" })
   }
 
+  // 병렬 키워드 분석 (순차 → Promise.allSettled)
+  const analysisResults = await Promise.allSettled(
+    batchKeywords.map((keyword) => analyzeKeyword(keyword).then((data) => ({ keyword, data })))
+  )
+
   const results: { keyword: string; status: string }[] = []
 
-  for (const keyword of batchKeywords) {
-    try {
-      // analyzeKeyword가 keyword_cache에 자동 저장함
-      const data = await analyzeKeyword(keyword)
-
-      if (!data) {
-        results.push({ keyword, status: "failed" })
-        continue
-      }
-
-      // content_queue에 저장
-      const { error } = await supabase.from("content_queue").insert({
-        keyword,
-        keyword_data: data as unknown as Record<string, unknown>,
-        status: "pending",
-      })
-
-      if (error) {
-        results.push({ keyword, status: "failed" })
-      } else {
-        results.push({ keyword, status: "queued" })
-      }
-    } catch {
-      results.push({ keyword, status: "error" })
+  for (const result of analysisResults) {
+    if (result.status === "rejected") {
+      results.push({ keyword: "unknown", status: "error" })
+      continue
     }
+
+    const { keyword, data } = result.value
+    if (!data) {
+      results.push({ keyword, status: "failed" })
+      continue
+    }
+
+    const { error } = await supabase.from("content_queue").insert({
+      keyword,
+      keyword_data: data as unknown as Record<string, unknown>,
+      status: "pending",
+    })
+
+    results.push({ keyword, status: error ? "failed" : "queued" })
   }
 
   // 다음 인덱스 계산 (순환)

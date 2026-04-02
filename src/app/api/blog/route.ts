@@ -42,12 +42,23 @@ export async function POST(request: NextRequest) {
   return Response.json({ success: true, post: data })
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const adminKey = request.headers.get("x-admin-key") || ""
+  const secret = process.env.ADMIN_SECRET || ""
+  const isAdmin = adminKey.length > 0 && secret.length > 0 && adminKey.length === secret.length
+    ? timingSafeEqual(Buffer.from(adminKey), Buffer.from(secret))
+    : false
+
   const supabase = getServiceClient()
-  const { data } = await supabase
+  let query = supabase
     .from("blog_posts")
     .select("slug, title, locale, published, created_at")
     .order("created_at", { ascending: false })
 
+  if (!isAdmin) {
+    query = query.eq("published", true)
+  }
+
+  const { data } = await query
   return Response.json({ posts: data || [] })
 }

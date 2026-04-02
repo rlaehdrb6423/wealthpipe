@@ -173,6 +173,24 @@ export default function FactorScreener({ locale }: ScreenerProps) {
     fetchScreener()
   }
 
+  const COLUMN_TOOLTIPS: Record<string, string> = locale === "ko" ? {
+    ai_score: "밸류에이션, 수익성, 배당, 실적 안정성을 종합한 팩터 점수 (0~100)",
+    per: "주가수익비율. 주가 / 주당순이익. 낮을수록 저평가 (보통 10 이하면 저평가)",
+    pbr: "주가순자산비율. 주가 / 주당순자산. 1 미만이면 자산가치보다 싸게 거래 중",
+    roe: "자기자본이익률. 투자한 자본 대비 얼마나 벌었는지. 높을수록 효율적 (10%+ 양호)",
+    dividend_yield: "배당수익률. 주가 대비 연간 배당금 비율. 높을수록 배당 매력적 (3%+ 고배당)",
+    market_cap: "시가총액. 주가 x 발행주식수. 기업의 시장가치 크기",
+    price: "현재 주가 (원)",
+  } : {
+    ai_score: "Composite factor score (0-100) based on valuation, profitability, dividend, and stability",
+    per: "Price-to-Earnings Ratio. Lower = cheaper (under 10 is undervalued)",
+    pbr: "Price-to-Book Ratio. Under 1.0 = trading below asset value",
+    roe: "Return on Equity. How efficiently capital is used (10%+ is good)",
+    dividend_yield: "Annual dividend / stock price. Higher = better income (3%+ is high)",
+    market_cap: "Market capitalization. Stock price x shares outstanding",
+    price: "Current stock price",
+  }
+
   const columns: { key: string; label: string; align: "left" | "right" }[] = [
     { key: "name", label: t.colName, align: "left" },
     { key: "ai_score", label: t.colScore, align: "right" },
@@ -303,31 +321,31 @@ export default function FactorScreener({ locale }: ScreenerProps) {
           }}
         >
           <div>
-            <label style={{ fontSize: 11, color: "#666", display: "block", marginBottom: 4 }}>PER {t.maxLabel}</label>
+            <label style={{ fontSize: 12, color: "#bbb", display: "block", marginBottom: 6, fontWeight: 600 }}>PER {t.maxLabel}</label>
             <input type="number" value={perMax} onChange={(e) => setPerMax(e.target.value)} style={inputStyle} placeholder="e.g. 15" />
           </div>
           <div>
-            <label style={{ fontSize: 11, color: "#666", display: "block", marginBottom: 4 }}>PBR {t.maxLabel}</label>
+            <label style={{ fontSize: 12, color: "#bbb", display: "block", marginBottom: 6, fontWeight: 600 }}>PBR {t.maxLabel}</label>
             <input type="number" value={pbrMax} onChange={(e) => setPbrMax(e.target.value)} style={inputStyle} placeholder="e.g. 1.0" />
           </div>
           <div>
-            <label style={{ fontSize: 11, color: "#666", display: "block", marginBottom: 4 }}>ROE {t.minLabel}</label>
+            <label style={{ fontSize: 12, color: "#bbb", display: "block", marginBottom: 6, fontWeight: 600 }}>ROE {t.minLabel}</label>
             <input type="number" value={roeMin} onChange={(e) => setRoeMin(e.target.value)} style={inputStyle} placeholder="e.g. 10" />
           </div>
           <div>
-            <label style={{ fontSize: 11, color: "#666", display: "block", marginBottom: 4 }}>{t.divLabel} {t.minLabel}</label>
+            <label style={{ fontSize: 12, color: "#bbb", display: "block", marginBottom: 6, fontWeight: 600 }}>{t.divLabel} {t.minLabel}</label>
             <input type="number" value={divMin} onChange={(e) => setDivMin(e.target.value)} style={inputStyle} placeholder="e.g. 3" />
           </div>
           <div>
-            <label style={{ fontSize: 11, color: "#666", display: "block", marginBottom: 4 }}>{t.capLabel} {t.minLabel}</label>
+            <label style={{ fontSize: 12, color: "#bbb", display: "block", marginBottom: 6, fontWeight: 600 }}>{t.capLabel} {t.minLabel}</label>
             <input type="number" value={capMin} onChange={(e) => setCapMin(e.target.value)} style={inputStyle} placeholder="e.g. 1000" />
           </div>
           <div>
-            <label style={{ fontSize: 11, color: "#666", display: "block", marginBottom: 4 }}>AI Score {t.minLabel}</label>
+            <label style={{ fontSize: 12, color: "#bbb", display: "block", marginBottom: 6, fontWeight: 600 }}>AI Score {t.minLabel}</label>
             <input type="number" value={scoreMin} onChange={(e) => setScoreMin(e.target.value)} style={inputStyle} placeholder="e.g. 60" />
           </div>
           <div>
-            <label style={{ fontSize: 11, color: "#666", display: "block", marginBottom: 4 }}>{t.marketLabel}</label>
+            <label style={{ fontSize: 12, color: "#bbb", display: "block", marginBottom: 6, fontWeight: 600 }}>{t.marketLabel}</label>
             <select
               value={market}
               onChange={(e) => setMarket(e.target.value)}
@@ -405,6 +423,14 @@ export default function FactorScreener({ locale }: ScreenerProps) {
                       }}
                     >
                       {col.label}
+                      {COLUMN_TOOLTIPS[col.key] && (
+                        <span
+                          title={COLUMN_TOOLTIPS[col.key]}
+                          style={{ marginLeft: 3, fontSize: 9, color: "#555", cursor: "help", verticalAlign: "super" }}
+                        >
+                          ?
+                        </span>
+                      )}
                       {sortCol === col.key && (
                         <span style={{ marginLeft: 4, fontSize: 10 }}>
                           {sortDir === "desc" ? "▼" : "▲"}

@@ -49,6 +49,17 @@ function formatNum(v: number | null, digits = 2): string {
   return v.toFixed(digits)
 }
 
+function useIsMobile(breakpoint = 768) {
+  const [isMobile, setIsMobile] = useState(false)
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < breakpoint)
+    check()
+    window.addEventListener("resize", check)
+    return () => window.removeEventListener("resize", check)
+  }, [breakpoint])
+  return isMobile
+}
+
 interface Preset {
   label: string
   labelEn: string
@@ -66,6 +77,7 @@ const PRESETS: Preset[] = [
 
 export default function FactorScreener({ locale }: ScreenerProps) {
   const t = getTexts(locale).screener
+  const isMobile = useIsMobile()
   const [stocks, setStocks] = useState<Stock[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
@@ -202,33 +214,57 @@ export default function FactorScreener({ locale }: ScreenerProps) {
     { key: "price", label: t.colPrice, align: "right" },
   ]
 
+  // Column min-widths to prevent text overlap
+  const COL_MIN_WIDTH: Record<string, number> = {
+    name: isMobile ? 120 : 140,
+    ai_score: 72,
+    per: 60,
+    pbr: 60,
+    roe: 64,
+    dividend_yield: 60,
+    market_cap: 72,
+    price: 80,
+  }
+
   const inputStyle: React.CSSProperties = {
     background: "#111",
     border: "1px solid #333",
     borderRadius: 6,
-    padding: "8px 12px",
+    padding: isMobile ? "10px 12px" : "8px 12px",
     color: "#fff",
-    fontSize: 13,
+    fontSize: isMobile ? 16 : 13,
     width: "100%",
     outline: "none",
+    minHeight: 44,
+    boxSizing: "border-box",
   }
 
+  // Shared cell padding
+  const cellPad = isMobile ? "8px 6px" : "10px 8px"
+
   return (
-    <div style={{ maxWidth: 960, margin: "0 auto", padding: "0 16px 80px" }}>
+    <div style={{ maxWidth: 960, margin: "0 auto", padding: isMobile ? "0 12px 60px" : "0 16px 80px" }}>
       {/* Back link */}
       <a
         href={locale === "ko" ? "/ko" : "/"}
-        style={{ display: "inline-block", color: "#666", fontSize: 13, marginBottom: 32, textDecoration: "none" }}
+        style={{
+          display: "inline-block",
+          color: "#666",
+          fontSize: 13,
+          marginBottom: isMobile ? 20 : 32,
+          textDecoration: "none",
+          padding: isMobile ? "8px 0" : undefined,
+        }}
       >
         {t.backLink}
       </a>
 
       {/* Heading */}
-      <div style={{ marginBottom: 32 }}>
-        <h1 style={{ fontSize: "clamp(28px, 5vw, 42px)", fontWeight: 800, color: "#fff", marginBottom: 12, lineHeight: 1.2 }}>
+      <div style={{ marginBottom: isMobile ? 24 : 32 }}>
+        <h1 style={{ fontSize: "clamp(24px, 5vw, 42px)", fontWeight: 800, color: "#fff", marginBottom: 12, lineHeight: 1.2 }}>
           {t.heading}
         </h1>
-        <p style={{ fontSize: 15, color: "#888", lineHeight: 1.6 }}>{t.subheading}</p>
+        <p style={{ fontSize: isMobile ? 14 : 15, color: "#888", lineHeight: 1.6 }}>{t.subheading}</p>
         {totalCount > 0 && (
           <p style={{ fontSize: 12, color: "#555", marginTop: 8 }}>
             KRX {totalCount.toLocaleString()} {t.stocksLabel}
@@ -254,11 +290,12 @@ export default function FactorScreener({ locale }: ScreenerProps) {
               color: "#000",
               border: "none",
               borderRadius: 6,
-              padding: "8px 20px",
-              fontSize: 13,
+              padding: isMobile ? "10px 16px" : "8px 20px",
+              fontSize: isMobile ? 14 : 13,
               fontWeight: 600,
               cursor: "pointer",
               whiteSpace: "nowrap",
+              minHeight: 44,
             }}
           >
             {t.searchBtn}
@@ -267,7 +304,7 @@ export default function FactorScreener({ locale }: ScreenerProps) {
       </form>
 
       {/* Presets */}
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 20 }}>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: isMobile ? 6 : 8, marginBottom: 20 }}>
         {PRESETS.map((p, i) => (
           <button
             key={i}
@@ -277,11 +314,12 @@ export default function FactorScreener({ locale }: ScreenerProps) {
               color: activePreset === i ? "#000" : "#ccc",
               border: `1px solid ${activePreset === i ? "#fff" : "#333"}`,
               borderRadius: 6,
-              padding: "6px 14px",
-              fontSize: 12,
+              padding: isMobile ? "8px 12px" : "6px 14px",
+              fontSize: isMobile ? 13 : 12,
               fontWeight: 600,
               cursor: "pointer",
               transition: "all 0.15s",
+              minHeight: 44,
             }}
           >
             {locale === "ko" ? p.label : p.labelEn}
@@ -296,11 +334,12 @@ export default function FactorScreener({ locale }: ScreenerProps) {
           background: "none",
           border: "1px solid #333",
           borderRadius: 6,
-          padding: "6px 14px",
-          fontSize: 12,
+          padding: isMobile ? "10px 16px" : "6px 14px",
+          fontSize: isMobile ? 13 : 12,
           color: "#888",
           cursor: "pointer",
           marginBottom: 16,
+          minHeight: 44,
         }}
       >
         {t.filterToggle} {showFilters ? "▲" : "▼"}
@@ -313,11 +352,13 @@ export default function FactorScreener({ locale }: ScreenerProps) {
             background: "#0d0d0d",
             border: "1px solid #222",
             borderRadius: 12,
-            padding: 20,
+            padding: isMobile ? 16 : 20,
             marginBottom: 20,
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))",
-            gap: 12,
+            gridTemplateColumns: isMobile
+              ? "repeat(2, 1fr)"
+              : "repeat(auto-fill, minmax(140px, 1fr))",
+            gap: isMobile ? 10 : 12,
           }}
         >
           <div>
@@ -356,7 +397,7 @@ export default function FactorScreener({ locale }: ScreenerProps) {
               <option value="KOSDAQ">KOSDAQ</option>
             </select>
           </div>
-          <div style={{ display: "flex", alignItems: "flex-end" }}>
+          <div style={{ display: "flex", alignItems: "flex-end", gridColumn: isMobile ? "1 / -1" : undefined }}>
             <button
               onClick={() => { setActivePreset(null); fetchScreener() }}
               style={{
@@ -364,11 +405,12 @@ export default function FactorScreener({ locale }: ScreenerProps) {
                 color: "#000",
                 border: "none",
                 borderRadius: 6,
-                padding: "8px 20px",
-                fontSize: 13,
+                padding: isMobile ? "12px 20px" : "8px 20px",
+                fontSize: isMobile ? 14 : 13,
                 fontWeight: 600,
                 cursor: "pointer",
                 width: "100%",
+                minHeight: 44,
               }}
             >
               {t.applyBtn}
@@ -393,51 +435,66 @@ export default function FactorScreener({ locale }: ScreenerProps) {
         <>
           <p style={{ fontSize: 12, color: "#666", marginBottom: 12 }}>
             {stocks.length} {t.resultsLabel}
+            {isMobile && stocks.length > 0 && (
+              <span style={{ marginLeft: 8, color: "#555" }}>← {locale === "ko" ? "좌우 스크롤" : "scroll"} →</span>
+            )}
           </p>
 
           {/* Table */}
-          <div style={{ overflowX: "auto", marginBottom: 32 }}>
-            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+          <div
+            style={{
+              overflowX: "auto",
+              marginBottom: 32,
+              WebkitOverflowScrolling: "touch",
+              position: "relative",
+            }}
+          >
+            <table style={{ width: isMobile ? "max-content" : "100%", borderCollapse: "separate", borderSpacing: 0, fontSize: isMobile ? 12 : 13 }}>
               <thead>
                 <tr>
-                  {columns.map((col) => (
-                    <th
-                      key={col.key}
-                      onClick={() => handleSort(col.key)}
-                      style={{
-                        textAlign: col.align,
-                        padding: "10px 8px",
-                        borderBottom: "1px solid #222",
-                        color: sortCol === col.key ? "#fff" : "#666",
-                        fontWeight: 600,
-                        fontSize: 11,
-                        letterSpacing: "0.05em",
-                        textTransform: "uppercase",
-                        cursor: "pointer",
-                        whiteSpace: "nowrap",
-                        userSelect: "none",
-                        position: "sticky",
-                        top: 0,
-                        background: "#000",
-                        zIndex: 1,
-                      }}
-                    >
-                      {col.label}
-                      {COLUMN_TOOLTIPS[col.key] && (
-                        <span
-                          title={COLUMN_TOOLTIPS[col.key]}
-                          style={{ marginLeft: 3, fontSize: 9, color: "#555", cursor: "help", verticalAlign: "super" }}
-                        >
-                          ?
-                        </span>
-                      )}
-                      {sortCol === col.key && (
-                        <span style={{ marginLeft: 4, fontSize: 10 }}>
-                          {sortDir === "desc" ? "▼" : "▲"}
-                        </span>
-                      )}
-                    </th>
-                  ))}
+                  {columns.map((col, colIdx) => {
+                    const isSticky = colIdx === 0
+                    return (
+                      <th
+                        key={col.key}
+                        onClick={() => handleSort(col.key)}
+                        style={{
+                          textAlign: col.align,
+                          padding: cellPad,
+                          borderBottom: "1px solid #222",
+                          color: sortCol === col.key ? "#fff" : "#666",
+                          fontWeight: 600,
+                          fontSize: isMobile ? 11 : 11,
+                          letterSpacing: "0.05em",
+                          textTransform: "uppercase",
+                          cursor: "pointer",
+                          whiteSpace: "nowrap",
+                          userSelect: "none",
+                          position: "sticky",
+                          top: 0,
+                          ...(isSticky && isMobile
+                            ? { left: 0, zIndex: 3, background: "#000", boxShadow: "2px 0 4px rgba(0,0,0,0.5)" }
+                            : { zIndex: 1, background: "#000" }),
+                          minWidth: COL_MIN_WIDTH[col.key] || 60,
+                        }}
+                      >
+                        {col.label}
+                        {COLUMN_TOOLTIPS[col.key] && !isMobile && (
+                          <span
+                            title={COLUMN_TOOLTIPS[col.key]}
+                            style={{ marginLeft: 3, fontSize: 9, color: "#555", cursor: "help", verticalAlign: "super" }}
+                          >
+                            ?
+                          </span>
+                        )}
+                        {sortCol === col.key && (
+                          <span style={{ marginLeft: 4, fontSize: 10 }}>
+                            {sortDir === "desc" ? "▼" : "▲"}
+                          </span>
+                        )}
+                      </th>
+                    )
+                  })}
                 </tr>
               </thead>
               <tbody>
@@ -454,9 +511,19 @@ export default function FactorScreener({ locale }: ScreenerProps) {
                       onMouseEnter={(e) => (e.currentTarget.style.background = "#111")}
                       onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
                     >
-                      <td style={{ padding: "10px 8px", borderBottom: "1px solid #111" }}>
-                        <div style={{ fontWeight: 600, color: "#fff" }}>{s.name}</div>
-                        <div style={{ fontSize: 11, color: "#555" }}>
+                      {/* Name column - sticky on mobile */}
+                      <td
+                        style={{
+                          padding: cellPad,
+                          borderBottom: "1px solid #111",
+                          minWidth: COL_MIN_WIDTH.name,
+                          ...(isMobile
+                            ? { position: "sticky", left: 0, background: "#000", zIndex: 2, boxShadow: "2px 0 4px rgba(0,0,0,0.5)" }
+                            : {}),
+                        }}
+                      >
+                        <div style={{ fontWeight: 600, color: "#fff", fontSize: isMobile ? 12 : undefined }}>{s.name}</div>
+                        <div style={{ fontSize: isMobile ? 10 : 11, color: "#555" }}>
                           {s.code}
                           <span
                             style={{
@@ -472,7 +539,7 @@ export default function FactorScreener({ locale }: ScreenerProps) {
                           </span>
                         </div>
                       </td>
-                      <td style={{ padding: "10px 8px", borderBottom: "1px solid #111", textAlign: "right" }}>
+                      <td style={{ padding: cellPad, borderBottom: "1px solid #111", textAlign: "right", minWidth: COL_MIN_WIDTH.ai_score }}>
                         <span
                           style={{
                             display: "inline-block",
@@ -482,43 +549,46 @@ export default function FactorScreener({ locale }: ScreenerProps) {
                             fontWeight: 700,
                             background: gc.bg,
                             color: gc.text,
+                            whiteSpace: "nowrap",
                           }}
                         >
                           {grade} {s.ai_score}
                         </span>
                       </td>
-                      <td style={{ padding: "10px 8px", borderBottom: "1px solid #111", textAlign: "right", color: "#ccc", fontVariantNumeric: "tabular-nums" }}>
+                      <td style={{ padding: cellPad, borderBottom: "1px solid #111", textAlign: "right", color: "#ccc", fontVariantNumeric: "tabular-nums", minWidth: COL_MIN_WIDTH.per }}>
                         {formatNum(s.per)}
                       </td>
-                      <td style={{ padding: "10px 8px", borderBottom: "1px solid #111", textAlign: "right", color: "#ccc", fontVariantNumeric: "tabular-nums" }}>
+                      <td style={{ padding: cellPad, borderBottom: "1px solid #111", textAlign: "right", color: "#ccc", fontVariantNumeric: "tabular-nums", minWidth: COL_MIN_WIDTH.pbr }}>
                         {formatNum(s.pbr)}
                       </td>
                       <td
                         style={{
-                          padding: "10px 8px",
+                          padding: cellPad,
                           borderBottom: "1px solid #111",
                           textAlign: "right",
                           color: s.roe && s.roe > 0 ? "#4ade80" : s.roe && s.roe < 0 ? "#f87171" : "#666",
                           fontVariantNumeric: "tabular-nums",
+                          minWidth: COL_MIN_WIDTH.roe,
                         }}
                       >
                         {formatNum(s.roe)}
                       </td>
                       <td
                         style={{
-                          padding: "10px 8px",
+                          padding: cellPad,
                           borderBottom: "1px solid #111",
                           textAlign: "right",
                           color: s.dividend_yield && s.dividend_yield >= 3 ? "#4ade80" : "#ccc",
                           fontVariantNumeric: "tabular-nums",
+                          minWidth: COL_MIN_WIDTH.dividend_yield,
                         }}
                       >
                         {formatNum(s.dividend_yield)}
                       </td>
-                      <td style={{ padding: "10px 8px", borderBottom: "1px solid #111", textAlign: "right", color: "#ccc", fontVariantNumeric: "tabular-nums" }}>
+                      <td style={{ padding: cellPad, borderBottom: "1px solid #111", textAlign: "right", color: "#ccc", fontVariantNumeric: "tabular-nums", minWidth: COL_MIN_WIDTH.market_cap }}>
                         {formatMarketCap(s.market_cap)}
                       </td>
-                      <td style={{ padding: "10px 8px", borderBottom: "1px solid #111", textAlign: "right", color: "#fff", fontWeight: 500, fontVariantNumeric: "tabular-nums" }}>
+                      <td style={{ padding: cellPad, borderBottom: "1px solid #111", textAlign: "right", color: "#fff", fontWeight: 500, fontVariantNumeric: "tabular-nums", minWidth: COL_MIN_WIDTH.price }}>
                         {s.price ? s.price.toLocaleString() : "—"}
                       </td>
                     </tr>
@@ -537,11 +607,11 @@ export default function FactorScreener({ locale }: ScreenerProps) {
       )}
 
       {/* AI Score Guide */}
-      <div style={{ background: "#0d0d0d", border: "1px solid #1a1a1a", borderRadius: 12, padding: 20, marginBottom: 32 }}>
+      <div style={{ background: "#0d0d0d", border: "1px solid #1a1a1a", borderRadius: 12, padding: isMobile ? 16 : 20, marginBottom: isMobile ? 24 : 32 }}>
         <p style={{ fontSize: 11, fontWeight: 700, color: "#666", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 12 }}>
           {t.scoreGuideTitle}
         </p>
-        <p style={{ fontSize: 13, color: "#888", lineHeight: 1.8, marginBottom: 16 }}>
+        <p style={{ fontSize: isMobile ? 12 : 13, color: "#888", lineHeight: 1.8, marginBottom: 16 }}>
           {t.scoreGuideDesc}
         </p>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
@@ -567,19 +637,56 @@ export default function FactorScreener({ locale }: ScreenerProps) {
       <div style={{ marginBottom: 24, display: "flex", gap: 8 }}>
         <button
           onClick={() => shareScreener()}
-          style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 16px", background: "#FEE500", color: "#000", border: "none", borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: "pointer" }}
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 6,
+            padding: isMobile ? "10px 18px" : "8px 16px",
+            background: "#FEE500",
+            color: "#000",
+            border: "none",
+            borderRadius: 8,
+            fontSize: 13,
+            fontWeight: 600,
+            cursor: "pointer",
+            minHeight: 44,
+          }}
         >
           <span style={{ fontSize: 16 }}>&#x1F4E2;</span> {locale === "ko" ? "카카오톡 공유" : "Share on KakaoTalk"}
         </button>
       </div>
 
       {/* Newsletter CTA */}
-      <div style={{ background: "#111", border: "1px solid #222", borderRadius: 12, padding: 28, marginBottom: 32, display: "flex", flexDirection: "column", gap: 12 }}>
+      <div
+        style={{
+          background: "#111",
+          border: "1px solid #222",
+          borderRadius: 12,
+          padding: isMobile ? 20 : 28,
+          marginBottom: isMobile ? 24 : 32,
+          display: "flex",
+          flexDirection: "column",
+          gap: 12,
+        }}
+      >
         <p style={{ fontSize: 13, color: "#888", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase" }}>{t.nlCtaDesc}</p>
-        <p style={{ fontSize: 18, fontWeight: 700, color: "#fff", lineHeight: 1.3 }}>{t.nlCtaTitle}</p>
+        <p style={{ fontSize: isMobile ? 16 : 18, fontWeight: 700, color: "#fff", lineHeight: 1.3 }}>{t.nlCtaTitle}</p>
         <a
           href={locale === "ko" ? "/ko#newsletter" : "/#newsletter"}
-          style={{ display: "inline-block", padding: "10px 24px", background: "#fff", color: "#000", borderRadius: 8, fontSize: 14, fontWeight: 600, textDecoration: "none", alignSelf: "flex-start", marginTop: 4 }}
+          style={{
+            display: "inline-block",
+            padding: isMobile ? "12px 24px" : "10px 24px",
+            background: "#fff",
+            color: "#000",
+            borderRadius: 8,
+            fontSize: 14,
+            fontWeight: 600,
+            textDecoration: "none",
+            alignSelf: "flex-start",
+            marginTop: 4,
+            minHeight: 44,
+            lineHeight: "20px",
+          }}
         >
           {t.nlCtaBtn} →
         </a>

@@ -31,7 +31,7 @@ export async function GET(request: Request) {
   try {
     const res = await fetch(`${SCREENER_API}/api/${endpoint}?${params}`, {
       headers: { Accept: "application/json" },
-      next: { revalidate: endpoint === "stats" ? 300 : 0 },
+      cache: endpoint === "stats" ? "force-cache" : "no-store",
     })
 
     if (!res.ok) {

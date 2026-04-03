@@ -1,6 +1,9 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
+// NOTE: In-memory rate limiting has limited effectiveness on Vercel (serverless).
+// Each cold start gets a fresh Map. For production-grade rate limiting,
+// consider Vercel KV, Upstash Redis, or Vercel's built-in WAF.
 const rateLimitMap = new Map<string, { count: number; reset: number }>();
 
 const RATE_LIMITS: Record<string, { max: number; windowMs: number }> = {
@@ -27,7 +30,6 @@ function checkRateLimit(ip: string, path: string): boolean {
     rateLimitMap.set(key, { count: 1, reset: now + limit.windowMs });
   }
 
-  // 분산 환경에서는 Vercel KV 등 외부 저장소 전환 권장
   if (rateLimitMap.size > 1_000) {
     for (const [k, v] of rateLimitMap) {
       if (now > v.reset) rateLimitMap.delete(k);
@@ -37,7 +39,7 @@ function checkRateLimit(ip: string, path: string): boolean {
   return true;
 }
 
-export async function proxy(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const ip = request.headers.get("x-real-ip") || request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
   const path = request.nextUrl.pathname;
 

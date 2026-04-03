@@ -36,13 +36,7 @@ export async function POST(request: NextRequest) {
         const subscription = await stripe.subscriptions.retrieve(subscriptionId)
         const item = subscription.items.data[0]
 
-        // Delete any existing subscription for this user before creating new one
-        await supabase
-          .from("subscriptions")
-          .delete()
-          .eq("user_id", userId)
-
-        const { error: insertError } = await supabase.from("subscriptions").insert({
+        const { error: upsertError } = await supabase.from("subscriptions").upsert({
           user_id: userId,
           stripe_customer_id: session.customer as string,
           stripe_subscription_id: subscriptionId,
@@ -51,11 +45,11 @@ export async function POST(request: NextRequest) {
           current_period_start: item ? new Date(item.current_period_start * 1000).toISOString() : null,
           current_period_end: item ? new Date(item.current_period_end * 1000).toISOString() : null,
           updated_at: new Date().toISOString(),
-        })
+        }, { onConflict: "user_id" })
 
-        if (insertError) {
-          console.error("Failed to insert subscription:", insertError)
-          return Response.json({ error: "Subscription insert failed" }, { status: 500 })
+        if (upsertError) {
+          console.error("Failed to upsert subscription:", upsertError)
+          return Response.json({ error: "Subscription upsert failed" }, { status: 500 })
         }
 
         const { error: profileError } = await supabase

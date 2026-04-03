@@ -5,46 +5,6 @@ import { getServiceClient } from "@/lib/supabase"
 
 const DAILY_LIMIT = 5
 
-async function checkUsageLimit(ip: string): Promise<{ allowed: boolean; remaining: number }> {
-  const supabase = getServiceClient()
-  const today = new Date().toISOString().split("T")[0]
-
-  const { data } = await supabase
-    .from("usage_limits")
-    .select("count, bonus_count")
-    .eq("ip_address", ip)
-    .eq("date", today)
-    .single()
-
-  if (!data) return { allowed: true, remaining: DAILY_LIMIT - 1 }
-
-  const totalAllowed = DAILY_LIMIT + (data.bonus_count || 0)
-  if (data.count >= totalAllowed) return { allowed: false, remaining: 0 }
-  return { allowed: true, remaining: totalAllowed - data.count - 1 }
-}
-
-async function incrementUsage(ip: string) {
-  const supabase = getServiceClient()
-  const today = new Date().toISOString().split("T")[0]
-
-  // 원자적 upsert: race condition 방지
-  await supabase
-    .from("usage_limits")
-    .upsert(
-      { ip_address: ip, date: today, count: 1 },
-      { onConflict: "ip_address,date" }
-    )
-    .then(async (res) => {
-      if (res.error?.code === "23505" || !res.error) {
-        // 이미 존재하면 원자적 증가
-        await supabase.rpc("increment_usage_count", {
-          p_ip: ip,
-          p_date: today,
-        })
-      }
-    })
-}
-
 export async function POST(request: NextRequest) {
   try {
     const ip = request.headers.get("x-real-ip") || request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown"
@@ -56,14 +16,20 @@ export async function POST(request: NextRequest) {
 
     let remaining = 999
     if (!isAdmin) {
-      const usage = await checkUsageLimit(ip)
-      if (!usage.allowed) {
+      const supabase = getServiceClient()
+      const today = new Date().toISOString().split("T")[0]
+      const { data: usageResult, error: usageError } = await supabase.rpc("check_and_increment_usage", {
+        p_ip: ip,
+        p_date: today,
+        p_daily_limit: DAILY_LIMIT,
+      })
+      if (usageError || !usageResult?.[0]?.allowed) {
         return Response.json(
           { error: "오늘 무료 사용 횟수를 모두 사용했습니다. (5회/일)", remaining: 0 },
           { status: 429 }
         )
       }
-      remaining = usage.remaining
+      remaining = usageResult[0].remaining
     }
 
     const keyword = body.keyword?.trim()
@@ -83,8 +49,6 @@ export async function POST(request: NextRequest) {
         { status: 404 }
       )
     }
-
-    if (!isAdmin) await incrementUsage(ip)
 
     return Response.json({ ...result, remaining })
   } catch {

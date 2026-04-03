@@ -41,31 +41,24 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    // 동일 IP+keyword+platform 중복 공유 방지
-    const { data: duplicate } = await supabase
-      .from("shares")
-      .select("id", { count: "exact", head: true })
-      .eq("sharer_ip", ip)
-      .eq("keyword", keyword.slice(0, 50))
-      .eq("platform", platform)
-      .gte("created_at", `${today}T00:00:00`)
-      .lte("created_at", `${today}T23:59:59`)
-
-    if (duplicate) {
-      return Response.json({
-        rewarded: false,
-        message: "이미 이 키워드를 해당 플랫폼으로 공유하셨습니다.",
-        todayShares,
-        maxShares: MAX_DAILY_SHARES,
-      })
-    }
-
-    // 공유 기록 저장
-    await supabase.from("shares").insert({
+    // 공유 기록 저장 (동일 IP+keyword+platform+date 중복 시 DB unique constraint로 방지)
+    const { error: insertError } = await supabase.from("shares").insert({
       keyword: keyword.slice(0, 50),
       platform,
       sharer_ip: ip,
     })
+
+    if (insertError) {
+      if (insertError.code === "23505") {
+        return Response.json({
+          rewarded: false,
+          message: "이미 이 키워드를 해당 플랫폼으로 공유하셨습니다.",
+          todayShares,
+          maxShares: MAX_DAILY_SHARES,
+        })
+      }
+      return Response.json({ error: "공유 기록 저장 실패" }, { status: 500 })
+    }
 
     // 보너스 분석 횟수 부여 (원자적 upsert)
     const { data: usage } = await supabase

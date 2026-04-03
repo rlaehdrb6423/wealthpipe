@@ -80,7 +80,11 @@ export async function GET(request: Request) {
       status: "pending",
     })
 
-    results.push({ keyword, status: error ? "failed" : "queued" })
+    if (error?.code === "23505") {
+      results.push({ keyword, status: "already_queued" })
+    } else {
+      results.push({ keyword, status: error ? "failed" : "queued" })
+    }
   }
 
   // 다음 인덱스 계산 (순환)

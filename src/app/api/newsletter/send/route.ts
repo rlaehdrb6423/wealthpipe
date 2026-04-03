@@ -2,6 +2,7 @@ import { getServiceClient } from "@/lib/supabase"
 import { getResendClient } from "@/lib/resend"
 import { getAnthropicClient } from "@/lib/anthropic"
 import { verifyCronAuth } from "@/lib/auth"
+import { escapeHtml } from "@/lib/sanitize"
 
 export async function GET(request: Request) {
   if (!verifyCronAuth(request)) {
@@ -63,7 +64,7 @@ export async function GET(request: Request) {
       (k) => `
       <tr>
         <td style="padding:12px 16px;border-bottom:1px solid #1a1a1a;">
-          <a href="https://wealthpipe.net/tools/keyword/${encodeURIComponent(k.keyword)}" style="color:#fff;text-decoration:none;font-weight:600;">"${k.keyword}"</a>
+          <a href="https://wealthpipe.net/tools/keyword/${encodeURIComponent(k.keyword)}" style="color:#fff;text-decoration:none;font-weight:600;">"${escapeHtml(k.keyword)}"</a>
         </td>
         <td style="padding:12px 16px;border-bottom:1px solid #1a1a1a;color:#888;text-align:right;">
           ${k.volume?.toLocaleString()}
@@ -102,7 +103,7 @@ export async function GET(request: Request) {
 
       <div style="background:#111;border:1px solid #222;border-radius:8px;padding:16px;margin-bottom:24px;">
         <p style="font-size:13px;color:#888;margin-bottom:8px;font-weight:600;">AI 트렌드 인사이트</p>
-        <p style="font-size:14px;line-height:1.7;color:#ccc;">${trendInsight}</p>
+        <p style="font-size:14px;line-height:1.7;color:#ccc;">${escapeHtml(trendInsight)}</p>
       </div>
 
       <a href="https://wealthpipe.net/tools/keyword" style="display:inline-block;padding:12px 28px;background:#fff;color:#000;border-radius:8px;font-size:14px;font-weight:600;text-decoration:none;">무료 키워드 분석하기 →</a>
@@ -130,7 +131,7 @@ export async function GET(request: Request) {
     const emails = batch.map((sub) => ({
       from: "WealthPipe <noreply@wealthpipe.net>" as const,
       to: sub.email,
-      subject: `[WealthPipe] 오늘의 인기 키워드 TOP 5 — ${sorted[0].keyword}`,
+      subject: `[WealthPipe] 오늘의 인기 키워드 TOP 5 — ${sorted[0].keyword.slice(0, 50)}`,
       html: emailHtml,
     }))
 

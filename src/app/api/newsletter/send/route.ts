@@ -58,6 +58,46 @@ export async function GET(request: Request) {
       ? aiResponse.content[0].text
       : "오늘의 트렌드 분석을 확인해보세요."
 
+  // 2.5 오늘의 시그널 데이터 가져오기
+  let signalHtml = ""
+  try {
+    const { data: signalData } = await supabase
+      .from("asset_signals")
+      .select("data")
+      .order("date", { ascending: false })
+      .limit(1)
+      .maybeSingle()
+
+    const assets = (signalData?.data?.assets || []) as Array<{
+      name: string; ticker: string; price: number; changePercent: number; signal: string
+    }>
+
+    if (assets.length > 0) {
+      const signalRows = assets.map((a) => {
+        const emoji = a.signal === "bullish" ? "\u{1F7E2}" : a.signal === "bearish" ? "\u{1F534}" : "\u{1F7E1}"
+        const change = a.changePercent >= 0 ? `+${a.changePercent.toFixed(1)}%` : `${a.changePercent.toFixed(1)}%`
+        const changeColor = a.changePercent >= 0 ? "#22c55e" : "#ef4444"
+        const price = a.ticker === "KRW=X" || a.ticker === "^KS11"
+          ? a.price.toLocaleString("ko-KR", { maximumFractionDigits: 0 })
+          : "$" + a.price.toLocaleString("en-US", { maximumFractionDigits: a.ticker === "BTC-USD" ? 0 : 2 })
+        return `<tr>
+          <td style="padding:8px 12px;border-bottom:1px solid #1a1a1a;color:#ccc;">${emoji} ${escapeHtml(a.name)}</td>
+          <td style="padding:8px 12px;border-bottom:1px solid #1a1a1a;color:#fff;text-align:right;font-weight:600;">${price}</td>
+          <td style="padding:8px 12px;border-bottom:1px solid #1a1a1a;text-align:right;color:${changeColor};">${change}</td>
+        </tr>`
+      }).join("")
+
+      signalHtml = `
+        <div style="background:#111;border:1px solid #222;border-radius:8px;padding:16px;margin-bottom:24px;">
+          <p style="font-size:13px;color:#888;margin-bottom:12px;font-weight:600;">AI 시장 시그널</p>
+          <table style="width:100%;border-collapse:collapse;">${signalRows}</table>
+          <a href="https://wealthpipe.net/ko/tools/signals" style="display:inline-block;margin-top:12px;font-size:12px;color:#3b82f6;text-decoration:none;">시그널 자세히 보기 →</a>
+        </div>`
+    }
+  } catch {
+    // 시그널 데이터 실패 시 무시
+  }
+
   // 3. 이메일 HTML 생성
   const keywordCards = sorted
     .map(
@@ -105,6 +145,8 @@ export async function GET(request: Request) {
         <p style="font-size:13px;color:#888;margin-bottom:8px;font-weight:600;">AI 트렌드 인사이트</p>
         <p style="font-size:14px;line-height:1.7;color:#ccc;">${escapeHtml(trendInsight)}</p>
       </div>
+
+      ${signalHtml}
 
       <a href="https://wealthpipe.net/tools/keyword" style="display:inline-block;padding:12px 28px;background:#fff;color:#000;border-radius:8px;font-size:14px;font-weight:600;text-decoration:none;">무료 키워드 분석하기 →</a>
 

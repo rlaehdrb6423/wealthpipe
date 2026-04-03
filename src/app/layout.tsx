@@ -1,8 +1,12 @@
 import type { Metadata } from "next";
 import { DM_Sans } from "next/font/google";
 import Script from "next/script";
+import dynamic from "next/dynamic";
 import "./globals.css";
-import AuthProvider from "@/components/AuthProvider";
+
+const AuthProvider = dynamic(() => import("@/components/AuthProvider"), {
+  ssr: false,
+});
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
@@ -69,9 +73,9 @@ export default async function RootLayout({
           <>
             <Script
               src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
-              strategy="afterInteractive"
+              strategy="lazyOnload"
             />
-            <Script id="gtag-init" strategy="afterInteractive">
+            <Script id="gtag-init" strategy="lazyOnload">
               {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${GA_ID}');`}
             </Script>
           </>
@@ -88,8 +92,7 @@ export default async function RootLayout({
           src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.4/kakao.min.js"
           strategy="lazyOnload"
         />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://t1.kakaocdn.net" />
         <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
       </head>
       <body>

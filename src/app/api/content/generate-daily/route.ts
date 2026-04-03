@@ -30,12 +30,15 @@ async function pickBestKeyword(supabase: ReturnType<typeof getServiceClient>) {
 
   if (!candidates || candidates.length === 0) return null
 
-  // 경쟁강도 A~C + 기회점수 높은 순 정렬
-  const scored = candidates
-    .filter((c) => {
-      const d = c.keyword_data as KeywordResult | null
-      return d && ["A", "B", "C"].includes(d.competitionGrade)
-    })
+  // 기회점수 높은 순 정렬 (경쟁강도 A~C 우선, 없으면 D~E도 허용)
+  const withData = candidates.filter((c) => {
+    const d = c.keyword_data as KeywordResult | null
+    return d && d.competitionGrade
+  })
+  const lowComp = withData.filter((c) =>
+    ["A", "B", "C"].includes((c.keyword_data as KeywordResult).competitionGrade)
+  )
+  const scored = (lowComp.length > 0 ? lowComp : withData)
     .sort((a, b) => {
       const da = a.keyword_data as KeywordResult
       const db = b.keyword_data as KeywordResult

@@ -43,6 +43,10 @@
     {
       "path": "/api/screener/crawl",
       "schedule": "40 6 * * 1-5"
+    },
+    {
+      "path": "/api/signals/tweet",
+      "schedule": "10 0 * * *"
     }
   ]
 }

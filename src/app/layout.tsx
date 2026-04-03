@@ -1,12 +1,8 @@
 import type { Metadata } from "next";
 import { DM_Sans } from "next/font/google";
 import Script from "next/script";
-import dynamic from "next/dynamic";
 import "./globals.css";
-
-const AuthProvider = dynamic(() => import("@/components/AuthProvider"), {
-  ssr: false,
-});
+import AuthProvider from "@/components/AuthProvider";
 
 const dmSans = DM_Sans({
   subsets: ["latin"],

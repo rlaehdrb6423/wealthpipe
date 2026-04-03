@@ -215,7 +215,14 @@ export async function GET(request: Request) {
   ])
 
   const naverPost = parseJson<BlogResult>(naverRaw.status === "fulfilled" ? naverRaw.value : null)
-  const wpPost = parseJson<BlogResult>(wpRaw.status === "fulfilled" ? wpRaw.value : null)
+  let wpPost = parseJson<BlogResult>(wpRaw.status === "fulfilled" ? wpRaw.value : null)
+
+  // WP 생성 실패 시 1회 재시도
+  if (!wpPost) {
+    console.log("WP generation failed, retrying...", wpRaw.status === "rejected" ? wpRaw.reason : "parse error")
+    const wpRetry = await callClaude(anthropic, buildWordPressPrompt(keyword, data), 4000)
+    wpPost = parseJson<BlogResult>(wpRetry)
+  }
   const threadsPosts = parseJson<SocialResult>(threadsRaw.status === "fulfilled" ? threadsRaw.value : null)
   const xPosts = parseJson<SocialResult>(xRaw.status === "fulfilled" ? xRaw.value : null)
 

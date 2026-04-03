@@ -1,5 +1,8 @@
 import { ImageResponse } from "next/og"
 import { getServiceClient } from "@/lib/supabase"
+import { ASSETS } from "@/lib/yahoo-finance"
+
+const ALL_TICKERS = ASSETS.map((a) => a.ticker)
 
 const SIGNAL_COLORS: Record<string, string> = {
   bullish: "#22c55e",
@@ -17,22 +20,35 @@ export async function GET() {
   const supabase = getServiceClient()
   const today = new Date().toISOString().split("T")[0]
 
-  const { data } = await supabase
+  const { data: rows } = await supabase
     .from("asset_signals")
     .select("data, date")
     .order("date", { ascending: false })
-    .limit(1)
-    .maybeSingle()
+    .limit(2)
 
-  const assets = (data?.data?.assets || []) as Array<{
-    name: string
-    ticker: string
-    price: number
-    changePercent: number
-    signal: string
-  }>
+  type Asset = { name: string; ticker: string; price: number; changePercent: number; signal: string }
 
-  const dateStr = (data?.date || today).replace(/-/g, ".")
+  let assets: Asset[] = []
+  let dateStr = today.replace(/-/g, ".")
+
+  if (rows && rows.length > 0) {
+    assets = rows[0].data?.assets || []
+    dateStr = rows[0].date.replace(/-/g, ".")
+
+    // 미수집 자산은 어제 데이터로 보완
+    if (rows.length >= 2) {
+      const todayTickers = new Set(assets.map((a: Asset) => a.ticker))
+      const missing = ALL_TICKERS.filter((t) => !todayTickers.has(t))
+      if (missing.length > 0) {
+        const yesterday = (rows[1].data?.assets || []) as Asset[]
+        const fillers = yesterday.filter((a) => missing.includes(a.ticker))
+        assets = [...assets, ...fillers].sort((a, b) =>
+          (ALL_TICKERS.indexOf(a.ticker) === -1 ? 999 : ALL_TICKERS.indexOf(a.ticker)) -
+          (ALL_TICKERS.indexOf(b.ticker) === -1 ? 999 : ALL_TICKERS.indexOf(b.ticker))
+        )
+      }
+    }
+  }
 
   return new ImageResponse(
     (

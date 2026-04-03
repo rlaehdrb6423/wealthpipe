@@ -5,6 +5,10 @@ const nextConfig: NextConfig = {
   experimental: {
     optimizePackageImports: ["react", "react-dom", "@anthropic-ai/sdk", "stripe", "resend"],
   },
+  images: {
+    formats: ["image/avif", "image/webp"],
+  },
+  compress: true,
   async headers() {
     return [
       {

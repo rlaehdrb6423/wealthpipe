@@ -53,7 +53,14 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // Supabase auth session refresh
+  // Supabase auth session refresh — only for routes that need auth
+  const AUTH_PATHS = ["/api/referral", "/api/watchlist", "/api/stripe", "/api/subscription", "/auth/callback", "/login", "/account"];
+  const needsAuth = AUTH_PATHS.some((p) => path.startsWith(p));
+
+  if (!needsAuth) {
+    return NextResponse.next({ request });
+  }
+
   let supabaseResponse = NextResponse.next({ request });
 
   const supabase = createServerClient(

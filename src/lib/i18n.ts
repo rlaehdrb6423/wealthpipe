@@ -293,7 +293,7 @@ const en: I18nTexts = {
   tools: {
     heading1: "FREE",
     heading2: "TOOLS",
-    subtext: "No login. No credit card.\nUse right now.",
+    subtext: "No login. 100% Free.\nUse right now.",
     items: [
       { n: "01", tag: "KOREA SEO", title: "Korean Market Keyword Analyzer", desc: "Unlock Naver search data — volume, competition, and revenue potential. The essential tool for global sellers entering the Korean market.", status: "LIVE" },
       { n: "02", tag: "MARKET", title: "Economic News Digest", desc: "AI distills global economic headlines daily. Stocks, FX, crypto, and rates — the full picture in under 10 minutes.", status: "LIVE" },
@@ -574,7 +574,7 @@ const ko: I18nTexts = {
   tools: {
     heading1: "FREE",
     heading2: "TOOLS",
-    subtext: "\ub85c\uadf8\uc778 \uc5c6\uc74c. \uce74\ub4dc \uc5c6\uc74c.\n\uc9c0\uae08 \ubc14\ub85c \uc0ac\uc6a9.",
+    subtext: "\ub85c\uadf8\uc778 \uc5c6\uc74c. \uc644\uc804 \ubb34\ub8cc.\n\uc9c0\uae08 \ubc14\ub85c \uc0ac\uc6a9.",
     items: [
       { n: "01", tag: "SEO", title: "\ud0a4\uc6cc\ub4dc \ubd84\uc11d\uae30", desc: "\uac80\uc0c9\ub7c9\u00b7\uacbd\uc7c1\ub3c4\u00b7\uc218\uc775\uc131 \ubd84\uc11d. \ube14\ub85c\uac70\uc640 \ub9c8\ucf00\ud130\uc758 \ud544\uc218 \ud234.", status: "LIVE" },
       { n: "02", tag: "MARKET", title: "\uacbd\uc81c \ub274\uc2a4 \ub2e4\uc774\uc81c\uc2a4\ud2b8", desc: "\uae00\ub85c\ubc8c \uacbd\uc81c \ud575\uc2ec\uc744 \ub9e4\uc77c AI\uac00 \uc694\uc57d. 10\ubd84 \uc548\uc5d0 \uc2dc\uc7a5 \uc804\uccb4 \ud30c\uc545.", status: "LIVE" },

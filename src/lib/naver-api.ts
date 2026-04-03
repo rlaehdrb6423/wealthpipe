@@ -17,11 +17,18 @@ function parseVolume(val: number | string): number {
   return val || 0
 }
 
+export interface RelatedKeywordItem {
+  keyword: string
+  pcVolume: number
+  mobileVolume: number
+  compIdx: string
+}
+
 export interface KeywordVolume {
   keyword: string
   pcVolume: number
   mobileVolume: number
-  relatedKeywords: string[]
+  relatedKeywords: RelatedKeywordItem[]
   compIdx: string
   avgClickCnt: number
   avgCtr: number
@@ -66,7 +73,12 @@ export async function getSearchVolume(keyword: string): Promise<KeywordVolume | 
       keyword: main.relKeyword,
       pcVolume: parseVolume(main.monthlyPcQcCnt),
       mobileVolume: parseVolume(main.monthlyMobileQcCnt),
-      relatedKeywords: items.slice(1, 21).map((item: { relKeyword: string }) => item.relKeyword),
+      relatedKeywords: items.slice(1, 21).map((item: { relKeyword: string; monthlyPcQcCnt: number | string; monthlyMobileQcCnt: number | string; compIdx: string }) => ({
+        keyword: item.relKeyword,
+        pcVolume: parseVolume(item.monthlyPcQcCnt),
+        mobileVolume: parseVolume(item.monthlyMobileQcCnt),
+        compIdx: item.compIdx || "",
+      })),
       compIdx: main.compIdx || "정보없음",
       avgClickCnt: (main.monthlyAvePcClkCnt || 0) + (main.monthlyAveMobileClkCnt || 0),
       avgCtr: Math.round(((main.monthlyAvePcCtr || 0) + (main.monthlyAveMobileCtr || 0)) / 2 * 100) / 100,
@@ -158,6 +170,43 @@ export async function getBlogSearchResult(keyword: string): Promise<BlogSearchRe
   } catch {
     clearTimeout(timeoutId)
     return null
+  }
+}
+
+export async function getBlogRank(keyword: string, blogUrl: string): Promise<{ rank: number | null; total: number }> {
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), 10000)
+
+  const normalized = blogUrl.replace(/^https?:\/\//, "").replace(/\/+$/, "").toLowerCase()
+
+  try {
+    const response = await fetch(
+      `https://openapi.naver.com/v1/search/blog?query=${encodeURIComponent(keyword)}&display=100&sort=sim`,
+      {
+        headers: {
+          "X-Naver-Client-Id": process.env.NAVER_CLIENT_ID!,
+          "X-Naver-Client-Secret": process.env.NAVER_CLIENT_SECRET!,
+        },
+        signal: controller.signal,
+      }
+    )
+    clearTimeout(timeoutId)
+
+    if (!response.ok) return { rank: null, total: 0 }
+    const data = await response.json()
+    const items: { link: string }[] = data.items || []
+
+    for (let i = 0; i < items.length; i++) {
+      const link = items[i].link.replace(/^https?:\/\//, "").replace(/\/+$/, "").toLowerCase()
+      if (link.includes(normalized)) {
+        return { rank: i + 1, total: data.total }
+      }
+    }
+
+    return { rank: null, total: data.total }
+  } catch {
+    clearTimeout(timeoutId)
+    return { rank: null, total: 0 }
   }
 }
 

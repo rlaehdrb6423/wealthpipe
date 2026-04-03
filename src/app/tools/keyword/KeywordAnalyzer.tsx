@@ -20,7 +20,7 @@ interface KeywordResult {
   profitGrade: string
   profitLabel: string
   ratio: number
-  relatedKeywords: string[]
+  relatedKeywords: { keyword: string; pcVolume: number; mobileVolume: number; compIdx: string }[]
   successRate: number
   compIdx: string
   avgClickCnt: number
@@ -79,6 +79,9 @@ export default function KeywordAnalyzer({ locale = "en", initialKeyword }: Keywo
   const [limitReached, setLimitReached] = useState(false)
   const [waitlistEmail, setWaitlistEmail] = useState("")
   const [waitlistSubmitted, setWaitlistSubmitted] = useState(false)
+  const [blogUrl, setBlogUrl] = useState("")
+  const [blogRank, setBlogRank] = useState<{ rank: number | null; total: number } | null>(null)
+  const [blogRankLoading, setBlogRankLoading] = useState(false)
 
   useEffect(() => {
     if (initialized) return
@@ -164,6 +167,24 @@ export default function KeywordAnalyzer({ locale = "en", initialKeyword }: Keywo
     } finally {
       setAiLoading(false)
     }
+  }
+
+  const fetchBlogRank = async () => {
+    if (!result || !blogUrl.trim() || blogRankLoading) return
+    setBlogRankLoading(true)
+    setBlogRank(null)
+    try {
+      const res = await fetch("/api/keyword/blog-rank", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ keyword: result.keyword, blogUrl: blogUrl.trim() }),
+      })
+      if (res.ok) {
+        const data = await res.json()
+        setBlogRank(data)
+      }
+    } catch { /* ignore */ }
+    finally { setBlogRankLoading(false) }
   }
 
   const shareUrl = result
@@ -619,30 +640,77 @@ export default function KeywordAnalyzer({ locale = "en", initialKeyword }: Keywo
             {result.relatedKeywords.length > 0 && (
               <div style={{ background: "#0a0a0a", border: "1px solid #1a1a1a", borderRadius: 12, padding: 20, marginBottom: 24 }}>
                 <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 12 }}>{t.relatedTitle}</h3>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                  {result.relatedKeywords.map((kw) => (
-                    <button
-                      key={kw}
-                      onClick={() => {
-                        setKeyword(kw)
-                        analyze(kw)
-                      }}
-                      style={{
-                        padding: "6px 14px",
-                        background: "#111",
-                        border: "1px solid #333",
-                        borderRadius: 20,
-                        color: "#ccc",
-                        fontSize: 13,
-                        cursor: "pointer",
-                      }}
-                    >
-                      {kw}
-                    </button>
-                  ))}
+                <div style={{ overflowX: "auto" }}>
+                  <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+                    <thead>
+                      <tr style={{ borderBottom: "1px solid #222" }}>
+                        <th style={{ textAlign: "left", padding: "8px 6px", color: "#666", fontWeight: 600, fontSize: 11 }}>{locale === "ko" ? "키워드" : "Keyword"}</th>
+                        <th style={{ textAlign: "right", padding: "8px 6px", color: "#666", fontWeight: 600, fontSize: 11 }}>PC</th>
+                        <th style={{ textAlign: "right", padding: "8px 6px", color: "#666", fontWeight: 600, fontSize: 11 }}>{locale === "ko" ? "모바일" : "Mobile"}</th>
+                        <th style={{ textAlign: "right", padding: "8px 6px", color: "#666", fontWeight: 600, fontSize: 11 }}>{locale === "ko" ? "경쟁지수" : "Comp."}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {result.relatedKeywords.map((rk) => (
+                        <tr
+                          key={rk.keyword}
+                          onClick={() => { setKeyword(rk.keyword); analyze(rk.keyword); setBlogRank(null) }}
+                          style={{ cursor: "pointer", borderBottom: "1px solid #111" }}
+                          onMouseEnter={(e) => (e.currentTarget.style.background = "#111")}
+                          onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+                        >
+                          <td style={{ padding: "8px 6px", color: "#ccc", fontWeight: 500 }}>{rk.keyword}</td>
+                          <td style={{ padding: "8px 6px", textAlign: "right", color: "#888", fontVariantNumeric: "tabular-nums" }}>{rk.pcVolume.toLocaleString()}</td>
+                          <td style={{ padding: "8px 6px", textAlign: "right", color: "#888", fontVariantNumeric: "tabular-nums" }}>{rk.mobileVolume.toLocaleString()}</td>
+                          <td style={{ padding: "8px 6px", textAlign: "right", color: "#888" }}>{rk.compIdx || "—"}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               </div>
             )}
+
+            {/* 블로그 순위 확인 */}
+            <div style={{ background: "#0a0a0a", border: "1px solid #1a1a1a", borderRadius: 12, padding: 20, marginBottom: 24 }}>
+              <h3 style={{ fontSize: 16, fontWeight: 600, marginBottom: 12 }}>{locale === "ko" ? "블로그 순위 확인" : "Check Blog Ranking"}</h3>
+              <p style={{ color: "#888", fontSize: 12, marginBottom: 12 }}>
+                {locale === "ko" ? `"${result.keyword}" 키워드에서 내 블로그가 몇 위인지 확인하세요.` : `Check your blog's ranking for "${result.keyword}".`}
+              </p>
+              <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+                <input
+                  type="text"
+                  value={blogUrl}
+                  onChange={(e) => setBlogUrl(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && !blogRankLoading && blogUrl.trim() && fetchBlogRank()}
+                  placeholder={locale === "ko" ? "블로그 URL (예: blog.naver.com/myblog)" : "Blog URL (e.g. blog.naver.com/myblog)"}
+                  style={{ flex: 1, padding: "10px 14px", background: "#111", border: "1px solid #333", borderRadius: 8, color: "#fff", fontSize: 13, outline: "none" }}
+                />
+                <button
+                  onClick={fetchBlogRank}
+                  disabled={blogRankLoading || !blogUrl.trim()}
+                  style={{ padding: "10px 20px", background: blogRankLoading ? "#333" : "#fff", color: "#000", border: "none", borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: blogRankLoading ? "not-allowed" : "pointer", whiteSpace: "nowrap" }}
+                >
+                  {blogRankLoading ? "..." : locale === "ko" ? "확인" : "Check"}
+                </button>
+              </div>
+              {blogRank && (
+                <div style={{ background: "#111", borderRadius: 8, padding: 14, textAlign: "center" }}>
+                  {blogRank.rank ? (
+                    <p style={{ fontSize: 18, fontWeight: 700, color: blogRank.rank <= 10 ? "#22c55e" : blogRank.rank <= 30 ? "#eab308" : "#ef4444" }}>
+                      {locale === "ko" ? `${blogRank.rank}위` : `#${blogRank.rank}`}
+                      <span style={{ fontSize: 13, color: "#888", fontWeight: 400, marginLeft: 8 }}>
+                        / {locale === "ko" ? `전체 ${blogRank.total.toLocaleString()}건` : `of ${blogRank.total.toLocaleString()}`}
+                      </span>
+                    </p>
+                  ) : (
+                    <p style={{ fontSize: 14, color: "#888" }}>
+                      {locale === "ko" ? "100위 안에 없습니다." : "Not found in top 100."}
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
 
             {/* 공유 버튼 */}
             <div id="share-section" style={{ position: "relative" }}>

@@ -22,7 +22,32 @@ export async function GET(request: Request) {
     return Response.json({ error: "Failed to fetch news" }, { status: 500 })
   }
 
-  return new Response(JSON.stringify({ digests: data || [] }), {
+  // Fetch latest asset prices for category badges
+  const { data: latestSignal } = await supabase
+    .from("asset_signals")
+    .select("data")
+    .order("date", { ascending: false })
+    .limit(1)
+    .single()
+
+  const CATEGORY_ASSET_MAP: Record<string, string> = {
+    stock: "^KS11",
+    exchange: "KRW=X",
+    crypto: "BTC-USD",
+  }
+
+  let assetPrices: Record<string, { name: string; price: number; change: number; changePercent: number } | null> = {}
+  if (latestSignal?.data?.assets) {
+    const assets = latestSignal.data.assets as { ticker: string; name: string; price: number; change: number; changePercent: number }[]
+    for (const [category, ticker] of Object.entries(CATEGORY_ASSET_MAP)) {
+      const asset = assets.find((a) => a.ticker === ticker)
+      if (asset) {
+        assetPrices[category] = { name: asset.name, price: asset.price, change: asset.change, changePercent: asset.changePercent }
+      }
+    }
+  }
+
+  return new Response(JSON.stringify({ digests: data || [], assetPrices }), {
     headers: {
       "Content-Type": "application/json",
       "Cache-Control": "public, s-maxage=300, stale-while-revalidate=60",

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { type Locale, getTexts } from "@/lib/i18n"
 import { initKakao, shareSignals } from "@/lib/kakao-share"
 import AdSlot from "@/components/AdSlot"
+import Sparkline from "@/components/Sparkline"
 
 interface AssetSignal {
   name: string
@@ -81,6 +82,8 @@ export default function SignalTracker({ locale }: SignalTrackerProps) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
   const [expandedDates, setExpandedDates] = useState<Set<string>>(new Set())
+  const [accuracy, setAccuracy] = useState<Record<string, { total: number; correct: number; rate: number }>>({})
+  const [historyData, setHistoryData] = useState<Record<string, number[]>>({})
 
   useEffect(() => { initKakao() }, [])
 
@@ -100,6 +103,17 @@ export default function SignalTracker({ locale }: SignalTrackerProps) {
       }
     }
     fetchSignals()
+    // Fetch accuracy & history in parallel
+    fetch("/api/signals/accuracy?days=30").then(r => r.ok ? r.json() : null).then(d => { if (d?.accuracy) setAccuracy(d.accuracy) }).catch(() => {})
+    fetch("/api/signals/history?range=1mo").then(r => r.ok ? r.json() : null).then(d => {
+      if (d?.history) {
+        const mapped: Record<string, number[]> = {}
+        for (const [ticker, points] of Object.entries(d.history)) {
+          mapped[ticker] = (points as { close: number }[]).map(p => p.close)
+        }
+        setHistoryData(mapped)
+      }
+    }).catch(() => {})
   }, [t.errorText])
 
   function toggleDate(date: string) {
@@ -176,7 +190,7 @@ export default function SignalTracker({ locale }: SignalTrackerProps) {
             <p style={{ color: "#666", fontSize: 14 }}>{t.noDataText}</p>
           </div>
         ) : (
-          <SignalDayView day={today} t={t} locale={locale} getSignalLabel={getSignalLabel} />
+          <SignalDayView day={today} t={t} locale={locale} getSignalLabel={getSignalLabel} accuracy={accuracy} historyData={historyData} />
         )}
       </section>
 
@@ -220,7 +234,7 @@ export default function SignalTracker({ locale }: SignalTrackerProps) {
                 </button>
                 {expandedDates.has(day.date) && (
                   <div style={{ padding: "0 20px 20px" }}>
-                    <SignalDayView day={day} t={t} locale={locale} getSignalLabel={getSignalLabel} compact />
+                    <SignalDayView day={day} t={t} locale={locale} getSignalLabel={getSignalLabel} accuracy={accuracy} historyData={historyData} compact />
                   </div>
                 )}
               </div>
@@ -240,10 +254,12 @@ interface SignalDayViewProps {
   t: ReturnType<typeof getTexts>["signals"]
   locale: Locale
   getSignalLabel: (signal: string) => string
+  accuracy?: Record<string, { total: number; correct: number; rate: number }>
+  historyData?: Record<string, number[]>
   compact?: boolean
 }
 
-function SignalDayView({ day, t, locale, getSignalLabel, compact = false }: SignalDayViewProps) {
+function SignalDayView({ day, t, locale, getSignalLabel, accuracy = {}, historyData = {}, compact = false }: SignalDayViewProps) {
   const { assets } = day.data
   const aiInsight = locale === "en" && day.data.aiInsightEn
     ? day.data.aiInsightEn
@@ -294,23 +310,30 @@ function SignalDayView({ day, t, locale, getSignalLabel, compact = false }: Sign
                 e.currentTarget.style.background = "#111"
               }}
             >
-              {/* Header: name + signal badge */}
+              {/* Header: name + signal badge + accuracy */}
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
                 <span style={{ fontSize: 13, fontWeight: 700, color: "#fff" }}>{asset.name}</span>
-                <span
-                  style={{
-                    fontSize: 10,
-                    fontWeight: 700,
-                    padding: "2px 8px",
-                    borderRadius: 4,
-                    background: signalColor + "22",
-                    color: signalColor,
-                    letterSpacing: "0.05em",
-                    textTransform: "uppercase",
-                  }}
-                >
-                  {getSignalLabel(asset.signal)}
-                </span>
+                <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                  {accuracy[asset.ticker]?.total >= 10 && (
+                    <span style={{ fontSize: 10, fontWeight: 600, color: "#888" }}>
+                      {accuracy[asset.ticker].rate}%
+                    </span>
+                  )}
+                  <span
+                    style={{
+                      fontSize: 10,
+                      fontWeight: 700,
+                      padding: "2px 8px",
+                      borderRadius: 4,
+                      background: signalColor + "22",
+                      color: signalColor,
+                      letterSpacing: "0.05em",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    {getSignalLabel(asset.signal)}
+                  </span>
+                </div>
               </div>
 
               {/* Price */}
@@ -321,7 +344,7 @@ function SignalDayView({ day, t, locale, getSignalLabel, compact = false }: Sign
               </div>
 
               {/* Change */}
-              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: reason ? 10 : 0 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 0 }}>
                 <span style={{ fontSize: 13, color: changeColor, fontWeight: 600 }}>
                   {isUp ? "+" : ""}{asset.change.toFixed(2)}
                 </span>
@@ -329,6 +352,13 @@ function SignalDayView({ day, t, locale, getSignalLabel, compact = false }: Sign
                   ({isUp ? "+" : ""}{asset.changePercent.toFixed(2)}%)
                 </span>
               </div>
+
+              {/* Sparkline */}
+              {historyData[asset.ticker]?.length > 1 && (
+                <div style={{ margin: "8px 0" }}>
+                  <Sparkline data={historyData[asset.ticker]} width={compact ? 160 : 190} height={28} />
+                </div>
+              )}
 
               {/* Signal reason */}
               {reason && (

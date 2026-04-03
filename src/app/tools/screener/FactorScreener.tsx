@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react"
 import { type Locale, getTexts } from "@/lib/i18n"
 import { initKakao, shareScreener } from "@/lib/kakao-share"
 import AdSlot from "@/components/AdSlot"
+import StockDetailModal from "@/components/StockDetailModal"
 
 interface Stock {
   code: string
@@ -85,6 +86,7 @@ export default function FactorScreener({ locale }: ScreenerProps) {
   const [lastUpdate, setLastUpdate] = useState("")
   const [searchQuery, setSearchQuery] = useState("")
   const [activePreset, setActivePreset] = useState<number | null>(null)
+  const [selectedStock, setSelectedStock] = useState<Stock | null>(null)
   const [sortCol, setSortCol] = useState("market_cap")
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc")
   const [showFilters, setShowFilters] = useState(false)
@@ -501,12 +503,10 @@ export default function FactorScreener({ locale }: ScreenerProps) {
                 {stocks.map((s) => {
                   const grade = getGrade(s.ai_score)
                   const gc = GRADE_COLORS[grade]
-                  const naverUrl = `https://finance.naver.com/item/main.naver?code=${s.code}`
-
                   return (
                     <tr
                       key={s.code}
-                      onClick={() => window.open(naverUrl, "_blank")}
+                      onClick={() => setSelectedStock(s)}
                       style={{ cursor: "pointer", transition: "background 0.1s" }}
                       onMouseEnter={(e) => (e.currentTarget.style.background = "#111")}
                       onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
@@ -694,6 +694,9 @@ export default function FactorScreener({ locale }: ScreenerProps) {
 
       {/* Ad slot */}
       <AdSlot slot="6789012345" format="auto" responsive />
+
+      {/* Stock Detail Modal */}
+      <StockDetailModal stock={selectedStock} onClose={() => setSelectedStock(null)} locale={locale} />
     </div>
   )
 }

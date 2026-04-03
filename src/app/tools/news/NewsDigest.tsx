@@ -44,6 +44,8 @@ export default function NewsDigest({ locale }: NewsDigestProps) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
   const [expandedDates, setExpandedDates] = useState<Set<string>>(new Set())
+  const [assetPrices, setAssetPrices] = useState<Record<string, { name: string; price: number; change: number; changePercent: number }>>({})
+
 
   useEffect(() => { initKakao() }, [])
 
@@ -56,6 +58,7 @@ export default function NewsDigest({ locale }: NewsDigestProps) {
         if (!res.ok) throw new Error("fetch failed")
         const json = await res.json()
         setDigests(json.digests || [])
+        if (json.assetPrices) setAssetPrices(json.assetPrices)
       } catch {
         setError(t.errorText)
       } finally {
@@ -142,7 +145,7 @@ export default function NewsDigest({ locale }: NewsDigestProps) {
             <p style={{ color: "#666", fontSize: 14 }}>{t.noDataText}</p>
           </div>
         ) : (
-          <DigestView digest={today} t={t} getCategoryLabel={getCategoryLabel} formatDate={formatDate} locale={locale} />
+          <DigestView digest={today} t={t} getCategoryLabel={getCategoryLabel} formatDate={formatDate} locale={locale} assetPrices={assetPrices} />
         )}
       </section>
 
@@ -186,7 +189,7 @@ export default function NewsDigest({ locale }: NewsDigestProps) {
                 </button>
                 {expandedDates.has(digest.date) && (
                   <div style={{ padding: "0 20px 20px" }}>
-                    <DigestView digest={digest} t={t} getCategoryLabel={getCategoryLabel} formatDate={formatDate} locale={locale} compact />
+                    <DigestView digest={digest} t={t} getCategoryLabel={getCategoryLabel} formatDate={formatDate} locale={locale} assetPrices={assetPrices} compact />
                   </div>
                 )}
               </div>
@@ -207,10 +210,11 @@ interface DigestViewProps {
   getCategoryLabel: (key: string) => string
   formatDate: (d: string) => string
   locale: string
+  assetPrices?: Record<string, { name: string; price: number; change: number; changePercent: number }>
   compact?: boolean
 }
 
-function DigestView({ digest, t, getCategoryLabel, locale, compact = false }: DigestViewProps) {
+function DigestView({ digest, t, getCategoryLabel, locale, assetPrices = {}, compact = false }: DigestViewProps) {
   const displayArticles = locale === "en" && digest.data.articlesEn?.length
     ? digest.data.articlesEn
     : digest.data.articles
@@ -229,7 +233,7 @@ function DigestView({ digest, t, getCategoryLabel, locale, compact = false }: Di
               key={i}
               style={{ background: "#111", border: "1px solid #222", borderRadius: 12, padding: compact ? "16px" : "20px" }}
             >
-              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10, flexWrap: "wrap" }}>
                 <span
                   style={{
                     fontSize: 11,
@@ -244,6 +248,22 @@ function DigestView({ digest, t, getCategoryLabel, locale, compact = false }: Di
                 >
                   {getCategoryLabel(article.category)}
                 </span>
+                {assetPrices[article.category] && (() => {
+                  const ap = assetPrices[article.category]
+                  const apUp = ap.changePercent >= 0
+                  return (
+                    <span style={{
+                      fontSize: 10,
+                      fontWeight: 600,
+                      padding: "3px 8px",
+                      borderRadius: 4,
+                      background: apUp ? "rgba(34,197,94,0.12)" : "rgba(239,68,68,0.12)",
+                      color: apUp ? "#22c55e" : "#ef4444",
+                    }}>
+                      {ap.name} {ap.price.toLocaleString()} {apUp ? "+" : ""}{ap.changePercent.toFixed(2)}%
+                    </span>
+                  )
+                })()}
                 <span style={{ fontSize: 11, color: "#555" }}>{article.source}</span>
               </div>
               <h3 style={{ fontSize: compact ? 14 : 16, fontWeight: 700, color: "#fff", marginBottom: 8, lineHeight: 1.4 }}>

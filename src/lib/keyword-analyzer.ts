@@ -4,6 +4,7 @@ import {
   getNewsCount,
   getCafeCount,
   getWebDocCount,
+  type RelatedKeywordItem,
 } from "@/lib/naver-api"
 import { getServiceClient } from "@/lib/supabase"
 
@@ -86,7 +87,7 @@ export interface KeywordResult {
   profitGrade: string
   profitLabel: string
   ratio: number
-  relatedKeywords: string[]
+  relatedKeywords: RelatedKeywordItem[]
   successRate: number
   compIdx: string
   avgClickCnt: number
@@ -211,6 +212,12 @@ async function getCached(keyword: string): Promise<KeywordResult | null> {
   // 이전 캐시에 새 필드가 없으면 캐시 무효화 → 재분석
   if (!cached.opportunityScore && cached.opportunityScore !== 0) return null
   if (!cached.verdictKey) return null
+  // relatedKeywords가 string[]인 이전 캐시 호환
+  if (cached.relatedKeywords?.length > 0 && typeof cached.relatedKeywords[0] === "string") {
+    cached.relatedKeywords = (cached.relatedKeywords as unknown as string[]).map((kw) => ({
+      keyword: kw, pcVolume: 0, mobileVolume: 0, compIdx: "",
+    }))
+  }
   return cached
 }
 

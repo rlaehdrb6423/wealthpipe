@@ -1,9 +1,10 @@
 -- Security Review Fixes (2026-04-03)
 
--- [S4] shares 테이블에 일일 중복 방지 unique index 추가
--- 동일 IP + keyword + platform + 날짜 조합이 중복되지 않도록 함
+-- [S4] shares 테이블에 일일 중복 방지용 share_date 컬럼 + unique index 추가
+ALTER TABLE shares ADD COLUMN IF NOT EXISTS share_date DATE DEFAULT CURRENT_DATE;
+UPDATE shares SET share_date = created_at::date WHERE share_date IS NULL;
 CREATE UNIQUE INDEX IF NOT EXISTS idx_shares_daily_unique
-  ON shares (sharer_ip, keyword, platform, (created_at::date));
+  ON shares (sharer_ip, keyword, platform, share_date);
 
 -- [S7] profiles 테이블에 referral_code 컬럼 추가 (예측 불가능한 코드)
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS referral_code TEXT UNIQUE;

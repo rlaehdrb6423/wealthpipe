@@ -46,6 +46,7 @@ export async function POST(request: NextRequest) {
       keyword: keyword.slice(0, 50),
       platform,
       sharer_ip: ip,
+      share_date: today,
     })
 
     if (insertError) {

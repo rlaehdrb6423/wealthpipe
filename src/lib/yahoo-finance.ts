@@ -12,6 +12,7 @@ const ASSETS = [
   { name: "NASDAQ", ticker: "^IXIC" },
   { name: "Bitcoin", ticker: "BTC-USD" },
   { name: "Gold", ticker: "GC=F" },
+  { name: "Oil (WTI)", ticker: "CL=F" },
   { name: "USD/KRW", ticker: "KRW=X" },
 ]
 

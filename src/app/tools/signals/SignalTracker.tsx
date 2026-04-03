@@ -40,6 +40,9 @@ function formatPrice(price: number, ticker: string): string {
   if (ticker === "BTC-USD") {
     return "$" + price.toLocaleString("en-US", { maximumFractionDigits: 0 })
   }
+  if (ticker === "CL=F" || ticker === "GC=F") {
+    return "$" + price.toLocaleString("en-US", { maximumFractionDigits: 2 })
+  }
   return "$" + price.toLocaleString("en-US", { maximumFractionDigits: 2 })
 }
 
@@ -69,6 +72,10 @@ const CHART_URLS: Record<string, { ko: string; en: string }> = {
   "GC=F": {
     ko: "https://finance.yahoo.com/quote/GC%3DF/",
     en: "https://finance.yahoo.com/quote/GC%3DF/",
+  },
+  "CL=F": {
+    ko: "https://finance.yahoo.com/quote/CL%3DF/",
+    en: "https://finance.yahoo.com/quote/CL%3DF/",
   },
   "KRW=X": {
     ko: "https://finance.naver.com/marketindex/exchangeDetail.naver?marketindexCd=FX_USDKRW",

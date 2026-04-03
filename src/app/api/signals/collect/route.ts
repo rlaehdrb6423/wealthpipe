@@ -18,7 +18,7 @@ interface AssetSignal {
 
 const ASSET_GROUPS: Record<string, string[]> = {
   kr: ["^KS11", "KRW=X"],
-  us: ["^GSPC", "^IXIC", "GC=F"],
+  us: ["^GSPC", "^IXIC", "GC=F", "CL=F"],
   crypto: ["BTC-USD"],
 }
 
@@ -56,6 +56,7 @@ const NEWS_QUERIES: Record<string, string> = {
   "^IXIC": "나스닥 기술주",
   "BTC-USD": "비트코인 시세",
   "GC=F": "금값 금시세",
+  "CL=F": "유가 WTI 원유",
   "KRW=X": "원달러 환율",
 }
 
@@ -215,7 +216,7 @@ ${assetSummary}
   }
 
   // 자산 순서 정렬 (KOSPI, S&P500, NASDAQ, Bitcoin, Gold, USD/KRW)
-  const TICKER_ORDER = ["^KS11", "^GSPC", "^IXIC", "BTC-USD", "GC=F", "KRW=X"]
+  const TICKER_ORDER = ["^KS11", "^GSPC", "^IXIC", "BTC-USD", "GC=F", "CL=F", "KRW=X"]
   mergedAssets.sort((a, b) => {
     const ai = TICKER_ORDER.indexOf(a.ticker)
     const bi = TICKER_ORDER.indexOf(b.ticker)

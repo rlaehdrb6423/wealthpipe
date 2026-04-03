@@ -51,6 +51,10 @@
     {
       "path": "/api/signals/blog-draft",
       "schedule": "20 0 * * *"
+    },
+    {
+      "path": "/api/content/generate-daily",
+      "schedule": "30 7 * * *"
     }
   ]
 }

@@ -15,6 +15,12 @@ declare global {
   }
 }
 
+// AdSense 승인 전까지 비활성화 — 승인 후 아래 주석 해제
+export default function AdSlot(_props: AdSlotProps) {
+  return null
+}
+
+/*
 export default function AdSlot({
   slot,
   format = "auto",
@@ -46,3 +52,4 @@ export default function AdSlot({
     />
   )
 }
+*/

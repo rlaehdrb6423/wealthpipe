@@ -76,12 +76,14 @@ export default async function RootLayout({
             </Script>
           </>
         )}
+        {/* AdSense 승인 전까지 비활성화
         <Script
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4740331651949774"
           crossOrigin="anonymous"
           strategy="afterInteractive"
         />
+        */}
         <Script
           src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.4/kakao.min.js"
           strategy="afterInteractive"

@@ -790,7 +790,7 @@ export default function KeywordAnalyzer({ locale = "en", initialKeyword }: Keywo
 
             {/* AdSense 인피드 광고 */}
             <div style={{ marginTop: 16 }}>
-              <AdSlot slot="KEYWORD_RESULT_BOTTOM" format="auto" responsive />
+              <AdSlot slot="3085942925" format="auto" responsive />
             </div>
           </div>
         )}

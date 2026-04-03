@@ -693,7 +693,7 @@ export default function FactorScreener({ locale }: ScreenerProps) {
       </div>
 
       {/* Ad slot */}
-      <AdSlot slot="6789012345" format="auto" responsive />
+      <AdSlot slot="3085942925" format="auto" responsive />
 
       {/* Stock Detail Modal */}
       <StockDetailModal stock={selectedStock} onClose={() => setSelectedStock(null)} locale={locale} />

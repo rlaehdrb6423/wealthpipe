@@ -348,7 +348,7 @@ export default function KeywordCompare({ locale = "en" }: KeywordCompareProps) {
 
             {/* AdSense */}
             <div style={{ marginTop: 24 }}>
-              <AdSlot slot="COMPARE_BOTTOM" format="auto" responsive />
+              <AdSlot slot="3085942925" format="auto" responsive />
             </div>
           </div>
         )}

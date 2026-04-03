@@ -102,7 +102,7 @@ export default async function BlogPostPage({ params }: Props) {
 
         {/* AdSense */}
         <div style={{ marginTop: 32 }}>
-          <AdSlot slot="BLOG_POST_BOTTOM" format="auto" responsive />
+          <AdSlot slot="3085942925" format="auto" responsive />
         </div>
 
         {/* 키워드 분석기 CTA */}

@@ -251,7 +251,7 @@ export default function SignalTracker({ locale }: SignalTrackerProps) {
       )}
 
       {/* Ad slot */}
-      <AdSlot slot="6789012345" format="auto" responsive />
+      <AdSlot slot="3085942925" format="auto" responsive />
     </div>
   )
 }

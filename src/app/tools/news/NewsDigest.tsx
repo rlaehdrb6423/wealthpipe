@@ -199,7 +199,7 @@ export default function NewsDigest({ locale }: NewsDigestProps) {
       )}
 
       {/* Ad slot */}
-      <AdSlot slot="5678901234" format="auto" responsive />
+      <AdSlot slot="3085942925" format="auto" responsive />
     </div>
   )
 }

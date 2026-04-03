@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react"
 import { type Locale, getTexts } from "@/lib/i18n"
 import { initKakao, shareScreener } from "@/lib/kakao-share"
 import AdSlot from "@/components/AdSlot"
+import XShareButton from "@/components/XShareButton"
 import StockDetailModal from "@/components/StockDetailModal"
 
 interface Stock {
@@ -654,6 +655,11 @@ export default function FactorScreener({ locale }: ScreenerProps) {
         >
           <span style={{ fontSize: 16 }}>&#x1F4E2;</span> {locale === "ko" ? "카카오톡 공유" : "Share on KakaoTalk"}
         </button>
+        <XShareButton
+          text={locale === "ko" ? "AI가 찾은 저평가 주식 — 무료 스크리너" : "AI-scored undervalued stocks — free screener"}
+          url="https://wealthpipe.net/ko/tools/screener"
+          label={locale === "ko" ? "X 공유" : "Share on X"}
+        />
       </div>
 
       {/* Newsletter CTA */}

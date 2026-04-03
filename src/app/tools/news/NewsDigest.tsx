@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { type Locale, getTexts } from "@/lib/i18n"
 import { initKakao, shareNews } from "@/lib/kakao-share"
 import AdSlot from "@/components/AdSlot"
+import XShareButton from "@/components/XShareButton"
 
 interface Article {
   title: string
@@ -157,6 +158,11 @@ export default function NewsDigest({ locale }: NewsDigestProps) {
         >
           <span style={{ fontSize: 16 }}>&#x1F4E2;</span> {locale === "ko" ? "카카오톡 공유" : "Share on KakaoTalk"}
         </button>
+        <XShareButton
+          text={locale === "ko" ? "오늘의 경제 뉴스를 AI가 요약했습니다" : "AI-curated daily economic news digest"}
+          url="https://wealthpipe.net/ko/tools/news"
+          label={locale === "ko" ? "X 공유" : "Share on X"}
+        />
       </div>
 
       {/* Newsletter CTA */}

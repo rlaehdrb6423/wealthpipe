@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { type Locale, getTexts } from "@/lib/i18n"
 import { initKakao, shareSignals } from "@/lib/kakao-share"
 import AdSlot from "@/components/AdSlot"
+import XShareButton from "@/components/XShareButton"
 import Sparkline from "@/components/Sparkline"
 
 interface AssetSignal {
@@ -209,6 +210,11 @@ export default function SignalTracker({ locale }: SignalTrackerProps) {
         >
           <span style={{ fontSize: 16 }}>&#x1F4E2;</span> {locale === "ko" ? "카카오톡 공유" : "Share on KakaoTalk"}
         </button>
+        <XShareButton
+          text={locale === "ko" ? "AI 시장 시그널 — 무료로 매일 확인하세요" : "AI Market Signals — check daily for free"}
+          url="https://wealthpipe.net/ko/tools/signals"
+          label={locale === "ko" ? "X 공유" : "Share on X"}
+        />
       </div>
 
       {/* Newsletter CTA */}

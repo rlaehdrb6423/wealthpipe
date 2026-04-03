@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { type Locale, getTexts } from "@/lib/i18n"
 import AdSlot from "@/components/AdSlot"
+import XShareButton from "@/components/XShareButton"
 import { initKakao, shareRanking } from "@/lib/kakao-share"
 
 interface RankingItem {
@@ -196,6 +197,11 @@ export default function RankingPage({ locale }: RankingPageProps) {
         >
           {t.kakaoShare}
         </button>
+        <XShareButton
+          text={locale === "ko" ? "이번 주 인기 키워드 TOP 20" : "This week's hot keywords TOP 20"}
+          url="https://wealthpipe.net/ko/tools/ranking"
+          label={locale === "ko" ? "X 공유" : "Share on X"}
+        />
       </div>
 
       {/* Rankings table */}

@@ -17,6 +17,13 @@ export const metadata: Metadata = {
     title: t.ogTitle,
     description: t.ogDesc,
     url: `${SITE_URL}/tools/signals`,
+    images: [{ url: `${SITE_URL}/api/og/signals`, width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: t.ogTitle,
+    description: t.ogDesc,
+    images: [`${SITE_URL}/api/og/signals`],
   },
 }
 

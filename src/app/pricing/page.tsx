@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import Link from "next/link"
 import { Suspense } from "react"
-import PricingClient from "./PricingClient"
+import PricingClient from "@/components/PricingClient"
 
 const SITE_URL = "https://wealthpipe.net"
 

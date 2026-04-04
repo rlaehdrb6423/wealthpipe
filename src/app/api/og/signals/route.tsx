@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og"
-import { getServiceClient } from "@/lib/supabase"
+import { getAnonClient } from "@/lib/supabase"
 import { ASSETS } from "@/lib/yahoo-finance"
 
 const ALL_TICKERS = ASSETS.map((a) => a.ticker)
@@ -17,7 +17,7 @@ const SIGNAL_LABELS: Record<string, string> = {
 }
 
 export async function GET() {
-  const supabase = getServiceClient()
+  const supabase = getAnonClient()
   const today = new Date().toISOString().split("T")[0]
 
   const { data: rows } = await supabase

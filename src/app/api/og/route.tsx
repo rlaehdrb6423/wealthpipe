@@ -3,13 +3,13 @@ import { NextRequest } from "next/server"
 
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl
-  const keyword = searchParams.get("keyword") || "키워드"
-  const volume = searchParams.get("volume") || "0"
-  const competition = searchParams.get("competition") || "보통"
-  const competitionGrade = searchParams.get("cg") || "C"
-  const profit = searchParams.get("profit") || "보통"
-  const profitGrade = searchParams.get("pg") || "C"
-  const score = searchParams.get("score") || ""
+  const keyword = (searchParams.get("keyword") || "키워드").slice(0, 100)
+  const volume = (searchParams.get("volume") || "0").replace(/[^0-9]/g, "").slice(0, 15)
+  const competition = (searchParams.get("competition") || "보통").slice(0, 20)
+  const competitionGrade = (searchParams.get("cg") || "C").slice(0, 2)
+  const profit = (searchParams.get("profit") || "보통").slice(0, 20)
+  const profitGrade = (searchParams.get("pg") || "C").slice(0, 2)
+  const score = (searchParams.get("score") || "").replace(/[^0-9]/g, "").slice(0, 3)
 
   function gradeColor(grade: string) {
     if (grade === "A") return "#22c55e"

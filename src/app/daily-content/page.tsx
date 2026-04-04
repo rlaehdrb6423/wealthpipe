@@ -1,4 +1,5 @@
 import { getServiceClient } from "@/lib/supabase"
+import { sanitizeBlogContent } from "@/lib/sanitize"
 import type { Metadata } from "next"
 import CopyButton from "./CopyButton"
 
@@ -150,7 +151,7 @@ function ContentCard({ item, platform }: { item: DailyContentRow; platform: stri
       {isBlog ? (
         <div
           style={{ color: "#ccc", fontSize: 14, lineHeight: 1.8, maxHeight: 300, overflow: "auto" }}
-          dangerouslySetInnerHTML={{ __html: item.content }}
+          dangerouslySetInnerHTML={{ __html: sanitizeBlogContent(item.content) }}
         />
       ) : (
         <p style={{ color: "#ccc", fontSize: 14, lineHeight: 1.6, whiteSpace: "pre-wrap" }}>

@@ -10,6 +10,9 @@ export function sanitizeBlogContent(html: string): string {
     allowedSchemesByTag: {
       a: ["http", "https", "mailto"],
     },
+    transformTags: {
+      a: sanitizeHtml.simpleTransform("a", { rel: "noopener noreferrer nofollow", target: "_blank" }),
+    },
   })
 }
 

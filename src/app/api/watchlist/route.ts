@@ -74,8 +74,8 @@ export async function DELETE(request: NextRequest) {
 
     const { stockCode } = await request.json()
 
-    if (!stockCode) {
-      return Response.json({ error: "종목 코드가 필요합니다." }, { status: 400 })
+    if (!stockCode || typeof stockCode !== "string" || stockCode.length > 20) {
+      return Response.json({ error: "유효한 종목 코드를 입력해주세요." }, { status: 400 })
     }
 
     const service = getServiceClient()

@@ -1,5 +1,16 @@
 const SCREENER_API = process.env.SCREENER_API_URL || ""
 
+const ALLOWED_HOSTS = ["factor-screener-production.up.railway.app"]
+
+function isAllowedScreenerUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url)
+    return ALLOWED_HOSTS.includes(parsed.hostname)
+  } catch {
+    return false
+  }
+}
+
 const ALLOWED_PARAMS: Record<string, string[]> = {
   screener: ["market", "sort", "order", "limit", "offset", "per_max", "pbr_max", "roe_min", "div_min", "cap_min", "score_min", "preset"],
   stats: [],
@@ -8,7 +19,7 @@ const ALLOWED_PARAMS: Record<string, string[]> = {
 }
 
 export async function GET(request: Request) {
-  if (!SCREENER_API) {
+  if (!SCREENER_API || !isAllowedScreenerUrl(SCREENER_API)) {
     return Response.json({ error: "SCREENER_API_URL not configured" }, { status: 500 })
   }
 

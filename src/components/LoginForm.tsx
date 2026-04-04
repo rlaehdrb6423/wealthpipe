@@ -35,7 +35,7 @@ export default function LoginForm({ locale = "en" }: LoginFormProps) {
     setLoading(false);
 
     if (authError) {
-      setError(authError.message);
+      setError("로그인 요청 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
     } else {
       setSent(true);
     }

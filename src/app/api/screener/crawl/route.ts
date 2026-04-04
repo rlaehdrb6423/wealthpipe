@@ -1,13 +1,22 @@
 import { verifyCronAuth } from "@/lib/auth"
 
 const SCREENER_API = process.env.SCREENER_API_URL || ""
+const ALLOWED_HOSTS = ["factor-screener-production.up.railway.app"]
+
+function isAllowedScreenerUrl(url: string): boolean {
+  try {
+    return ALLOWED_HOSTS.includes(new URL(url).hostname)
+  } catch {
+    return false
+  }
+}
 
 export async function GET(request: Request) {
   if (!verifyCronAuth(request)) {
     return Response.json({ error: "Unauthorized" }, { status: 401 })
   }
 
-  if (!SCREENER_API) {
+  if (!SCREENER_API || !isAllowedScreenerUrl(SCREENER_API)) {
     return Response.json({ error: "SCREENER_API_URL not configured" }, { status: 500 })
   }
 

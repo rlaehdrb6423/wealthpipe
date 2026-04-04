@@ -17,6 +17,10 @@ export async function POST(request: NextRequest) {
       return Response.json({ error: "URL이 너무 깁니다." }, { status: 400 })
     }
 
+    if (!/^https?:\/\//i.test(blogUrl.trim())) {
+      return Response.json({ error: "유효한 URL을 입력해주세요. (http:// 또는 https://)" }, { status: 400 })
+    }
+
     const result = await getBlogRank(keyword.trim(), blogUrl.trim())
 
     return Response.json(result)

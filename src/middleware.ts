@@ -1,51 +1,70 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
+import { Ratelimit } from "@upstash/ratelimit";
+import { Redis } from "@upstash/redis";
 
-// NOTE: In-memory rate limiting has limited effectiveness on Vercel (serverless).
-// Each cold start gets a fresh Map. For production-grade rate limiting,
-// consider Vercel KV, Upstash Redis, or Vercel's built-in WAF.
-const rateLimitMap = new Map<string, { count: number; reset: number }>();
+// Upstash Redis rate limiting — persistent across serverless cold starts
+const redis =
+  process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
+    ? new Redis({
+        url: process.env.UPSTASH_REDIS_REST_URL,
+        token: process.env.UPSTASH_REDIS_REST_TOKEN,
+      })
+    : null;
 
-const RATE_LIMITS: Record<string, { max: number; windowMs: number }> = {
-  "/api/contact": { max: 5, windowMs: 60_000 },
-  "/api/newsletter": { max: 5, windowMs: 60_000 },
-  "/api/keyword/trend": { max: 20, windowMs: 60_000 },
-  "/api/share/reward": { max: 10, windowMs: 60_000 },
-};
-
-const DEFAULT_API_LIMIT = { max: 60, windowMs: 60_000 };
-
-function checkRateLimit(ip: string, path: string): boolean {
-  const limit = RATE_LIMITS[path] || (path.startsWith("/api/") ? DEFAULT_API_LIMIT : null);
-  if (!limit) return true;
-
-  const key = `${ip}:${path}`;
-  const now = Date.now();
-  const entry = rateLimitMap.get(key);
-
-  if (entry && now < entry.reset) {
-    if (entry.count >= limit.max) return false;
-    entry.count++;
-  } else {
-    rateLimitMap.set(key, { count: 1, reset: now + limit.windowMs });
-  }
-
-  if (rateLimitMap.size > 1_000) {
-    for (const [k, v] of rateLimitMap) {
-      if (now > v.reset) rateLimitMap.delete(k);
+// Path-specific rate limiters (stricter)
+const strictLimiters: Record<string, Ratelimit> = redis
+  ? {
+      "/api/contact": new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(5, "60 s"), prefix: "rl:contact" }),
+      "/api/newsletter": new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(5, "60 s"), prefix: "rl:newsletter" }),
+      "/api/keyword/trend": new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(20, "60 s"), prefix: "rl:trend" }),
+      "/api/share/reward": new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(10, "60 s"), prefix: "rl:reward" }),
+      "/api/keyword": new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(10, "60 s"), prefix: "rl:keyword" }),
+      "/api/keyword-structure": new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(5, "60 s"), prefix: "rl:structure" }),
     }
-  }
+  : {};
 
-  return true;
+// Default API rate limiter
+const defaultLimiter = redis
+  ? new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(60, "60 s"), prefix: "rl:api" })
+  : null;
+
+async function checkRateLimit(ip: string, path: string): Promise<boolean> {
+  if (!redis) return true; // Graceful fallback if Redis not configured
+
+  const limiter = strictLimiters[path] || (path.startsWith("/api/") ? defaultLimiter : null);
+  if (!limiter) return true;
+
+  try {
+    const { success } = await limiter.limit(ip);
+    return success;
+  } catch {
+    return true; // Allow on Redis errors to avoid blocking legitimate traffic
+  }
 }
 
 export async function middleware(request: NextRequest) {
-  const ip = request.headers.get("x-real-ip") || request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+  const ip = request.headers.get("x-real-ip") || "unknown";
   const path = request.nextUrl.pathname;
 
-  // Rate limiting for API routes
+  // CSRF: Origin 검증 for state-changing requests
+  if ((request.method === "POST" || request.method === "DELETE" || request.method === "PUT" || request.method === "PATCH") && path.startsWith("/api/")) {
+    const origin = request.headers.get("origin");
+    const allowedOrigins = [
+      "https://wealthpipe.net",
+      "https://www.wealthpipe.net",
+      process.env.NEXT_PUBLIC_SITE_URL,
+    ].filter(Boolean);
+    // Allow cron jobs (no origin header) and Stripe webhooks
+    if (origin && allowedOrigins.length > 0 && !allowedOrigins.includes(origin) && !path.startsWith("/api/stripe/webhook")) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+  }
+
+  // Rate limiting for API routes (Upstash Redis)
   if (path.startsWith("/api/")) {
-    if (!checkRateLimit(ip, path)) {
+    const allowed = await checkRateLimit(ip, path);
+    if (!allowed) {
       return NextResponse.json(
         { error: "Too many requests. Please try again later." },
         { status: 429 }

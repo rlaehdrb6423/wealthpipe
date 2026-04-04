@@ -9,6 +9,10 @@ export async function POST(request: NextRequest) {
       return Response.json({ error: "키워드를 입력해주세요." }, { status: 400 })
     }
 
+    if (keyword.trim().length > 50) {
+      return Response.json({ error: "키워드는 50자 이내로 입력해주세요." }, { status: 400 })
+    }
+
     const trend = await getSearchTrend(keyword.trim())
 
     if (!trend) {

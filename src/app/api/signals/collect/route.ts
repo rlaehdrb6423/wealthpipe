@@ -168,7 +168,7 @@ ${assetSummary}
       groupInsight = "시장 인사이트를 분석 중입니다."
     }
   } catch (error) {
-    console.error("Claude AI error:", error)
+    console.error("Claude AI error:", error instanceof Error ? error.message : "Unknown error")
     newSignals = assets.map((a: AssetData) => ({
       name: a.name,
       ticker: a.ticker,
@@ -233,7 +233,7 @@ ${assetSummary}
   )
 
   if (upsertError) {
-    console.error("Supabase upsert error:", upsertError)
+    console.error("Supabase upsert error:", upsertError.message)
     return Response.json({ error: "Failed to save signals" }, { status: 500 })
   }
 

@@ -1,4 +1,4 @@
-import { getServiceClient } from "@/lib/supabase"
+import { getAnonClient } from "@/lib/supabase"
 import { ASSETS } from "@/lib/yahoo-finance"
 
 const ALL_TICKERS = ASSETS.map((a) => a.ticker)
@@ -7,7 +7,7 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const days = Math.min(Math.max(parseInt(searchParams.get("days") || "7", 10), 1), 30)
 
-  const supabase = getServiceClient()
+  const supabase = getAnonClient()
 
   const cutoff = new Date()
   cutoff.setDate(cutoff.getDate() - days - 1) // 1일 더 여유 (보완용)

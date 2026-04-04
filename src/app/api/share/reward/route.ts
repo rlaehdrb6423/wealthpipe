@@ -7,7 +7,7 @@ const MAX_DAILY_SHARES = 3
 
 export async function POST(request: NextRequest) {
   try {
-    const ip = request.headers.get("x-real-ip") || request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown"
+    const ip = request.headers.get("x-real-ip") || "unknown"
     const body = await request.json()
     const { keyword, platform } = body
 

@@ -1,8 +1,8 @@
-import { getServiceClient } from "@/lib/supabase"
+import { getAnonClient } from "@/lib/supabase"
 
 export async function GET() {
   try {
-    const supabase = getServiceClient()
+    const supabase = getAnonClient()
     const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
 
     // 최근 7일 keyword_cache에서 키워드별 분석 횟수 집계

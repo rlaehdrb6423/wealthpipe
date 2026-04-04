@@ -67,7 +67,7 @@ interface BlogStructure {
 
 export async function POST(request: NextRequest) {
   try {
-    const ip = request.headers.get("x-real-ip") || request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown"
+    const ip = request.headers.get("x-real-ip") || "unknown"
     const adminKey = request.headers.get("x-admin-key") || ""
     const isAdmin = adminKey.length > 0 && process.env.ADMIN_SECRET && adminKey.length === process.env.ADMIN_SECRET.length
       ? timingSafeEqual(Buffer.from(adminKey), Buffer.from(process.env.ADMIN_SECRET))

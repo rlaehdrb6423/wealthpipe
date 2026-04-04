@@ -78,7 +78,7 @@ async function fetchNaverNews(query: string): Promise<NaverNewsItem | null> {
     return items[0]
   } catch (error) {
     clearTimeout(timeoutId)
-    console.error(`Naver news fetch error for "${query}":`, error)
+    console.error(`Naver news fetch error for "${query}":`, error instanceof Error ? error.message : "Unknown error")
     return null
   }
 }
@@ -118,7 +118,7 @@ async function fetchGNews(query: string): Promise<GNewsArticle | null> {
     return articles[0] || null
   } catch (error) {
     clearTimeout(timeoutId)
-    console.error(`GNews fetch error for "${query}":`, error)
+    console.error(`GNews fetch error for "${query}":`, error instanceof Error ? error.message : "Unknown error")
     return null
   }
 }
@@ -207,7 +207,7 @@ export async function GET(request: Request) {
           }
           return null
         } catch (error) {
-          console.error("Claude AI error (KO):", error)
+          console.error("Claude AI error (KO):", error instanceof Error ? error.message : "Unknown error")
           return null
         }
       })()
@@ -243,7 +243,7 @@ export async function GET(request: Request) {
           }
           return null
         } catch (error) {
-          console.error("Claude AI error (EN):", error)
+          console.error("Claude AI error (EN):", error instanceof Error ? error.message : "Unknown error")
           return null
         }
       })()
@@ -312,7 +312,7 @@ export async function GET(request: Request) {
   )
 
   if (upsertError) {
-    console.error("Supabase upsert error:", upsertError)
+    console.error("Supabase upsert error:", upsertError.message)
     return Response.json({ error: "Failed to save digest" }, { status: 500 })
   }
 

@@ -242,11 +242,7 @@ export async function POST(request: NextRequest) {
         break
     }
   } catch (err) {
-<<<<<<< HEAD
     console.error(`[stripe-webhook] Handler error for ${event.type} (${event.id}):`, err instanceof Error ? { message: err.message, stack: err.stack } : err)
-=======
-    console.error(`Webhook handler error for ${event.type}:`, err instanceof Error ? err.message : "Unknown error")
->>>>>>> 7cb6eaa (fix: 보안 종합 패치 — XSS, CSRF, rate limiting, 입력 검증 등 15건)
     return Response.json({ error: "Webhook handler failed" }, { status: 500 })
   }
 

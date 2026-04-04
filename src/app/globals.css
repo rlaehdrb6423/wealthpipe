@@ -405,6 +405,62 @@ body {
   text-transform: uppercase;
 }
 
+/* ───── Persona ───── */
+
+.persona-section {
+  padding: 80px 52px;
+  max-width: 1200px;
+  margin: 0 auto;
+  border-bottom: 1px solid #111;
+}
+
+.persona-header {
+  margin-bottom: 48px;
+}
+
+.persona-heading {
+  font-size: clamp(28px, 4vw, 48px);
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  color: #fff;
+}
+
+.persona-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+}
+
+.persona-card {
+  padding: 32px 28px;
+  border: 1px solid #222;
+  border-radius: 12px;
+  transition: border-color 0.3s;
+}
+
+.persona-card:hover {
+  border-color: #444;
+}
+
+.persona-icon {
+  font-size: 32px;
+  margin-bottom: 16px;
+}
+
+.persona-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 12px;
+}
+
+.persona-desc {
+  font-size: 14px;
+  color: #999;
+  line-height: 1.7;
+  white-space: pre-line;
+}
+
 /* ───── Tools ───── */
 
 .tools-section {
@@ -917,6 +973,19 @@ body {
 
   .stats-grid {
     grid-template-columns: 1fr 1fr !important;
+  }
+
+  .persona-section {
+    padding: 60px 20px;
+  }
+
+  .persona-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .persona-card {
+    padding: 24px 20px;
   }
 
   .tools-section {

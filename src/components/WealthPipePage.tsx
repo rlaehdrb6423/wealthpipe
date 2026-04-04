@@ -70,7 +70,9 @@ export default function WealthPipePage({ locale }: WealthPipePageProps) {
       <div className="marquee-section">
         <div className="marquee-track">
           {Array(4)
-            .fill(["AI PIPELINE", "WEALTH SIGNAL", "DATA FLOW", "MARKET INTEL", "ALPHA ENGINE", "SEO POWER", "AUTO CRAWL", "INVEST DATA"])
+            .fill(isKo
+              ? ["키워드 분석", "매매 신호", "종목 스크리닝", "경제 뉴스 요약", "100% 무료", "로그인 불필요", "매일 업데이트", "AI 자동 분석"]
+              : ["KEYWORD ANALYSIS", "TRADING SIGNALS", "STOCK SCREENING", "NEWS DIGEST", "100% FREE", "NO LOGIN", "DAILY UPDATES", "AI POWERED"])
             .flat()
             .map((text, i) => (
               <span key={i} className="m-item">
@@ -87,6 +89,32 @@ export default function WealthPipePage({ locale }: WealthPipePageProps) {
             <RevealOnScroll key={i} delay={i * 0.08} className="stat-item" style={{ borderLeft: i === 0 ? "2px solid #fff" : "1px solid #1a1a1a", paddingLeft: 28 }}>
               <div className={`stat-number${i === 0 ? " stat-number-active" : ""}`}>{n}</div>
               <div className="stat-label">{l}</div>
+            </RevealOnScroll>
+          ))}
+        </div>
+      </section>
+
+      {/* PERSONA */}
+      <section className="persona-section">
+        <RevealOnScroll className="persona-header">
+          <h2 className="persona-heading">
+            {isKo ? "이런 분께 딱이에요" : "Built for you"}
+          </h2>
+        </RevealOnScroll>
+        <div className="persona-grid">
+          {(isKo ? [
+            { icon: "🛒", title: "쇼핑몰 셀러", desc: "네이버 키워드 검색량·경쟁도를 확인하고,\n잘 팔릴 상품 키워드를 찾아보세요." },
+            { icon: "📈", title: "주식 투자자", desc: "2,700개 종목 스크리닝과 매매 신호를\nAI가 매일 아침 정리해드려요." },
+            { icon: "✍️", title: "블로거 · 마케터", desc: "어떤 키워드로 글을 써야 할지,\n검색 데이터 기반으로 알려드려요." },
+          ] : [
+            { icon: "🛒", title: "Online Sellers", desc: "Find high-opportunity keywords\nin the Korean market with real Naver data." },
+            { icon: "📈", title: "Investors", desc: "AI screens 2,700+ stocks and detects\ntrading signals every morning." },
+            { icon: "✍️", title: "Bloggers & Marketers", desc: "Discover what keywords to target\nbased on actual search data." },
+          ]).map((p, i) => (
+            <RevealOnScroll key={i} delay={i * 0.1} className="persona-card">
+              <div className="persona-icon">{p.icon}</div>
+              <h3 className="persona-title">{p.title}</h3>
+              <p className="persona-desc">{p.desc}</p>
             </RevealOnScroll>
           ))}
         </div>
